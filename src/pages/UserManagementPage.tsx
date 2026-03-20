@@ -1,15 +1,11 @@
+import { useEffect, useState } from "react";
 import { Users, Search, MoreVertical, Shield, Wrench, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-const users = [
-  { id: 1, name: "Sarah Mitchell", email: "sarah@example.com", role: "customer", status: "Active", joined: "Jan 15, 2026" },
-  { id: 2, name: "James Henderson", email: "james@example.com", role: "worker", status: "Active", joined: "Feb 3, 2026" },
-  { id: 3, name: "Maria Lopez", email: "maria@example.com", role: "worker", status: "Active", joined: "Feb 10, 2026" },
-  { id: 4, name: "Carlos Rivera", email: "carlos@example.com", role: "worker", status: "Pending", joined: "Mar 18, 2026" },
-  { id: 5, name: "Emily Kim", email: "emily@example.com", role: "customer", status: "Active", joined: "Mar 5, 2026" },
-  { id: 6, name: "Admin User", email: "admin@example.com", role: "admin", status: "Active", joined: "Jan 1, 2026" },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 
 const roleIcon = (role: string) => {
   if (role === "admin") return <Shield className="w-3.5 h-3.5" />;
@@ -18,6 +14,54 @@ const roleIcon = (role: string) => {
 };
 
 export default function UserManagementPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  async function loadUsers() {
+    const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    if (!profiles) { setLoading(false); return; }
+
+    const userIds = profiles.map(p => p.id);
+    const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+    const { data: workerProfiles } = await supabase.from("worker_profiles").select("user_id, verification_status");
+
+    const roleMap: Record<string, string> = {};
+    (roles || []).forEach(r => { roleMap[r.user_id] = r.role; });
+    const wpMap: Record<string, string> = {};
+    (workerProfiles || []).forEach(w => { wpMap[w.user_id] = w.verification_status; });
+
+    setUsers(profiles.map(p => ({
+      ...p,
+      role: roleMap[p.id] || "customer",
+      status: roleMap[p.id] === "worker" ? (wpMap[p.id] === "approved" ? "Active" : wpMap[p.id] === "pending" ? "Pending" : "Rejected") : "Active",
+    })));
+    setLoading(false);
+  }
+
+  useEffect(() => { loadUsers(); }, []);
+
+  const filtered = users.filter(u =>
+    u.name.toLowerCase().includes(search.toLowerCase()) ||
+    u.email.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleDeleteUser = async (userId: string) => {
+    // Only admins can see this page, delete via activity log
+    toast({ title: "User deletion requires backend admin action", description: "Contact system administrator." });
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 max-w-sm" />
+        <Skeleton className="h-96 rounded-xl" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -25,12 +69,11 @@ export default function UserManagementPage() {
           <h1 className="text-2xl font-bold text-foreground">User Management</h1>
           <p className="text-muted-foreground text-sm">Manage platform users and roles</p>
         </div>
-        <Button size="sm">Add User</Button>
       </div>
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Search users..." className="pl-10 bg-card" />
+        <Input placeholder="Search users..." className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="stat-card overflow-hidden p-0 animate-fade-in">
@@ -46,12 +89,12 @@ export default function UserManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {filtered.length > 0 ? filtered.map((u) => (
                 <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
-                        {u.name.split(" ").map(n => n[0]).join("")}
+                        {u.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <p className="font-medium text-foreground">{u.name}</p>
@@ -66,17 +109,30 @@ export default function UserManagementPage() {
                   </td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      u.status === "Active" ? "bg-green-500/10 text-green-500" : "bg-chart-4/10 text-chart-4"
+                      u.status === "Active" ? "bg-green-500/10 text-green-500" :
+                      u.status === "Pending" ? "bg-chart-4/10 text-chart-4" :
+                      "bg-destructive/10 text-destructive"
                     }`}>{u.status}</span>
                   </td>
-                  <td className="p-4 text-muted-foreground">{u.joined}</td>
+                  <td className="p-4 text-muted-foreground">{new Date(u.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                   <td className="p-4">
-                    <Button variant="ghost" size="icon" className="w-8 h-8">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="w-8 h-8">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleDeleteUser(u.id)}>Remove User</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground text-sm">No users found</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

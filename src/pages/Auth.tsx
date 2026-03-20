@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wrench, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/workers-hero.jpg";
 
 const Auth = () => {
@@ -17,6 +18,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const { login, signup } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,10 +26,21 @@ const Auth = () => {
     try {
       if (isSignIn) {
         await login(email, password);
+        navigate("/dashboard");
       } else {
         await signup(email, password, name, role);
+        toast({
+          title: "Account created",
+          description: "Please check your email for verification, or sign in if auto-confirmed.",
+        });
+        navigate("/dashboard");
       }
-      navigate("/dashboard");
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -35,7 +48,6 @@ const Auth = () => {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left - Hero Image */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <img src={heroImage} alt="Skilled workers" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
@@ -49,10 +61,8 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Right - Auth Form */}
       <div className="flex-1 flex items-center justify-center bg-card p-8 dark:bg-background">
         <div className="w-full max-w-md animate-fade-in">
-          {/* Logo */}
           <div className="text-center mb-10">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4">
               <Wrench className="w-7 h-7 text-primary" />
@@ -61,7 +71,6 @@ const Auth = () => {
             <p className="text-muted-foreground text-sm mt-1">Skilled Workers Marketplace</p>
           </div>
 
-          {/* Tabs */}
           <div className="flex bg-muted rounded-lg p-1 mb-8">
             <button
               onClick={() => setIsSignIn(true)}
@@ -87,14 +96,7 @@ const Auth = () => {
                 <Label htmlFor="name" className="text-foreground font-medium">Full Name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
-                    className="pl-10 h-12 bg-muted/50 border-border"
-                    required
-                  />
+                  <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" className="pl-10 h-12 bg-muted/50 border-border" required />
                 </div>
               </div>
             )}
@@ -103,15 +105,7 @@ const Auth = () => {
               <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10 h-12 bg-muted/50 border-border"
-                  required
-                />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border-border" required />
               </div>
             </div>
 
@@ -119,27 +113,13 @@ const Auth = () => {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
                 {isSignIn && (
-                  <button type="button" className="text-xs text-primary hover:underline">
-                    Forgot password?
-                  </button>
+                  <button type="button" className="text-xs text-primary hover:underline">Forgot password?</button>
                 )}
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10 h-12 bg-muted/50 border-border"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 pr-10 h-12 bg-muted/50 border-border" required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -148,16 +128,11 @@ const Auth = () => {
             {!isSignIn && (
               <div className="space-y-2 animate-fade-in">
                 <Label className="text-foreground font-medium">I am a</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["customer", "worker", "admin"] as UserRole[]).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setRole(r)}
+                <div className="grid grid-cols-2 gap-2">
+                  {(["customer", "worker"] as UserRole[]).map((r) => (
+                    <button key={r} type="button" onClick={() => setRole(r)}
                       className={`py-2.5 px-3 rounded-lg text-sm font-medium border transition-all duration-200 capitalize ${
-                        role === r
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground hover:border-primary/40"
+                        role === r ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
                       }`}
                     >
                       {r}
@@ -167,11 +142,7 @@ const Auth = () => {
               </div>
             )}
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
-            >
+            <Button type="submit" disabled={loading} className="w-full h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform">
               {loading ? "Please wait..." : isSignIn ? "Sign In" : "Create Account"}
             </Button>
           </form>

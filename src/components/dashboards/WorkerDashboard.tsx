@@ -1,22 +1,104 @@
+import { useEffect, useState } from "react";
 import { Briefcase, CreditCard, Star, Clock, ToggleLeft, ToggleRight } from "lucide-react";
-import { useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-
-const earningsData = [
-  { day: "Mon", amount: 120 }, { day: "Tue", amount: 85 },
-  { day: "Wed", amount: 200 }, { day: "Thu", amount: 150 },
-  { day: "Fri", amount: 290 }, { day: "Sat", amount: 180 },
-  { day: "Sun", amount: 95 },
-];
-
-const recentJobs = [
-  { id: 1, title: "Electrical Wiring Repair", customer: "Sarah M.", status: "Completed", amount: "$120", date: "Today" },
-  { id: 2, title: "Plumbing Installation", customer: "Mike R.", status: "In Progress", amount: "$85", date: "Today" },
-  { id: 3, title: "Light Fixture Install", customer: "Emily K.", status: "Pending", amount: "$65", date: "Yesterday" },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function WorkerDashboard() {
-  const [isOnline, setIsOnline] = useState(true);
+  const { user } = useAuth();
+  const [isOnline, setIsOnline] = useState(false);
+  const [stats, setStats] = useState({ earnings: 0, completed: 0, rating: 0, pending: 0 });
+  const [recentJobs, setRecentJobs] = useState<any[]>([]);
+  const [earningsData, setEarningsData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    async function load() {
+      // Get worker profile
+      const { data: wp } = await supabase.from("worker_profiles").select("*").eq("user_id", user!.id).single();
+      if (wp) setIsOnline(wp.is_online);
+
+      // Stats
+      const [completedRes, pendingRes, paymentsRes, reviewsRes] = await Promise.all([
+        supabase.from("jobs").select("id", { count: "exact", head: true }).eq("worker_id", user!.id).eq("status", "completed"),
+        supabase.from("jobs").select("id", { count: "exact", head: true }).eq("worker_id", user!.id).eq("status", "pending"),
+        supabase.from("payments").select("amount").eq("payee_id", user!.id).eq("status", "completed"),
+        supabase.from("reviews").select("rating").eq("reviewee_id", user!.id),
+      ]);
+
+      const totalEarnings = (paymentsRes.data || []).reduce((s, p) => s + Number(p.amount), 0);
+      const ratings = reviewsRes.data || [];
+      const avgRating = ratings.length > 0 ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : 0;
+
+      setStats({
+        earnings: totalEarnings,
+        completed: completedRes.count ?? 0,
+        rating: Math.round(avgRating * 10) / 10,
+        pending: pendingRes.count ?? 0,
+      });
+
+      // Recent jobs
+      const { data: jobs } = await supabase
+        .from("jobs")
+        .select("*, profiles!jobs_customer_id_fkey(name)")
+        .eq("worker_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      setRecentJobs(jobs || []);
+
+      // Weekly earnings
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      const { data: recentPayments } = await supabase
+        .from("payments")
+        .select("amount, created_at")
+        .eq("payee_id", user!.id)
+        .eq("status", "completed")
+        .gte("created_at", sevenDaysAgo.toISOString());
+
+      const dayCounts: Record<string, number> = {};
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        dayCounts[days[d.getDay()]] = 0;
+      }
+      (recentPayments || []).forEach(p => {
+        const day = days[new Date(p.created_at).getDay()];
+        dayCounts[day] = (dayCounts[day] || 0) + Number(p.amount);
+      });
+      setEarningsData(Object.entries(dayCounts).map(([day, amount]) => ({ day, amount })));
+
+      setLoading(false);
+    }
+    load();
+  }, [user]);
+
+  const toggleOnline = async () => {
+    const newStatus = !isOnline;
+    setIsOnline(newStatus);
+    await supabase.from("worker_profiles").update({ is_online: newStatus }).eq("user_id", user!.id);
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+        </div>
+      </div>
+    );
+  }
+
+  const statCards = [
+    { label: "Total Earnings", value: `$${stats.earnings.toLocaleString()}`, icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Jobs Completed", value: String(stats.completed), icon: Briefcase, color: "text-chart-2", bg: "bg-chart-2/10" },
+    { label: "Average Rating", value: stats.rating > 0 ? String(stats.rating) : "N/A", icon: Star, color: "text-chart-4", bg: "bg-chart-4/10" },
+    { label: "Pending Jobs", value: String(stats.pending), icon: Clock, color: "text-chart-3", bg: "bg-chart-3/10" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -25,8 +107,7 @@ export default function WorkerDashboard() {
           <h1 className="text-2xl font-bold text-foreground">Worker Dashboard</h1>
           <p className="text-muted-foreground text-sm">Manage your jobs and availability</p>
         </div>
-        <button
-          onClick={() => setIsOnline(!isOnline)}
+        <button onClick={toggleOnline}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             isOnline ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
           }`}
@@ -37,12 +118,7 @@ export default function WorkerDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Total Earnings", value: "$3,420", icon: CreditCard, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Jobs Completed", value: "47", icon: Briefcase, color: "text-chart-2", bg: "bg-chart-2/10" },
-          { label: "Average Rating", value: "4.8", icon: Star, color: "text-chart-4", bg: "bg-chart-4/10" },
-          { label: "Pending Jobs", value: "3", icon: Clock, color: "text-chart-3", bg: "bg-chart-3/10" },
-        ].map((stat, i) => (
+        {statCards.map((stat, i) => (
           <div key={stat.label} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
             <div className="flex items-center justify-between">
               <div>
@@ -79,24 +155,30 @@ export default function WorkerDashboard() {
 
         <div className="stat-card animate-fade-in" style={{ animationDelay: "500ms" }}>
           <h3 className="text-lg font-semibold text-foreground mb-4">Recent Jobs</h3>
-          <div className="space-y-3">
-            {recentJobs.map((job) => (
-              <div key={job.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div>
-                  <p className="text-sm font-medium text-foreground">{job.title}</p>
-                  <p className="text-xs text-muted-foreground">{job.customer} · {job.date}</p>
+          {recentJobs.length > 0 ? (
+            <div className="space-y-3">
+              {recentJobs.map((job) => (
+                <div key={job.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{job.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(job as any).profiles?.name || "Customer"} · {new Date(job.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-foreground">{job.budget ? `$${job.budget}` : "-"}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${
+                      job.status === "completed" ? "bg-green-500/10 text-green-500" :
+                      job.status === "in_progress" ? "bg-primary/10 text-primary" :
+                      "bg-chart-4/10 text-chart-4"
+                    }`}>{job.status.replace("_", " ")}</span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-foreground">{job.amount}</p>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    job.status === "Completed" ? "bg-green-500/10 text-green-500" :
-                    job.status === "In Progress" ? "bg-primary/10 text-primary" :
-                    "bg-chart-4/10 text-chart-4"
-                  }`}>{job.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">No jobs yet — set yourself online to start receiving requests</div>
+          )}
         </div>
       </div>
     </div>

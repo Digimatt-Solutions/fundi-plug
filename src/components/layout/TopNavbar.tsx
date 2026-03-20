@@ -15,8 +15,8 @@ export function TopNavbar() {
     setDark(!dark);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/auth");
   };
 
@@ -38,7 +38,6 @@ export function TopNavbar() {
         </Button>
         <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
           <Bell className="w-4 h-4" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
         </Button>
         <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
           <LogOut className="w-4 h-4" />
