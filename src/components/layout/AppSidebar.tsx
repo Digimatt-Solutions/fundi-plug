@@ -27,19 +27,18 @@ const adminNav = [
 const workerNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase },
-  { title: "Availability", url: "/dashboard/availability", icon: CalendarDays },
+  { title: "Profile", url: "/dashboard/profile", icon: UserCog },
   { title: "Earnings", url: "/dashboard/earnings", icon: CreditCard },
   { title: "Reviews", url: "/dashboard/reviews", icon: Star },
-  { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
-  { title: "Profile", url: "/dashboard/profile", icon: UserCog },
+  { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
 const customerNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Post a Job", url: "/dashboard/post-job", icon: Briefcase },
   { title: "Find Workers", url: "/dashboard/find-workers", icon: Search },
   { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays },
-  { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
