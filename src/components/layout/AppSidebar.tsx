@@ -2,10 +2,8 @@ import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard, Users, UserPlus, Heartbeat, CalendarDays, Stethoscope, FlaskConical,
-  ClipboardList, Pill, Building2, Wrench, MapPin, Star, Briefcase, Search,
-  BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, MessageSquare,
-  FileText, UserCog, Bell,
+  LayoutDashboard, Users, CalendarDays, ClipboardList, Wrench, MapPin, Star, Briefcase, Search,
+  BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, MessageSquare, UserCog,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
