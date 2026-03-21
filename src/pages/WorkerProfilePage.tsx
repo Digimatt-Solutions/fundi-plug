@@ -193,7 +193,7 @@ export default function WorkerProfilePage() {
       </div>
 
       <Button onClick={saveProfile} disabled={saving} className="active:scale-[0.97]">
-        {saving ? "Saving..." : (!profile?.bio && !profile?.hourly_rate) ? "Submit for Review" : "Save Profile"}
+        {saving ? "Saving..." : "Save & Submit for Review"}
       </Button>
     </div>
   );
