@@ -90,8 +90,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [loadUser]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    // Log login to activity_logs
+    if (data.user) {
+      supabase.from("activity_logs").insert({
+        user_id: data.user.id, action: "User Login",
+        detail: "User signed in", entity_type: "user", entity_id: data.user.id,
+      }).then(() => {});
+    }
   }, []);
 
   const signup = useCallback(async (email: string, password: string, name: string, role: UserRole) => {

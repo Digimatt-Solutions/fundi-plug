@@ -68,22 +68,20 @@ export default function WorkerProfilePage() {
   const saveProfile = async () => {
     if (!profile) return;
     setSaving(true);
-    const isFirstSetup = !profile.bio && !profile.hourly_rate;
+    // Always reset to pending on profile update to trigger re-verification
     await supabase.from("worker_profiles").update({
       bio, hourly_rate: hourlyRate ? Number(hourlyRate) : null,
       years_experience: yearsExperience ? Number(yearsExperience) : 0,
       service_area: serviceArea || null, skills: selectedSkills,
-      verification_status: isFirstSetup ? "pending" : profile.verification_status,
+      verification_status: "pending",
     }).eq("id", profile.id);
 
-    if (isFirstSetup) {
-      await supabase.from("activity_logs").insert({
-        user_id: user!.id, action: "Profile Submitted",
-        detail: "Worker submitted profile for review", entity_type: "worker_profile", entity_id: profile.id,
-      });
-      setProfile((prev: any) => ({ ...prev, verification_status: "pending", bio, hourly_rate: hourlyRate ? Number(hourlyRate) : null }));
-    }
-    toast({ title: isFirstSetup ? "Profile submitted for review!" : "Profile updated" });
+    await supabase.from("activity_logs").insert({
+      user_id: user!.id, action: "Profile Submitted",
+      detail: "Worker submitted/updated profile for review", entity_type: "worker_profile", entity_id: profile.id,
+    });
+    setProfile((prev: any) => ({ ...prev, verification_status: "pending", bio, hourly_rate: hourlyRate ? Number(hourlyRate) : null }));
+    toast({ title: "Profile submitted for review!" });
     setSaving(false);
   };
 
