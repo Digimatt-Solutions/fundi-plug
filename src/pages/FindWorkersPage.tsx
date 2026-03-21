@@ -3,11 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Search, Star, MapPin, DollarSign, CheckCircle } from "lucide-react";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function FindWorkersPage() {
   const { user } = useAuth();
@@ -62,10 +59,19 @@ export default function FindWorkersPage() {
     setSelectedWorker(worker);
     const [certsRes, reviewsRes] = await Promise.all([
       supabase.from("certifications").select("*").eq("worker_id", worker.id),
-      supabase.from("reviews").select("*, profiles:reviewer_id(name)").eq("reviewee_id", worker.user_id).order("created_at", { ascending: false }).limit(10),
+      supabase.from("reviews").select("*, jobs:job_id(title)").eq("reviewee_id", worker.user_id).order("created_at", { ascending: false }).limit(10),
     ]);
+
+    // Get reviewer names
+    const reviewerIds = [...new Set((reviewsRes.data || []).map(r => r.reviewer_id))];
+    const { data: profiles } = reviewerIds.length > 0
+      ? await supabase.from("profiles").select("id, name").in("id", reviewerIds)
+      : { data: [] };
+    const nameMap: Record<string, string> = {};
+    (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
+
     setWorkerCerts(certsRes.data || []);
-    setWorkerReviews(reviewsRes.data || []);
+    setWorkerReviews((reviewsRes.data || []).map(r => ({ ...r, reviewerName: nameMap[r.reviewer_id] || "Customer" })));
   };
 
   const filtered = workers.filter(w =>
@@ -127,7 +133,6 @@ export default function FindWorkersPage() {
         </div>
       )}
 
-      {/* Worker Profile Dialog */}
       <Dialog open={!!selectedWorker} onOpenChange={(open) => !open && setSelectedWorker(null)}>
         <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
           {selectedWorker && (
@@ -158,14 +163,12 @@ export default function FindWorkersPage() {
                     <p className="text-xs text-muted-foreground">Per Hour</p>
                   </div>
                 </div>
-
                 {selectedWorker.bio && (
                   <div>
                     <h4 className="text-sm font-medium text-foreground mb-1">About</h4>
                     <p className="text-sm text-muted-foreground">{selectedWorker.bio}</p>
                   </div>
                 )}
-
                 {workerCerts.length > 0 && (
                   <div>
                     <h4 className="text-sm font-medium text-foreground mb-2">Certifications</h4>
@@ -179,7 +182,6 @@ export default function FindWorkersPage() {
                     </div>
                   </div>
                 )}
-
                 {workerReviews.length > 0 && (
                   <div>
                     <h4 className="text-sm font-medium text-foreground mb-2">Reviews</h4>
@@ -192,7 +194,7 @@ export default function FindWorkersPage() {
                                 <Star key={s} className={`w-3 h-3 ${s <= r.rating ? "text-chart-4 fill-current" : "text-muted-foreground"}`} />
                               ))}
                             </div>
-                            <span className="text-xs text-muted-foreground">{(r as any).profiles?.name || "Customer"}</span>
+                            <span className="text-xs text-muted-foreground">{r.reviewerName}</span>
                           </div>
                           {r.comment && <p className="text-xs text-muted-foreground">{r.comment}</p>}
                         </div>

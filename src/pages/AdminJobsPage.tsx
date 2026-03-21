@@ -15,15 +15,18 @@ export default function AdminJobsPage() {
   async function loadJobs() {
     const { data } = await supabase
       .from("jobs")
-      .select("*, service_categories:category_id(name), customer:customer_id(name:profiles!jobs_customer_id_fkey(name)), worker:worker_id(name:profiles(name))")
+      .select("*, service_categories:category_id(name)")
       .order("created_at", { ascending: false })
       .limit(100);
 
-    // Flatten names
-    const customerIds = (data || []).map(j => j.customer_id);
-    const workerIds = (data || []).map(j => j.worker_id).filter(Boolean);
-    const allIds = [...new Set([...customerIds, ...workerIds])];
-    const { data: profiles } = allIds.length > 0 ? await supabase.from("profiles").select("id, name").in("id", allIds) : { data: [] };
+    // Fetch profile names separately
+    const allUserIds = [...new Set([
+      ...(data || []).map(j => j.customer_id),
+      ...(data || []).map(j => j.worker_id).filter(Boolean),
+    ])];
+    const { data: profiles } = allUserIds.length > 0
+      ? await supabase.from("profiles").select("id, name").in("id", allUserIds)
+      : { data: [] };
     const nameMap: Record<string, string> = {};
     (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
 
@@ -36,7 +39,13 @@ export default function AdminJobsPage() {
     setLoading(false);
   }
 
-  useEffect(() => { loadJobs(); }, []);
+  useEffect(() => {
+    loadJobs();
+    const channel = supabase.channel("admin-jobs-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "jobs" }, () => loadJobs())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const cancelJob = async (jobId: string) => {
     await supabase.from("jobs").update({ status: "cancelled" }).eq("id", jobId);

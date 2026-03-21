@@ -15,12 +15,23 @@ export default function WorkerReviewsPage() {
     async function load() {
       const { data } = await supabase
         .from("reviews")
-        .select("*, profiles:reviewer_id(name), jobs:job_id(title)")
+        .select("*, jobs:job_id(title)")
         .eq("reviewee_id", user!.id)
         .order("created_at", { ascending: false });
+
       const all = data || [];
-      setReviews(all);
-      if (all.length) setAvg(Math.round(all.reduce((s, r) => s + r.rating, 0) / all.length * 10) / 10);
+
+      // Fetch reviewer names
+      const reviewerIds = [...new Set(all.map(r => r.reviewer_id))];
+      const { data: profiles } = reviewerIds.length > 0
+        ? await supabase.from("profiles").select("id, name").in("id", reviewerIds)
+        : { data: [] };
+      const nameMap: Record<string, string> = {};
+      (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
+
+      const enriched = all.map(r => ({ ...r, reviewerName: nameMap[r.reviewer_id] || "Customer" }));
+      setReviews(enriched);
+      if (enriched.length) setAvg(Math.round(enriched.reduce((s, r) => s + r.rating, 0) / enriched.length * 10) / 10);
       setLoading(false);
     }
     load();
@@ -61,7 +72,7 @@ export default function WorkerReviewsPage() {
                         <Star key={s} className={`w-3.5 h-3.5 ${s <= r.rating ? "text-chart-4 fill-current" : "text-muted-foreground"}`} />
                       ))}
                     </div>
-                    <span className="text-sm font-medium text-foreground">{(r as any).profiles?.name || "Customer"}</span>
+                    <span className="text-sm font-medium text-foreground">{r.reviewerName}</span>
                   </div>
                   {r.comment && <p className="text-sm text-muted-foreground">{r.comment}</p>}
                   <p className="text-xs text-muted-foreground mt-1">Job: {(r as any).jobs?.title || "—"}</p>

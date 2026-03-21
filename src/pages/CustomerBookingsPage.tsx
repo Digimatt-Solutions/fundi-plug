@@ -6,9 +6,7 @@ import { CalendarDays, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
@@ -24,12 +22,12 @@ export default function CustomerBookingsPage() {
     if (!user) return;
     const { data } = await supabase
       .from("jobs")
-      .select("*, service_categories:category_id(name, icon), worker_profile:worker_id(name:profiles!worker_profiles_user_id_fkey(name))")
+      .select("*, service_categories:category_id(name, icon)")
       .eq("customer_id", user.id)
       .in("status", ["accepted", "in_progress", "completed"])
       .order("created_at", { ascending: false });
-    
-    // Get worker names via profiles
+
+    // Get worker names
     const workerIds = (data || []).map(j => j.worker_id).filter(Boolean);
     const { data: workerProfiles } = workerIds.length > 0
       ? await supabase.from("profiles").select("id, name").in("id", workerIds)
@@ -58,28 +56,15 @@ export default function CustomerBookingsPage() {
     if (!reviewDialog || !user) return;
     setSubmitting(true);
     await supabase.from("reviews").insert({
-      job_id: reviewDialog.id,
-      reviewer_id: user.id,
-      reviewee_id: reviewDialog.worker_id,
-      rating,
-      comment: comment || null,
+      job_id: reviewDialog.id, reviewer_id: user.id,
+      reviewee_id: reviewDialog.worker_id, rating, comment: comment || null,
     });
     toast({ title: "Review submitted!" });
-    setReviewDialog(null);
-    setRating(5);
-    setComment("");
-    setSubmitting(false);
-    loadData();
+    setReviewDialog(null); setRating(5); setComment("");
+    setSubmitting(false); loadData();
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-96 rounded-xl" />
-      </div>
-    );
-  }
+  if (loading) return <div className="space-y-6"><Skeleton className="h-8 w-48" /><Skeleton className="h-96 rounded-xl" /></div>;
 
   return (
     <div className="space-y-6">
@@ -127,12 +112,9 @@ export default function CustomerBookingsPage() {
         </div>
       )}
 
-      {/* Review Dialog */}
       <Dialog open={!!reviewDialog} onOpenChange={(open) => !open && setReviewDialog(null)}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rate Worker</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Rate Worker</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-1 justify-center">
               {[1, 2, 3, 4, 5].map((s) => (
