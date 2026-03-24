@@ -26,13 +26,13 @@
     --input: 220 13% 87%;
     --ring: 22 93% 49%;
     --radius: 0.625rem;
-    --sidebar-background: 222 30% 12%;
-    --sidebar-foreground: 220 14% 75%;
+    --sidebar-background: 220 16% 96%;
+    --sidebar-foreground: 220 20% 20%;
     --sidebar-primary: 22 93% 49%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 25% 18%;
-    --sidebar-accent-foreground: 220 14% 90%;
-    --sidebar-border: 222 20% 20%;
+    --sidebar-accent: 220 14% 90%;
+    --sidebar-accent-foreground: 220 20% 15%;
+    --sidebar-border: 220 13% 87%;
     --sidebar-ring: 22 93% 49%;
     --chart-1: 22 93% 49%;
     --chart-2: 173 58% 39%;

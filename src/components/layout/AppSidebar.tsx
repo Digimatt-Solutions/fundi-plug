@@ -72,10 +72,10 @@ export function AppSidebar() {
                         end={item.url === "/dashboard"}
                         className={`rounded-lg border transition-all duration-150 text-[13px] font-medium ${
                           active
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "border-sidebar-border hover:bg-primary/10 hover:text-primary hover:border-primary/40"
+                            ? "bg-primary/10 text-primary border-primary/40 shadow-sm"
+                            : "text-sidebar-foreground border-sidebar-border hover:bg-primary/10 hover:text-primary hover:border-primary/40"
                         }`}
-                        activeClassName="bg-primary text-primary-foreground border-primary"
+                        activeClassName="bg-primary/10 text-primary border-primary/40"
                       >
                         <item.icon className="w-4 h-4 shrink-0" />
                         {!collapsed && <span>{item.title}</span>}
