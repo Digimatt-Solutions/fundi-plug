@@ -42,6 +42,15 @@ export default function WorkerMyJobsPage() {
     (profiles || []).forEach(p => { profileMap[p.id] = p; });
 
     const appliedJobIds = new Set((appsRes.data || []).map((a: any) => a.job_id));
+    
+    // Fetch payment statuses for assigned jobs
+    const assignedJobIds = (assignedRes.data || []).map(j => j.id);
+    const { data: paymentsData } = assignedJobIds.length > 0
+      ? await supabase.from("payments").select("job_id, status").in("job_id", assignedJobIds)
+      : { data: [] };
+    const paymentMap: Record<string, string> = {};
+    (paymentsData || []).forEach(p => { paymentMap[p.job_id] = p.status; });
+
     setAvailableJobs((availRes.data || []).filter((j: any) => !appliedJobIds.has(j.id)).map(j => ({
       ...j, customerName: profileMap[j.customer_id]?.name || "Customer",
     })));
@@ -53,6 +62,7 @@ export default function WorkerMyJobsPage() {
       customerName: profileMap[j.customer_id]?.name || "Customer",
       customerEmail: profileMap[j.customer_id]?.email || "",
       customerPhone: profileMap[j.customer_id]?.phone || "",
+      paymentStatus: paymentMap[j.id] || null,
     })));
     setLoading(false);
   }
@@ -204,6 +214,15 @@ export default function WorkerMyJobsPage() {
                     }`}>{job.status.replace("_", " ")}</span>
                     {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")}>Start</Button>}
                     {job.status === "in_progress" && <Button size="sm" onClick={() => updateJobStatus(job.id, "completed")}>Complete</Button>}
+                    {job.status === "completed" && job.paymentStatus && (
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                        job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
+                        job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
+                      }`}>💰 {job.paymentStatus}</span>
+                    )}
+                    {job.status === "completed" && !job.paymentStatus && (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
+                    )}
                   </div>
                 </div>
                 {/* Customer contact details */}
