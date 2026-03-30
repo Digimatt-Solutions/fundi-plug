@@ -42,6 +42,15 @@ export default function WorkerMyJobsPage() {
     (profiles || []).forEach(p => { profileMap[p.id] = p; });
 
     const appliedJobIds = new Set((appsRes.data || []).map((a: any) => a.job_id));
+    
+    // Fetch payment statuses for assigned jobs
+    const assignedJobIds = (assignedRes.data || []).map(j => j.id);
+    const { data: paymentsData } = assignedJobIds.length > 0
+      ? await supabase.from("payments").select("job_id, status").in("job_id", assignedJobIds)
+      : { data: [] };
+    const paymentMap: Record<string, string> = {};
+    (paymentsData || []).forEach(p => { paymentMap[p.job_id] = p.status; });
+
     setAvailableJobs((availRes.data || []).filter((j: any) => !appliedJobIds.has(j.id)).map(j => ({
       ...j, customerName: profileMap[j.customer_id]?.name || "Customer",
     })));
@@ -53,6 +62,7 @@ export default function WorkerMyJobsPage() {
       customerName: profileMap[j.customer_id]?.name || "Customer",
       customerEmail: profileMap[j.customer_id]?.email || "",
       customerPhone: profileMap[j.customer_id]?.phone || "",
+      paymentStatus: paymentMap[j.id] || null,
     })));
     setLoading(false);
   }
