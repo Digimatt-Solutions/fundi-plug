@@ -106,7 +106,7 @@ export default function PaymentsPage() {
                   {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">Payer</th>}
                   {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">Payee</th>}
                   <th className="text-left p-4 text-muted-foreground font-medium">Amount</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Commission</th>
+                  {(isAdmin || isWorker) && <th className="text-left p-4 text-muted-foreground font-medium">Commission</th>}
                   <th className="text-left p-4 text-muted-foreground font-medium">Status</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Date</th>
                 </tr>
@@ -118,7 +118,7 @@ export default function PaymentsPage() {
                     {isAdmin && <td className="p-4 text-muted-foreground">{p.payerName}</td>}
                     {isAdmin && <td className="p-4 text-muted-foreground">{p.payeeName}</td>}
                     <td className="p-4 text-foreground tabular-nums">KSH {Number(p.amount).toLocaleString()}</td>
-                    <td className="p-4 text-muted-foreground tabular-nums">{p.commission ? `KSH ${Number(p.commission).toLocaleString()}` : "-"}</td>
+                    {(isAdmin || isWorker) && <td className="p-4 text-muted-foreground tabular-nums">{p.commission ? `KSH ${Number(p.commission).toLocaleString()}` : "-"}</td>}
                     <td className="p-4">
                       <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${
                         p.status === "completed" ? "bg-green-500/10 text-green-500" :
