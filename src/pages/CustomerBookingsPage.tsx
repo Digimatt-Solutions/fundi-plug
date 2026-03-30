@@ -80,7 +80,7 @@ export default function CustomerBookingsPage() {
 
   useEffect(() => {
     if (!loading && jobs.length > 0) {
-      const unpaid = jobs.find(j => j.status === "completed" && !j.paymentStatus);
+      const unpaid = jobs.find(j => j.status === "completed" && (!j.paymentStatus || j.paymentStatus === "pending"));
       if (unpaid && !payDialog) setPayDialog(unpaid);
     }
   }, [jobs, loading]);
