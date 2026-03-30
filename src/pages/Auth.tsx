@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, type UserRole } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,16 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { login, signup } = useAuth();
+  const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Navigate to dashboard once authenticated
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,20 +36,19 @@ const Auth = () => {
     try {
       if (isSignIn) {
         await login(email, password);
-        navigate("/dashboard");
+        // Navigation handled by useEffect watching isAuthenticated
       } else {
         await signup(email, password, name, role);
         toast({
           title: "Account created",
           description: "Please check your email for verification, or sign in if auto-confirmed.",
         });
-        navigate("/dashboard");
+        // Navigation handled by useEffect watching isAuthenticated
       }
     } catch (err: any) {
       const msg = err.message || "Something went wrong";
       setError(msg);
       toast({ title: "Error", description: msg, variant: "destructive" });
-    } finally {
       setLoading(false);
     }
   };

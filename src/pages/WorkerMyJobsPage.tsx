@@ -204,6 +204,15 @@ export default function WorkerMyJobsPage() {
                     }`}>{job.status.replace("_", " ")}</span>
                     {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")}>Start</Button>}
                     {job.status === "in_progress" && <Button size="sm" onClick={() => updateJobStatus(job.id, "completed")}>Complete</Button>}
+                    {job.status === "completed" && job.paymentStatus && (
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                        job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
+                        job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
+                      }`}>💰 {job.paymentStatus}</span>
+                    )}
+                    {job.status === "completed" && !job.paymentStatus && (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
+                    )}
                   </div>
                 </div>
                 {/* Customer contact details */}
