@@ -117,7 +117,7 @@ export default function PaymentsPage() {
                     <td className="p-4 text-foreground">{p.jobTitle}</td>
                     {isAdmin && <td className="p-4 text-muted-foreground">{p.payerName}</td>}
                     {isAdmin && <td className="p-4 text-muted-foreground">{p.payeeName}</td>}
-                    <td className="p-4 text-foreground tabular-nums">KSH {Number(p.amount).toLocaleString()}</td>
+                    <td className="p-4 text-foreground tabular-nums">KSH {(!isAdmin && !isWorker ? Number(p.amount) + Number(p.commission || 0) : Number(p.amount)).toLocaleString()}</td>
                     {(isAdmin || isWorker) && <td className="p-4 text-muted-foreground tabular-nums">{p.commission ? `KSH ${Number(p.commission).toLocaleString()}` : "-"}</td>}
                     <td className="p-4">
                       <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${
