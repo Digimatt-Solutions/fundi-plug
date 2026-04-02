@@ -66,7 +66,6 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
-    </SplashScreen>
   </QueryClientProvider>
   </ThemeProvider>
 );
