@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     const { data: roleData } = await userClient.from("user_roles").select("role").eq("user_id", caller.id).single();
     if (roleData?.role !== "admin") throw new Error("Admin access required");
 
-    const { action, userId, newRole, isActive } = await req.json();
+    const { action, userId, newRole, isActive, paymentId } = await req.json();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     if (action === "change_role") {
@@ -54,6 +54,17 @@ Deno.serve(async (req) => {
       await adminClient.from("activity_logs").insert({
         user_id: caller.id, action: "User Deleted",
         detail: "Permanently deleted user account", entity_type: "user", entity_id: userId,
+      });
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "reset_payment") {
+      if (!paymentId) throw new Error("Missing paymentId");
+      // Delete the failed payment record so customer can retry
+      await adminClient.from("payments").delete().eq("id", paymentId).eq("status", "failed");
+      await adminClient.from("activity_logs").insert({
+        user_id: caller.id, action: "Payment Reset",
+        detail: "Reset failed payment for customer retry", entity_type: "payment", entity_id: paymentId,
       });
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
