@@ -58,6 +58,17 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "reset_payment") {
+      if (!paymentId) throw new Error("Missing paymentId");
+      // Delete the failed payment record so customer can retry
+      await adminClient.from("payments").delete().eq("id", paymentId).eq("status", "failed");
+      await adminClient.from("activity_logs").insert({
+        user_id: caller.id, action: "Payment Reset",
+        detail: "Reset failed payment for customer retry", entity_type: "payment", entity_id: paymentId,
+      });
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     throw new Error("Invalid action");
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), {
