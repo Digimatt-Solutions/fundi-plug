@@ -21,6 +21,8 @@ export default function CustomerBookingsPage() {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | null>(null);
+  const [mpesaPhone, setMpesaPhone] = useState("");
 
   async function loadData() {
     if (!user) return;
