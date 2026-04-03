@@ -73,46 +73,7 @@ export default function PaymentsPage() {
     }
   };
 
-  useEffect(() => {
-    if (!user) return;
-    async function load() {
-      let query = supabase.from("payments").select("*, jobs:job_id(title)").order("created_at", { ascending: false });
-      if (!isAdmin && isWorker) {
-        query = query.eq("payee_id", user!.id);
-      } else if (!isAdmin) {
-        query = query.eq("payer_id", user!.id);
-      }
-      const { data } = await query;
-
-      const allIds = [...new Set((data || []).flatMap(p => [p.payer_id, p.payee_id]))];
-      const { data: profiles } = allIds.length > 0 ? await supabase.from("profiles").select("id, name").in("id", allIds) : { data: [] };
-      const nameMap: Record<string, string> = {};
-      (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
-
-      const mapped = (data || []).map(p => ({
-        ...p,
-        payerName: nameMap[p.payer_id] || "-",
-        payeeName: nameMap[p.payee_id] || "-",
-        jobTitle: (p as any).jobs?.title || "-",
-      }));
-      setPayments(mapped);
-
-      // Build monthly chart
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const monthlyAmounts: Record<string, number> = {};
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date(); d.setMonth(d.getMonth() - i);
-        monthlyAmounts[months[d.getMonth()]] = 0;
-      }
-      mapped.filter(p => p.status === "completed").forEach(p => {
-        const m = months[new Date(p.created_at).getMonth()];
-        if (monthlyAmounts[m] !== undefined) monthlyAmounts[m] += Number(p.amount);
-      });
-      setChartData(Object.entries(monthlyAmounts).map(([month, amount]) => ({ month, amount: Math.round(amount) })));
-      setLoading(false);
-    }
-    load();
-  }, [user]);
+  useEffect(() => { load(); }, [user]);
 
   const filtered = payments.filter(p =>
     p.jobTitle.toLowerCase().includes(search.toLowerCase()) ||
