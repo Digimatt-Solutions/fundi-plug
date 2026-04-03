@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarDays, Star, CreditCard } from "lucide-react";
+import { CalendarDays, Star, CreditCard, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useSearchParams } from "react-router-dom";
@@ -20,6 +21,8 @@ export default function CustomerBookingsPage() {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | null>(null);
+  const [mpesaPhone, setMpesaPhone] = useState("");
 
   async function loadData() {
     if (!user) return;
@@ -85,16 +88,34 @@ export default function CustomerBookingsPage() {
     }
   }, [jobs, loading]);
 
-  const handlePay = async (job: any) => {
+  const handlePay = async (job: any, method: "stripe" | "mpesa") => {
     setPaying(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const { data, error } = await supabase.functions.invoke("create-payment", {
-        body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      if (error || data?.error) throw new Error(data?.error || error?.message);
-      if (data?.url) window.location.href = data.url;
+      if (method === "stripe") {
+        const { data, error } = await supabase.functions.invoke("create-payment", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        if (data?.url) window.location.href = data.url;
+      } else {
+        if (!mpesaPhone) {
+          toast({ title: "Phone number required", description: "Enter your M-Pesa phone number", variant: "destructive" });
+          setPaying(false);
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id, phoneNumber: mpesaPhone },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        toast({ title: "M-Pesa prompt sent!", description: data?.message || "Check your phone to complete payment." });
+        setPayDialog(null);
+        setPaymentMethod(null);
+        setMpesaPhone("");
+        setTimeout(() => loadData(), 5000);
+      }
     } catch (err: any) {
       toast({ title: "Payment failed", description: err.message, variant: "destructive" });
     } finally {
@@ -156,7 +177,7 @@ export default function CustomerBookingsPage() {
                 </div>
                 <div className="flex gap-2">
                   {job.status === "completed" && (!job.paymentStatus || job.paymentStatus === "pending") && (
-                    <Button size="sm" onClick={() => handlePay(job)} className="active:scale-[0.97]">
+                    <Button size="sm" onClick={() => setPayDialog(job)} className="active:scale-[0.97]">
                       <CreditCard className="w-4 h-4 mr-1" /> Pay Now
                     </Button>
                   )}
@@ -181,10 +202,10 @@ export default function CustomerBookingsPage() {
         </div>
       )}
 
-      <Dialog open={!!payDialog} onOpenChange={(open) => !open && setPayDialog(null)}>
+      <Dialog open={!!payDialog} onOpenChange={(open) => { if (!open) { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); } }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Payment Required</DialogTitle></DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               The service for <strong className="text-foreground">{payDialog?.title}</strong> has been completed by <strong className="text-foreground">{payDialog?.workerName}</strong>.
             </p>
@@ -192,13 +213,58 @@ export default function CustomerBookingsPage() {
               <span className="text-sm text-muted-foreground">Amount Due</span>
               <span className="text-2xl font-bold text-foreground">KSH {payDialog?.budget || 50}</span>
             </div>
+
+            {!paymentMethod ? (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">Choose payment method:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setPaymentMethod("stripe")}
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                  >
+                    <CreditCard className="w-8 h-8 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Card (Stripe)</span>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("mpesa")}
+                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                  >
+                    <Smartphone className="w-8 h-8 text-primary" />
+                    <span className="text-sm font-medium text-foreground">M-Pesa</span>
+                  </button>
+                </div>
+              </div>
+            ) : paymentMethod === "mpesa" ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
+                  <span className="text-sm font-medium text-foreground">M-Pesa STK Push</span>
+                </div>
+                <Input
+                  placeholder="Phone number e.g. 0712345678"
+                  value={mpesaPhone}
+                  onChange={(e) => setMpesaPhone(e.target.value)}
+                  className="bg-muted/50"
+                />
+                <p className="text-xs text-muted-foreground">You'll receive an STK push on your phone to complete payment.</p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
+                <span className="text-sm font-medium text-foreground">Pay with Card (Stripe)</span>
+              </div>
+            )}
+
             <p className="text-xs text-muted-foreground">A platform commission will be deducted. The worker receives the net amount.</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPayDialog(null)}>Later</Button>
-            <Button onClick={() => { setPayDialog(null); handlePay(payDialog); }} disabled={paying}>
-              <CreditCard className="w-4 h-4 mr-2" /> {paying ? "Processing..." : "Pay Now"}
-            </Button>
+            <Button variant="outline" onClick={() => { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); }}>Later</Button>
+            {paymentMethod && (
+              <Button onClick={() => handlePay(payDialog, paymentMethod)} disabled={paying}>
+                {paymentMethod === "mpesa" ? <Smartphone className="w-4 h-4 mr-2" /> : <CreditCard className="w-4 h-4 mr-2" />}
+                {paying ? "Processing..." : paymentMethod === "mpesa" ? "Send STK Push" : "Pay with Card"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
