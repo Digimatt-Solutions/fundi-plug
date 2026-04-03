@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     const { data: roleData } = await userClient.from("user_roles").select("role").eq("user_id", caller.id).single();
     if (roleData?.role !== "admin") throw new Error("Admin access required");
 
-    const { action, userId, newRole, isActive } = await req.json();
+    const { action, userId, newRole, isActive, paymentId } = await req.json();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     if (action === "change_role") {
