@@ -88,16 +88,34 @@ export default function CustomerBookingsPage() {
     }
   }, [jobs, loading]);
 
-  const handlePay = async (job: any) => {
+  const handlePay = async (job: any, method: "stripe" | "mpesa") => {
     setPaying(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const { data, error } = await supabase.functions.invoke("create-payment", {
-        body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
-        headers: { Authorization: `Bearer ${session?.access_token}` },
-      });
-      if (error || data?.error) throw new Error(data?.error || error?.message);
-      if (data?.url) window.location.href = data.url;
+      if (method === "stripe") {
+        const { data, error } = await supabase.functions.invoke("create-payment", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        if (data?.url) window.location.href = data.url;
+      } else {
+        if (!mpesaPhone) {
+          toast({ title: "Phone number required", description: "Enter your M-Pesa phone number", variant: "destructive" });
+          setPaying(false);
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id, phoneNumber: mpesaPhone },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        toast({ title: "M-Pesa prompt sent!", description: data?.message || "Check your phone to complete payment." });
+        setPayDialog(null);
+        setPaymentMethod(null);
+        setMpesaPhone("");
+        setTimeout(() => loadData(), 5000);
+      }
     } catch (err: any) {
       toast({ title: "Payment failed", description: err.message, variant: "destructive" });
     } finally {
