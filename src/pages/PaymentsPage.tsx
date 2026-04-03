@@ -148,6 +148,16 @@ export default function PaymentsPage() {
                       }`}>{p.status}</span>
                     </td>
                     <td className="p-4 text-muted-foreground text-xs">{new Date(p.created_at).toLocaleString()}</td>
+                    {isAdmin && (
+                      <td className="p-4">
+                        {p.status === "failed" ? (
+                          <Button size="sm" variant="outline" onClick={() => handleResetPayment(p.id)} disabled={resetting === p.id} className="gap-1.5">
+                            <RotateCcw className={`w-3.5 h-3.5 ${resetting === p.id ? "animate-spin" : ""}`} />
+                            {resetting === p.id ? "Resetting..." : "Reset"}
+                          </Button>
+                        ) : <span className="text-muted-foreground">—</span>}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
