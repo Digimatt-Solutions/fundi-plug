@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const MPESA_SHORTCODE = "174379";
-const MPESA_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a1520bfc04c462872d4428e4bd8a2e6e3e7852";
+const MPESA_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
 const MPESA_BASE_URL = "https://sandbox.safaricom.co.ke";
 
 async function getMpesaToken(): Promise<string> {
