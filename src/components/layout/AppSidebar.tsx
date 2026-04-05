@@ -3,7 +3,7 @@ import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList, MapPin, Star, Briefcase, Search,
-  BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, UserCog,
+  BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, UserCog, ArrowDownCircle,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
