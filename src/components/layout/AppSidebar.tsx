@@ -17,6 +17,7 @@ const adminNav = [
   { title: "Jobs", url: "/dashboard/jobs", icon: Briefcase },
   { title: "Categories", url: "/dashboard/categories", icon: ClipboardList },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
+  { title: "Disbursements", url: "/dashboard/disbursements", icon: ArrowDownCircle },
   { title: "Reports", url: "/dashboard/reports", icon: BarChart3 },
   { title: "Activity Logs", url: "/dashboard/activity", icon: Activity },
   { title: "User Management", url: "/dashboard/user-management", icon: UserCog },
