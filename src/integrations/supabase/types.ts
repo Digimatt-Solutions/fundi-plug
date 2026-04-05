@@ -499,6 +499,39 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawals: {
+        Row: {
+          admin_notes: string | null
+          amount: number
+          id: string
+          processed_at: string | null
+          processed_by: string | null
+          requested_at: string
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          worker_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount: number
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          worker_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount?: number
+          id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          worker_id?: string
+        }
+        Relationships: []
+      }
       worker_profiles: {
         Row: {
           bio: string | null
@@ -588,6 +621,7 @@ export type Database = {
         | "cancelled"
       payment_status: "pending" | "completed" | "failed" | "refunded"
       verification_status: "pending" | "approved" | "rejected"
+      withdrawal_status: "pending" | "approved" | "rejected" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -732,6 +766,7 @@ export const Constants = {
       ],
       payment_status: ["pending", "completed", "failed", "refunded"],
       verification_status: ["pending", "approved", "rejected"],
+      withdrawal_status: ["pending", "approved", "rejected", "completed"],
     },
   },
 } as const
