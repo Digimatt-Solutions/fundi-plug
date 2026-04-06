@@ -151,6 +151,17 @@ export default function PaymentsPage() {
                       }`}>{p.status}</span>
                     </td>
                     <td className="p-4 text-muted-foreground text-xs">{new Date(p.created_at).toLocaleString()}</td>
+                    <td className="p-4">
+                      {p.status === "completed" && (
+                        <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => setReceiptData({
+                          id: p.id, type: "payment", amount: Number(p.amount), commission: Number(p.commission || 0),
+                          status: p.status, date: p.created_at, paymentMethod: getPaymentMethod(p.stripe_payment_id),
+                          jobTitle: p.jobTitle, payerName: p.payerName, payeeName: p.payeeName,
+                        })}>
+                          <FileText className="w-3.5 h-3.5" /> View
+                        </Button>
+                      )}
+                    </td>
                     {isAdmin && (
                       <td className="p-4">
                         {p.status === "failed" ? (
