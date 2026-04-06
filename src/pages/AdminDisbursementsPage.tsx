@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowDownCircle, CheckCircle, XCircle, Clock, Search } from "lucide-react";
+import { ArrowDownCircle, CheckCircle, XCircle, Clock, Search, FileText } from "lucide-react";
+import TransactionReceipt from "@/components/TransactionReceipt";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
