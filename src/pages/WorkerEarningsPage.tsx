@@ -310,7 +310,17 @@ export default function WorkerEarningsPage() {
                     }`}>{p.status}</span>
                   </td>
                   <td className="p-4 text-muted-foreground text-xs">{new Date(p.created_at).toLocaleString()}</td>
-                </tr>
+                  <td className="p-4">
+                    {p.status === "completed" && (
+                      <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => setReceiptData({
+                        id: p.id, type: "payment", amount: Number(p.amount), commission: Number(p.commission || 0),
+                        status: p.status, date: p.created_at, paymentMethod: getPaymentMethod(p.stripe_payment_id),
+                        jobTitle: (p as any).jobs?.title || "-", payeeName: user?.name,
+                      })}>
+                        <FileText className="w-3.5 h-3.5" /> View
+                      </Button>
+                    )}
+                  </td>
               ))}
             </tbody>
           </table>
