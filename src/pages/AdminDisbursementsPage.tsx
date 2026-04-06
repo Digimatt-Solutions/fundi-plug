@@ -219,7 +219,18 @@ export default function AdminDisbursementsPage() {
                           </Button>
                         )}
                         {(w.status === "completed" || w.status === "rejected") && (
-                          <span className="text-muted-foreground text-xs">—</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-muted-foreground text-xs">—</span>
+                            {w.status === "completed" && (
+                              <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setReceiptData({
+                                id: w.id, type: "withdrawal", amount: Number(w.amount), status: w.status,
+                                date: w.processed_at || w.requested_at, workerName: w.workerName,
+                                phone: w.workerPhone, adminNotes: w.admin_notes,
+                              })}>
+                                <FileText className="w-3.5 h-3.5" /> Receipt
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </td>
