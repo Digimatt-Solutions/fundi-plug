@@ -130,8 +130,9 @@ export default function PaymentsPage() {
                   <th className="text-left p-4 text-muted-foreground font-medium">Amount</th>
                   {(isAdmin || isWorker) && <th className="text-left p-4 text-muted-foreground font-medium">Commission</th>}
                   <th className="text-left p-4 text-muted-foreground font-medium">Status</th>
-                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">Actions</th>}
                   <th className="text-left p-4 text-muted-foreground font-medium">Date</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">Receipt</th>
+                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">Actions</th>}
                 </tr>
               </thead>
               <tbody>
