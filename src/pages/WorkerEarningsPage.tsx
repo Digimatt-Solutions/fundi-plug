@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, TrendingUp, DollarSign, ArrowUpRight, ArrowDownCircle, Clock, CheckCircle, XCircle } from "lucide-react";
+import { CreditCard, TrendingUp, DollarSign, ArrowUpRight, ArrowDownCircle, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
+import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
