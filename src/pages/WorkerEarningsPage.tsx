@@ -322,6 +322,7 @@ export default function WorkerEarningsPage() {
                       </Button>
                     )}
                   </td>
+                </tr>
               ))}
             </tbody>
           </table>
