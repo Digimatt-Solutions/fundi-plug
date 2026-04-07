@@ -16,6 +16,7 @@ export default function AdminDisbursementsPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [workerFinancials, setWorkerFinancials] = useState<Record<string, { earned: number; withdrawn: number; pending: number }>>({});
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
   const [actionDialog, setActionDialog] = useState<{ withdrawal: any; action: "approve" | "reject" | "complete" } | null>(null);
@@ -37,6 +38,31 @@ export default function AdminDisbursementsPage() {
     const profileMap: Record<string, any> = {};
     (profiles || []).forEach(p => { profileMap[p.id] = p; });
 
+    // Fetch earnings for each worker
+    const { data: payments } = workerIds.length > 0
+      ? await supabase.from("payments").select("payee_id, amount, commission, status").eq("status", "completed").in("payee_id", workerIds)
+      : { data: [] };
+
+    const financials: Record<string, { earned: number; withdrawn: number; pending: number }> = {};
+    workerIds.forEach(id => { financials[id] = { earned: 0, withdrawn: 0, pending: 0 }; });
+
+    (payments || []).forEach((p: any) => {
+      if (financials[p.payee_id]) {
+        financials[p.payee_id].earned += Number(p.amount) - Number(p.commission || 0);
+      }
+    });
+
+    (wds || []).forEach((w: any) => {
+      if (financials[w.worker_id]) {
+        if (w.status === "completed" || w.status === "approved") {
+          financials[w.worker_id].withdrawn += Number(w.amount);
+        } else if (w.status === "pending") {
+          financials[w.worker_id].pending += Number(w.amount);
+        }
+      }
+    });
+
+    setWorkerFinancials(financials);
     setWithdrawals((wds || []).map((w: any) => ({
       ...w,
       workerName: profileMap[w.worker_id]?.name || "Unknown",
@@ -103,6 +129,12 @@ export default function AdminDisbursementsPage() {
     if (status === "approved") return "bg-primary/10 text-primary";
     if (status === "rejected") return "bg-destructive/10 text-destructive";
     return "bg-chart-4/10 text-chart-4";
+  };
+
+  const getWorkerBalance = (workerId: string) => {
+    const f = workerFinancials[workerId];
+    if (!f) return { earned: 0, balance: 0 };
+    return { earned: Math.round(f.earned), balance: Math.round(f.earned - f.withdrawn - f.pending) };
   };
 
   if (loading) {
@@ -179,63 +211,70 @@ export default function AdminDisbursementsPage() {
                 <tr className="border-b border-border bg-muted/30">
                   <th className="text-left p-4 text-muted-foreground font-medium">Worker</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Amount</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">Earnings</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">Balance</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Status</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Requested</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Processed</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((w: any) => (
-                  <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
-                    <td className="p-4">
-                      <p className="text-foreground font-medium">{w.workerName}</p>
-                      <p className="text-xs text-muted-foreground">{w.workerPhone || w.workerEmail}</p>
-                    </td>
-                    <td className="p-4 text-foreground font-semibold tabular-nums">KSH {Number(w.amount).toLocaleString()}</td>
-                    <td className="p-4">
-                      <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${statusColor(w.status)}`}>{w.status}</span>
-                    </td>
-                    <td className="p-4 text-muted-foreground text-xs">{new Date(w.requested_at).toLocaleString()}</td>
-                    <td className="p-4 text-muted-foreground text-xs">{w.processed_at ? new Date(w.processed_at).toLocaleString() : "—"}</td>
-                    <td className="p-4">
-                      <div className="flex gap-1.5">
-                        {w.status === "pending" && (
-                          <>
-                            <Button size="sm" variant="outline" className="text-xs gap-1 border-green-500/30 text-green-500 hover:bg-green-500/10"
-                              onClick={() => { setActionDialog({ withdrawal: w, action: "approve" }); setAdminNotes(""); }}>
-                              <CheckCircle className="w-3.5 h-3.5" /> Approve
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10"
-                              onClick={() => { setActionDialog({ withdrawal: w, action: "reject" }); setAdminNotes(""); }}>
-                              <XCircle className="w-3.5 h-3.5" /> Reject
-                            </Button>
-                          </>
-                        )}
-                        {w.status === "approved" && (
-                          <Button size="sm" className="text-xs gap-1"
-                            onClick={() => { setActionDialog({ withdrawal: w, action: "complete" }); setAdminNotes(""); }}>
-                            <CheckCircle className="w-3.5 h-3.5" /> Mark Sent
-                          </Button>
-                        )}
-                        {(w.status === "completed" || w.status === "rejected") && (
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-muted-foreground text-xs">—</span>
-                            {w.status === "completed" && (
-                              <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setReceiptData({
-                                id: w.id, type: "withdrawal", amount: Number(w.amount), status: w.status,
-                                date: w.processed_at || w.requested_at, workerName: w.workerName,
-                                phone: w.workerPhone, adminNotes: w.admin_notes,
-                              })}>
-                                <FileText className="w-3.5 h-3.5" /> Receipt
+                {filtered.map((w: any) => {
+                  const { earned, balance } = getWorkerBalance(w.worker_id);
+                  return (
+                    <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                      <td className="p-4">
+                        <p className="text-foreground font-medium">{w.workerName}</p>
+                        <p className="text-xs text-muted-foreground">{w.workerPhone || w.workerEmail}</p>
+                      </td>
+                      <td className="p-4 text-foreground font-semibold tabular-nums">KSH {Number(w.amount).toLocaleString()}</td>
+                      <td className="p-4 text-muted-foreground tabular-nums text-xs">KSH {earned.toLocaleString()}</td>
+                      <td className="p-4">
+                        <span className={`font-semibold tabular-nums text-xs ${balance > 0 ? "text-green-500" : "text-muted-foreground"}`}>
+                          KSH {balance.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${statusColor(w.status)}`}>{w.status}</span>
+                      </td>
+                      <td className="p-4 text-muted-foreground text-xs">{new Date(w.requested_at).toLocaleDateString()}</td>
+                      <td className="p-4">
+                        <div className="flex gap-1.5">
+                          {w.status === "pending" && (
+                            <>
+                              <Button size="sm" variant="outline" className="text-xs gap-1 border-green-500/30 text-green-500 hover:bg-green-500/10"
+                                onClick={() => { setActionDialog({ withdrawal: w, action: "approve" }); setAdminNotes(""); }}>
+                                <CheckCircle className="w-3.5 h-3.5" /> Approve
                               </Button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                              <Button size="sm" variant="outline" className="text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10"
+                                onClick={() => { setActionDialog({ withdrawal: w, action: "reject" }); setAdminNotes(""); }}>
+                                <XCircle className="w-3.5 h-3.5" /> Reject
+                              </Button>
+                            </>
+                          )}
+                          {w.status === "approved" && (
+                            <Button size="sm" className="text-xs gap-1"
+                              onClick={() => { setActionDialog({ withdrawal: w, action: "complete" }); setAdminNotes(""); }}>
+                              <CheckCircle className="w-3.5 h-3.5" /> Mark Sent
+                            </Button>
+                          )}
+                          {w.status === "completed" && (
+                            <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setReceiptData({
+                              id: w.id, type: "withdrawal", amount: Number(w.amount), status: w.status,
+                              date: w.processed_at || w.requested_at, workerName: w.workerName,
+                              phone: w.workerPhone, adminNotes: w.admin_notes,
+                            })}>
+                              <FileText className="w-3.5 h-3.5" /> Receipt
+                            </Button>
+                          )}
+                          {w.status === "rejected" && (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -263,6 +302,15 @@ export default function AdminDisbursementsPage() {
                 {actionDialog.withdrawal.workerPhone && (
                   <p className="text-sm text-muted-foreground">Phone: <span className="text-foreground">{actionDialog.withdrawal.workerPhone}</span></p>
                 )}
+                {(() => {
+                  const { earned, balance } = getWorkerBalance(actionDialog.withdrawal.worker_id);
+                  return (
+                    <>
+                      <p className="text-sm text-muted-foreground">Total Earnings: <span className="text-foreground">KSH {earned.toLocaleString()}</span></p>
+                      <p className="text-sm text-muted-foreground">Available Balance: <span className={`font-bold ${balance > 0 ? "text-green-500" : "text-destructive"}`}>KSH {balance.toLocaleString()}</span></p>
+                    </>
+                  );
+                })()}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Notes (optional)</label>
