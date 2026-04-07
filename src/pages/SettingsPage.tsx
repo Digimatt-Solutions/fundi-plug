@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings, Shield, DollarSign } from "lucide-react";
+import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function SettingsPage() {
   const { user, refreshProfile } = useAuth();
@@ -19,6 +22,10 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [commissionData, setCommissionData] = useState<any[]>([]);
   const [totalCommission, setTotalCommission] = useState(0);
+  const [flushOpen, setFlushOpen] = useState(false);
+  const [flushPassword, setFlushPassword] = useState("");
+  const [flushing, setFlushing] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -70,6 +77,62 @@ export default function SettingsPage() {
     ], { onConflict: "key" });
     toast({ title: "Platform settings saved" });
     setSaving(false);
+  };
+
+  const handleBackup = async () => {
+    setBackingUp(true);
+    try {
+      const tables = ["profiles", "user_roles", "jobs", "bookings", "payments", "withdrawals", "reviews", "job_applications", "service_categories", "worker_profiles", "activity_logs", "platform_settings", "availability", "certifications"] as const;
+      const backup: Record<string, any[]> = {};
+
+      for (const table of tables) {
+        const { data } = await supabase.from(table).select("*");
+        backup[table] = data || [];
+      }
+
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `backup-${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Backup downloaded", description: "All data has been exported successfully." });
+    } catch (err: any) {
+      toast({ title: "Backup failed", description: err.message, variant: "destructive" });
+    } finally {
+      setBackingUp(false);
+    }
+  };
+
+  const handleFlush = async () => {
+    setFlushing(true);
+    try {
+      // Verify admin password
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: user!.email,
+        password: flushPassword,
+      });
+      if (authError) {
+        toast({ title: "Invalid password", description: "Please enter your correct admin password.", variant: "destructive" });
+        setFlushing(false);
+        return;
+      }
+
+      // Call edge function to flush data
+      const { data, error } = await supabase.functions.invoke("flush-data", {
+        body: { admin_id: user!.id },
+      });
+      if (error) throw error;
+
+      toast({ title: "Data flushed", description: "All records have been cleared except admin accounts." });
+      setFlushOpen(false);
+      setFlushPassword("");
+    } catch (err: any) {
+      toast({ title: "Flush failed", description: err.message, variant: "destructive" });
+    } finally {
+      setFlushing(false);
+    }
   };
 
   if (loading) {
@@ -167,10 +230,38 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Danger Zone */}
+            <div className="stat-card animate-fade-in border-destructive/30" style={{ animationDelay: "400ms" }}>
+              <h3 className="text-lg font-semibold text-destructive mb-2 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" /> Danger Zone
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">These actions are irreversible. Please proceed with caution.</p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Backup All Data</p>
+                    <p className="text-xs text-muted-foreground">Download a JSON export of all platform data</p>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={handleBackup} disabled={backingUp}>
+                    <Download className="w-3.5 h-3.5" /> {backingUp ? "Exporting..." : "Download Backup"}
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/30 bg-destructive/5">
+                  <div>
+                    <p className="text-sm font-medium text-destructive">Flush All Data</p>
+                    <p className="text-xs text-muted-foreground">Delete all records except admin accounts. Backup first!</p>
+                  </div>
+                  <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setFlushOpen(true)}>
+                    <Trash2 className="w-3.5 h-3.5" /> Flush Data
+                  </Button>
+                </div>
+              </div>
+            </div>
           </>
         )}
 
-        <div className="stat-card animate-fade-in" style={{ animationDelay: "400ms" }}>
+        <div className="stat-card animate-fade-in" style={{ animationDelay: "500ms" }}>
           <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <Shield className="w-5 h-5 text-primary" /> Security
           </h3>
@@ -180,6 +271,46 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Flush confirmation dialog */}
+      <Dialog open={flushOpen} onOpenChange={setFlushOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" /> Confirm Data Flush
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+              <p className="text-sm text-foreground font-medium">This will permanently delete:</p>
+              <ul className="text-xs text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                <li>All jobs, bookings, and applications</li>
+                <li>All payments and withdrawal records</li>
+                <li>All reviews and activity logs</li>
+                <li>All worker profiles and certifications</li>
+                <li>All non-admin user accounts</li>
+              </ul>
+              <p className="text-xs text-destructive font-semibold mt-3">Admin accounts will be preserved.</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Enter your admin password to confirm</Label>
+              <Input
+                type="password"
+                placeholder="Your password"
+                value={flushPassword}
+                onChange={(e) => setFlushPassword(e.target.value)}
+                className="bg-muted/50"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setFlushOpen(false); setFlushPassword(""); }}>Cancel</Button>
+            <Button variant="destructive" onClick={handleFlush} disabled={flushing || !flushPassword}>
+              {flushing ? "Flushing..." : "Flush All Data"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { useRef } from "react";
-import { Download, X } from "lucide-react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
+import appLogo from "@/assets/logo.png";
 
 interface ReceiptData {
   id: string;
@@ -53,23 +54,28 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 40px; background: #fff; color: #1a1a1a; }
-        .receipt { max-width: 420px; margin: 0 auto; border: 1px solid #e5e5e5; border-radius: 12px; padding: 32px; }
-        .header { text-align: center; margin-bottom: 24px; border-bottom: 2px dashed #e5e5e5; padding-bottom: 20px; }
-        .header h2 { font-size: 20px; margin-bottom: 4px; }
-        .header p { font-size: 12px; color: #666; }
-        .logo { height: 28px; margin-bottom: 12px; }
-        .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; }
-        .row .label { color: #666; }
-        .row .value { font-weight: 600; text-align: right; max-width: 60%; }
-        .divider { border-top: 1px solid #e5e5e5; margin: 12px 0; }
-        .total-row { font-size: 16px; font-weight: 700; }
-        .status { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+        .receipt { max-width: 440px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 16px; padding: 36px 28px; }
+        .header { text-align: center; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 2px dashed #ddd; }
+        .header .app-logo { height: 40px; margin-bottom: 10px; }
+        .header h2 { font-size: 18px; font-weight: 700; margin-bottom: 2px; color: #111; }
+        .header p { font-size: 11px; color: #888; }
+        .method-logo { height: 22px; vertical-align: middle; }
+        .row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
+        .row .label { color: #777; }
+        .row .value { font-weight: 600; text-align: right; max-width: 60%; color: #222; }
+        .divider { border: none; border-top: 1px solid #eee; margin: 10px 0; }
+        .total-row { font-size: 16px; font-weight: 700; padding: 10px 0; }
+        .total-row .value { color: #e65100; }
+        .status { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
         .status.completed { background: #dcfce7; color: #16a34a; }
         .status.pending { background: #fef3c7; color: #d97706; }
         .status.failed { background: #fee2e2; color: #dc2626; }
-        .footer { text-align: center; margin-top: 20px; padding-top: 16px; border-top: 2px dashed #e5e5e5; font-size: 11px; color: #999; }
-        .method-logo { height: 22px; vertical-align: middle; }
-        @media print { body { padding: 0; } .receipt { border: none; } }
+        .status.approved { background: #dbeafe; color: #2563eb; }
+        .status.rejected { background: #fee2e2; color: #dc2626; }
+        .footer { text-align: center; margin-top: 18px; padding-top: 16px; border-top: 2px dashed #ddd; }
+        .footer p { font-size: 11px; color: #999; line-height: 1.6; }
+        .footer .company { font-weight: 600; color: #666; font-size: 11px; margin-top: 6px; }
+        @media print { body { padding: 0; } .receipt { border: none; box-shadow: none; } }
       </style></head><body>
       <div class="receipt">${el.innerHTML}</div>
       <script>window.print(); window.onafterprint = () => window.close();</script>
@@ -80,8 +86,8 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-md p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-5 pb-0">
           <DialogTitle className="flex items-center justify-between">
             Transaction Receipt
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownload}>
@@ -89,16 +95,10 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
             </Button>
           </DialogTitle>
         </DialogHeader>
-        <div ref={receiptRef} className="bg-background rounded-xl p-6 space-y-4">
-          {/* Header */}
+        <div ref={receiptRef} className="bg-background px-6 pb-6 pt-4 space-y-3">
+          {/* Header with App Logo */}
           <div className="text-center border-b-2 border-dashed border-border pb-4">
-            {method !== "unknown" && (
-              <img
-                src={method === "mpesa" ? mpesaLogo : stripeLogo}
-                alt={method === "mpesa" ? "M-Pesa" : "Stripe"}
-                className="h-7 mx-auto mb-2 object-contain"
-              />
-            )}
+            <img src={appLogo} alt="FundiPlug" className="h-10 mx-auto mb-2 object-contain" />
             <h2 className="text-lg font-bold text-foreground">
               {data.type === "payment" ? "Payment Receipt" : "Withdrawal Receipt"}
             </h2>
@@ -107,19 +107,21 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
             </p>
           </div>
 
-          {/* Transaction ID */}
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Receipt ID</span>
-            <span className="font-mono text-xs text-foreground">{data.id.slice(0, 8).toUpperCase()}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Transaction UUID</span>
-            <span className="font-mono text-xs text-foreground break-all">{data.id}</span>
+          {/* IDs */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Receipt ID</span>
+              <span className="font-mono text-xs font-semibold text-foreground">{data.id.slice(0, 8).toUpperCase()}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Transaction UUID</span>
+              <span className="font-mono text-[10px] text-muted-foreground break-all max-w-[55%] text-right">{data.id}</span>
+            </div>
           </div>
 
-          <div className="border-t border-border" />
+          <hr className="border-border" />
 
-          {/* Details */}
+          {/* Payment Details */}
           {data.type === "payment" && (
             <>
               {data.jobTitle && (
@@ -140,10 +142,10 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
                   <span className="font-medium text-foreground">{data.payeeName}</span>
                 </div>
               )}
-              <div className="border-t border-border" />
+              <hr className="border-border" />
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Service Amount</span>
-                <span className="text-foreground tabular-nums">KSH {data.amount.toLocaleString()}</span>
+                <span className="text-foreground tabular-nums font-medium">KSH {data.amount.toLocaleString()}</span>
               </div>
               {data.commission !== undefined && data.commission > 0 && (
                 <div className="flex justify-between text-sm">
@@ -151,14 +153,15 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
                   <span className="text-foreground tabular-nums">KSH {data.commission.toLocaleString()}</span>
                 </div>
               )}
-              <div className="border-t border-border" />
-              <div className="flex justify-between text-base font-bold">
-                <span className="text-foreground">Total Paid</span>
-                <span className="text-foreground tabular-nums">KSH {totalAmount.toLocaleString()}</span>
+              <hr className="border-border" />
+              <div className="flex justify-between items-center py-1">
+                <span className="text-base font-bold text-foreground">Total Paid</span>
+                <span className="text-lg font-bold text-primary tabular-nums">KSH {totalAmount.toLocaleString()}</span>
               </div>
             </>
           )}
 
+          {/* Withdrawal Details */}
           {data.type === "withdrawal" && (
             <>
               {data.workerName && (
@@ -179,43 +182,40 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
                   <span className="text-foreground text-right max-w-[60%]">{data.adminNotes}</span>
                 </div>
               )}
-              <div className="border-t border-border" />
-              <div className="flex justify-between text-base font-bold">
-                <span className="text-foreground">Amount Disbursed</span>
-                <span className="text-foreground tabular-nums">KSH {data.amount.toLocaleString()}</span>
+              <hr className="border-border" />
+              <div className="flex justify-between items-center py-1">
+                <span className="text-base font-bold text-foreground">Amount Disbursed</span>
+                <span className="text-lg font-bold text-primary tabular-nums">KSH {data.amount.toLocaleString()}</span>
               </div>
             </>
           )}
 
-          {/* Status */}
+          {/* Status & Method */}
+          <hr className="border-border" />
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Status</span>
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${
               data.status === "completed" ? "bg-green-500/10 text-green-500" :
+              data.status === "approved" ? "bg-blue-500/10 text-blue-500" :
               data.status === "pending" ? "bg-chart-4/10 text-chart-4" :
               "bg-destructive/10 text-destructive"
             }`}>{data.status}</span>
           </div>
-
-          {/* Payment Method */}
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Payment Method</span>
             <div className="flex items-center gap-2">
               {method !== "unknown" && (
-                <img
-                  src={method === "mpesa" ? mpesaLogo : stripeLogo}
-                  alt={method}
-                  className="h-5 object-contain"
-                />
+                <img src={method === "mpesa" ? mpesaLogo : stripeLogo} alt={method} className="h-5 object-contain" />
               )}
-              <span className="text-foreground capitalize">{method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : "Stripe"}</span>
+              <span className="text-foreground capitalize font-medium">{method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : "Stripe"}</span>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center pt-4 border-t-2 border-dashed border-border">
+          <div className="text-center pt-4 border-t-2 border-dashed border-border space-y-1">
             <p className="text-xs text-muted-foreground">Thank you for your business</p>
-            <p className="text-xs text-muted-foreground mt-1">This is a computer-generated receipt</p>
+            <p className="text-xs text-muted-foreground">This is a computer-generated receipt</p>
+            <p className="text-[11px] font-semibold text-muted-foreground pt-2">Digimatt Solutions Limited</p>
           </div>
         </div>
       </DialogContent>
