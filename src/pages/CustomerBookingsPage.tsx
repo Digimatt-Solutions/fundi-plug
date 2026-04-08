@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarDays, Star, CreditCard, Smartphone, CheckCircle, FileText } from "lucide-react";
+import { CalendarDays, Star, CreditCard, Smartphone } from "lucide-react";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useSearchParams } from "react-router-dom";
-import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
@@ -26,9 +25,6 @@ export default function CustomerBookingsPage() {
   const [paying, setPaying] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState("");
-  // Thank you / receipt state
-  const [thankYouData, setThankYouData] = useState<any>(null);
-  const [receiptData, setReceiptData] = useState<any>(null);
 
   async function loadData() {
     if (!user) return;
@@ -52,20 +48,19 @@ export default function CustomerBookingsPage() {
         ? supabase.from("reviews").select("job_id").eq("reviewer_id", user.id).in("job_id", jobIds)
         : Promise.resolve({ data: [] }),
       jobIds.length > 0
-        ? supabase.from("payments").select("id, job_id, status, amount, commission, created_at, stripe_payment_id").in("job_id", jobIds)
+        ? supabase.from("payments").select("job_id, status").in("job_id", jobIds)
         : Promise.resolve({ data: [] }),
     ]);
 
     const reviewedJobIds = new Set((existingReviews.data || []).map(r => r.job_id));
-    const paidJobMap: Record<string, any> = {};
-    (existingPayments.data || []).forEach(p => { paidJobMap[p.job_id] = p; });
+    const paidJobMap: Record<string, string> = {};
+    (existingPayments.data || []).forEach(p => { paidJobMap[p.job_id] = p.status; });
 
     setJobs((data || []).map(j => ({
       ...j,
       workerName: nameMap[j.worker_id] || "Assigned Worker",
       hasReview: reviewedJobIds.has(j.id),
-      paymentStatus: paidJobMap[j.id]?.status || null,
-      paymentRecord: paidJobMap[j.id] || null,
+      paymentStatus: paidJobMap[j.id] || null,
     })));
     setLoading(false);
   }
@@ -82,42 +77,18 @@ export default function CustomerBookingsPage() {
           body: { paymentId },
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
-        // Show thank you after Stripe success
-        await loadData();
-        // Find the just-paid job
-        const { data: payment } = await supabase.from("payments").select("*, jobs:job_id(title)").eq("id", paymentId).maybeSingle();
-        if (payment) {
-          showThankYou(payment);
-        } else {
-          toast({ title: "Payment successful!", description: "Your payment has been processed." });
-        }
+        toast({ title: "Payment successful!", description: "Your payment has been processed." });
+        loadData();
       })();
     }
   }, [searchParams]);
 
   useEffect(() => {
-    if (!loading && jobs.length > 0 && !thankYouData) {
+    if (!loading && jobs.length > 0) {
       const unpaid = jobs.find(j => j.status === "completed" && (!j.paymentStatus || j.paymentStatus === "pending"));
       if (unpaid && !payDialog) setPayDialog(unpaid);
     }
   }, [jobs, loading]);
-
-  const showThankYou = (payment: any) => {
-    setPayDialog(null);
-    setPaymentMethod(null);
-    setMpesaPhone("");
-    setThankYouData({
-      id: payment.id,
-      type: "payment",
-      amount: Number(payment.amount),
-      commission: Number(payment.commission || 0),
-      status: payment.status,
-      date: payment.created_at,
-      paymentMethod: getPaymentMethod(payment.stripe_payment_id),
-      jobTitle: payment.jobs?.title || "-",
-      payerName: user?.name,
-    });
-  };
 
   const handlePay = async (job: any, method: "stripe" | "mpesa") => {
     setPaying(true);
@@ -142,24 +113,10 @@ export default function CustomerBookingsPage() {
         });
         if (error || data?.error) throw new Error(data?.error || error?.message);
         toast({ title: "M-Pesa prompt sent!", description: data?.message || "Check your phone to complete payment." });
-
-        // Poll for payment completion then show thank you
         setPayDialog(null);
         setPaymentMethod(null);
         setMpesaPhone("");
-        
-        const pollForCompletion = async (attempts: number = 0) => {
-          if (attempts > 12) return; // max 60 seconds
-          await new Promise(r => setTimeout(r, 5000));
-          await loadData();
-          const { data: pmt } = await supabase.from("payments").select("*, jobs:job_id(title)").eq("job_id", job.id).eq("status", "completed").maybeSingle();
-          if (pmt) {
-            showThankYou(pmt);
-          } else {
-            pollForCompletion(attempts + 1);
-          }
-        };
-        pollForCompletion();
+        setTimeout(() => loadData(), 5000);
       }
     } catch (err: any) {
       toast({ title: "Payment failed", description: err.message, variant: "destructive" });
@@ -231,16 +188,6 @@ export default function CustomerBookingsPage() {
                       <Star className="w-4 h-4 mr-1" /> Review
                     </Button>
                   )}
-                  {job.status === "completed" && job.paymentStatus === "completed" && job.paymentRecord && (
-                    <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => setReceiptData({
-                      id: job.paymentRecord.id, type: "payment", amount: Number(job.paymentRecord.amount),
-                      commission: Number(job.paymentRecord.commission || 0), status: job.paymentRecord.status,
-                      date: job.paymentRecord.created_at, paymentMethod: getPaymentMethod(job.paymentRecord.stripe_payment_id),
-                      jobTitle: job.title, payerName: user?.name, payeeName: job.workerName,
-                    })}>
-                      <FileText className="w-3.5 h-3.5" /> Receipt
-                    </Button>
-                  )}
                   {job.hasReview && (
                     <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
                   )}
@@ -257,8 +204,7 @@ export default function CustomerBookingsPage() {
         </div>
       )}
 
-      {/* Payment Dialog */}
-      <Dialog open={!!payDialog && !thankYouData} onOpenChange={(open) => { if (!open) { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); } }}>
+      <Dialog open={!!payDialog} onOpenChange={(open) => { if (!open) { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); } }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Payment Required</DialogTitle></DialogHeader>
           <div className="space-y-4">
@@ -325,41 +271,6 @@ export default function CustomerBookingsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Thank You Dialog */}
-      <Dialog open={!!thankYouData} onOpenChange={(open) => { if (!open) setThankYouData(null); }}>
-        <DialogContent className="sm:max-w-md text-center">
-          <div className="py-6 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
-              <CheckCircle className="w-10 h-10 text-green-500" />
-            </div>
-            <h2 className="text-xl font-bold text-foreground">Thank You!</h2>
-            <p className="text-sm text-muted-foreground">Your payment has been processed successfully.</p>
-            {thankYouData && (
-              <div className="p-4 rounded-lg bg-muted/50 space-y-2 text-left">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Service</span>
-                  <span className="text-foreground font-medium">{thankYouData.jobTitle}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Amount</span>
-                  <span className="text-foreground font-bold">KSH {(thankYouData.amount + (thankYouData.commission || 0)).toLocaleString()}</span>
-                </div>
-              </div>
-            )}
-            <div className="flex gap-2 justify-center pt-2">
-              <Button variant="outline" onClick={() => {
-                setReceiptData(thankYouData);
-                setThankYouData(null);
-              }}>
-                <FileText className="w-4 h-4 mr-2" /> View Receipt
-              </Button>
-              <Button onClick={() => setThankYouData(null)}>Done</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Review Dialog */}
       <Dialog open={!!reviewDialog} onOpenChange={(open) => !open && setReviewDialog(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Rate Worker</DialogTitle></DialogHeader>
@@ -379,9 +290,6 @@ export default function CustomerBookingsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Receipt Dialog */}
-      <TransactionReceipt open={!!receiptData} onClose={() => setReceiptData(null)} data={receiptData} />
     </div>
   );
 }

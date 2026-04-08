@@ -7,23 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Upload, FileText, Trash2, CheckCircle, Clock, XCircle, Camera, AlertTriangle } from "lucide-react";
-
-const REQUIRED_DOCS = [
-  { key: "national_id", label: "National ID", description: "Upload a copy of your National ID (front)" },
-  { key: "nca_document", label: "NCA Document", description: "National Construction Authority certificate or equivalent skill document" },
-];
-
-const OPTIONAL_DOCS = [
-  { key: "academic", label: "Academic Certificate", description: "Diploma, degree, or trade certificate (optional)" },
-];
+import { Upload, FileText, Trash2, CheckCircle, Clock, XCircle, Camera } from "lucide-react";
 
 export default function WorkerProfilePage() {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const [profile, setProfile] = useState<any>(null);
@@ -95,19 +86,8 @@ export default function WorkerProfilePage() {
     setUploadingAvatar(false);
   };
 
-  const hasRequiredDocs = () => {
-    const certNames = certs.map(c => c.name.toLowerCase());
-    return REQUIRED_DOCS.every(doc => 
-      certNames.some(name => name.includes(doc.key.replace("_", " ")) || name.includes(doc.label.toLowerCase()))
-    );
-  };
-
   const saveProfile = async () => {
     if (!profile) return;
-    if (!hasRequiredDocs()) {
-      toast({ title: "Required documents missing", description: "Please upload your National ID and NCA Document before submitting.", variant: "destructive" });
-      return;
-    }
     setSaving(true);
     await supabase.from("worker_profiles").update({
       bio, hourly_rate: hourlyRate ? Number(hourlyRate) : null,
@@ -125,36 +105,18 @@ export default function WorkerProfilePage() {
     setSaving(false);
   };
 
-  const uploadRequiredDoc = async (docKey: string, docLabel: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !profile) return;
-    setUploading(docKey);
-    const path = `${user!.id}/${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("certifications").upload(path, file);
-    if (uploadError) {
-      toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
-      setUploading(null); return;
-    }
-    const { data: urlData } = supabase.storage.from("certifications").getPublicUrl(path);
-    await supabase.from("certifications").insert({ worker_id: profile.id, name: docLabel, file_url: urlData.publicUrl });
-    const { data: updated } = await supabase.from("certifications").select("*").eq("worker_id", profile.id).order("created_at", { ascending: false });
-    setCerts(updated || []);
-    toast({ title: `${docLabel} uploaded` });
-    setUploading(null);
-  };
-
   const uploadCertification = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !profile || !certName.trim()) {
       toast({ title: "Please enter a certification name first", variant: "destructive" });
       return;
     }
-    setUploading("custom");
+    setUploading(true);
     const path = `${user!.id}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage.from("certifications").upload(path, file);
     if (uploadError) {
       toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" });
-      setUploading(null); return;
+      setUploading(false); return;
     }
     const { data: urlData } = supabase.storage.from("certifications").getPublicUrl(path);
     await supabase.from("certifications").insert({ worker_id: profile.id, name: certName.trim(), file_url: urlData.publicUrl });
@@ -162,7 +124,7 @@ export default function WorkerProfilePage() {
     setCerts(updated || []);
     setCertName("");
     toast({ title: "Certification uploaded" });
-    setUploading(null);
+    setUploading(false);
   };
 
   const deleteCert = async (certId: string, fileUrl: string) => {
@@ -171,10 +133,6 @@ export default function WorkerProfilePage() {
     await supabase.from("certifications").delete().eq("id", certId);
     setCerts((prev) => prev.filter((c) => c.id !== certId));
     toast({ title: "Certification removed" });
-  };
-
-  const isDocUploaded = (docLabel: string) => {
-    return certs.some(c => c.name.toLowerCase() === docLabel.toLowerCase());
   };
 
   if (loading) {
@@ -250,106 +208,19 @@ export default function WorkerProfilePage() {
         </div>
       </div>
 
-      {/* Required Documents */}
       <div className="stat-card animate-fade-in space-y-4" style={{ animationDelay: "200ms" }}>
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-foreground">Required Documents</h3>
-          {!hasRequiredDocs() && <AlertTriangle className="w-4 h-4 text-chart-4" />}
+        <h3 className="text-lg font-semibold text-foreground">Certifications & Documents</h3>
+        <p className="text-sm text-muted-foreground">Upload certificates, licenses, or ID documents for verification</p>
+        <div className="flex gap-2">
+          <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certificate name (e.g. Electrical License)" className="bg-muted/50 flex-1" />
+          <label className="cursor-pointer">
+            <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={uploadCertification} />
+            <Button asChild variant="outline" disabled={uploading || !certName.trim()}><span><Upload className="w-4 h-4 mr-2" /> {uploading ? "Uploading..." : "Upload"}</span></Button>
+          </label>
         </div>
-        <p className="text-sm text-muted-foreground">You must upload these documents for verification approval</p>
-        <div className="space-y-3">
-          {REQUIRED_DOCS.map((doc) => {
-            const uploaded = isDocUploaded(doc.label);
-            const existingCert = certs.find(c => c.name.toLowerCase() === doc.label.toLowerCase());
-            return (
-              <div key={doc.key} className={`p-4 rounded-lg border ${uploaded ? "border-green-500/30 bg-green-500/5" : "border-chart-4/30 bg-chart-4/5"}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {uploaded ? <CheckCircle className="w-5 h-5 text-green-500" /> : <AlertTriangle className="w-5 h-5 text-chart-4" />}
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{doc.label} <span className="text-destructive">*</span></p>
-                      <p className="text-xs text-muted-foreground">{doc.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {uploaded && existingCert?.file_url && (
-                      <>
-                        <a href={existingCert.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View</a>
-                        <Button variant="ghost" size="icon" className="w-8 h-8 text-destructive hover:text-destructive" onClick={() => deleteCert(existingCert.id, existingCert.file_url || "")}><Trash2 className="w-4 h-4" /></Button>
-                      </>
-                    )}
-                    {!uploaded && (
-                      <label className="cursor-pointer">
-                        <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={(e) => uploadRequiredDoc(doc.key, doc.label, e)} />
-                        <Button asChild variant="outline" size="sm" disabled={uploading === doc.key}>
-                          <span><Upload className="w-3.5 h-3.5 mr-1.5" /> {uploading === doc.key ? "Uploading..." : "Upload"}</span>
-                        </Button>
-                      </label>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Optional & Additional Documents */}
-      <div className="stat-card animate-fade-in space-y-4" style={{ animationDelay: "300ms" }}>
-        <h3 className="text-lg font-semibold text-foreground">Additional Documents (Optional)</h3>
-        <p className="text-sm text-muted-foreground">Upload academic certificates or other supporting documents</p>
-        
-        {/* Pre-defined optional docs */}
-        {OPTIONAL_DOCS.map((doc) => {
-          const uploaded = isDocUploaded(doc.label);
-          const existingCert = certs.find(c => c.name.toLowerCase() === doc.label.toLowerCase());
-          return (
-            <div key={doc.key} className={`p-4 rounded-lg border ${uploaded ? "border-green-500/30 bg-green-500/5" : "border-border"}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {uploaded ? <CheckCircle className="w-5 h-5 text-green-500" /> : <FileText className="w-5 h-5 text-muted-foreground" />}
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{doc.label}</p>
-                    <p className="text-xs text-muted-foreground">{doc.description}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {uploaded && existingCert?.file_url && (
-                    <>
-                      <a href={existingCert.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View</a>
-                      <Button variant="ghost" size="icon" className="w-8 h-8 text-destructive hover:text-destructive" onClick={() => deleteCert(existingCert.id, existingCert.file_url || "")}><Trash2 className="w-4 h-4" /></Button>
-                    </>
-                  )}
-                  {!uploaded && (
-                    <label className="cursor-pointer">
-                      <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={(e) => uploadRequiredDoc(doc.key, doc.label, e)} />
-                      <Button asChild variant="outline" size="sm" disabled={uploading === doc.key}>
-                        <span><Upload className="w-3.5 h-3.5 mr-1.5" /> {uploading === doc.key ? "Uploading..." : "Upload"}</span>
-                      </Button>
-                    </label>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Custom certifications */}
-        <div className="pt-2 border-t border-border">
-          <p className="text-sm font-medium text-foreground mb-2">Other Certifications</p>
-          <div className="flex gap-2">
-            <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certificate name (e.g. Electrical License)" className="bg-muted/50 flex-1" />
-            <label className="cursor-pointer">
-              <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={uploadCertification} />
-              <Button asChild variant="outline" disabled={uploading === "custom" || !certName.trim()}><span><Upload className="w-4 h-4 mr-2" /> {uploading === "custom" ? "Uploading..." : "Upload"}</span></Button>
-            </label>
-          </div>
-        </div>
-
-        {/* Show uploaded non-required certs */}
-        {certs.filter(c => !REQUIRED_DOCS.some(d => d.label.toLowerCase() === c.name.toLowerCase()) && !OPTIONAL_DOCS.some(d => d.label.toLowerCase() === c.name.toLowerCase())).length > 0 && (
-          <div className="space-y-2 pt-2">
-            {certs.filter(c => !REQUIRED_DOCS.some(d => d.label.toLowerCase() === c.name.toLowerCase()) && !OPTIONAL_DOCS.some(d => d.label.toLowerCase() === c.name.toLowerCase())).map((cert) => (
+        {certs.length > 0 ? (
+          <div className="space-y-2">
+            {certs.map((cert) => (
               <div key={cert.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5 text-primary" />
@@ -362,7 +233,7 @@ export default function WorkerProfilePage() {
               </div>
             ))}
           </div>
-        )}
+        ) : <p className="text-sm text-muted-foreground py-4 text-center">No certifications uploaded yet</p>}
       </div>
 
       <Button onClick={saveProfile} disabled={saving} className="active:scale-[0.97]">

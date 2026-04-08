@@ -2,12 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Search, Star, MapPin, CheckCircle } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,33 +18,16 @@ export default function FindWorkersPage() {
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
   const [workerCerts, setWorkerCerts] = useState<any[]>([]);
   const [workerReviews, setWorkerReviews] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-
-  // Hire dialog state
-  const [hireDialog, setHireDialog] = useState<any>(null);
-  const [hireTitle, setHireTitle] = useState("");
-  const [hireDescription, setHireDescription] = useState("");
-  const [hireBudget, setHireBudget] = useState("");
-  const [hireAddress, setHireAddress] = useState("");
-  const [hirePhone, setHirePhone] = useState("");
-  const [hireCategoryId, setHireCategoryId] = useState("");
-  const [hiring, setHiring] = useState(false);
 
   useEffect(() => {
     async function load() {
-      const [wpsRes, catsRes] = await Promise.all([
-        supabase
-          .from("worker_profiles")
-          .select("*, profiles:user_id(name, email, avatar_url)")
-          .eq("verification_status", "approved")
-          .order("is_online", { ascending: false }),
-        supabase.from("service_categories").select("*").order("name"),
-      ]);
+      const { data: wps } = await supabase
+        .from("worker_profiles")
+        .select("*, profiles:user_id(name, email, avatar_url)")
+        .eq("verification_status", "approved")
+        .order("is_online", { ascending: false });
 
-      const wps = wpsRes.data || [];
-      setCategories(catsRes.data || []);
-
-      const workerUserIds = wps.map(w => w.user_id);
+      const workerUserIds = (wps || []).map(w => w.user_id);
       const { data: reviewsData } = workerUserIds.length > 0
         ? await supabase.from("reviews").select("reviewee_id, rating").in("reviewee_id", workerUserIds)
         : { data: [] };
@@ -59,14 +39,14 @@ export default function FindWorkersPage() {
         ratingMap[r.reviewee_id].count += 1;
       });
 
-      const skillIds = [...new Set(wps.flatMap(w => w.skills || []))];
+      const skillIds = [...new Set((wps || []).flatMap(w => w.skills || []))];
       const { data: cats } = skillIds.length > 0
         ? await supabase.from("service_categories").select("id, name").in("id", skillIds)
         : { data: [] };
       const catMap: Record<string, string> = {};
       (cats || []).forEach(c => { catMap[c.id] = c.name; });
 
-      setWorkers(wps.map(w => ({
+      setWorkers((wps || []).map(w => ({
         ...w,
         name: (w as any).profiles?.name || "Worker",
         email: (w as any).profiles?.email || "",
@@ -80,55 +60,29 @@ export default function FindWorkersPage() {
     load();
   }, []);
 
-  const openHireDialog = (worker: any) => {
-    setHireDialog(worker);
-    setHireTitle(`Hire: ${worker.name}`);
-    setHireDescription("");
-    setHireBudget(worker.hourly_rate?.toString() || "");
-    setHireAddress("");
-    setHirePhone(user?.phone || "");
-    setHireCategoryId("");
-    setSelectedWorker(null);
-  };
-
-  const hireWorker = async () => {
-    if (!user || !hireDialog || !hireTitle.trim() || !hireBudget) {
-      toast({ title: "Please fill in job title and price", variant: "destructive" });
-      return;
-    }
-    setHiring(true);
-
-    // Save customer phone if provided
-    if (hirePhone && hirePhone !== user.phone) {
-      await supabase.from("profiles").update({ phone: hirePhone }).eq("id", user.id);
-    }
-
+  const hireWorker = async (worker: any) => {
+    if (!user) return;
     const { data: job, error } = await supabase.from("jobs").insert({
-      title: hireTitle.trim(),
-      description: hireDescription.trim() || `Customer hired ${hireDialog.name} directly`,
-      budget: Number(hireBudget),
-      address: hireAddress.trim() || null,
-      category_id: hireCategoryId || null,
+      title: `Hire: ${worker.name}`,
+      description: `Customer hired ${worker.name} directly`,
       customer_id: user.id,
-      worker_id: hireDialog.user_id,
-      status: "pending",
+      worker_id: worker.user_id,
+      status: "accepted",
       is_instant: true,
     }).select().single();
 
     if (error) {
       toast({ title: "Failed to hire", description: error.message, variant: "destructive" });
-      setHiring(false);
       return;
     }
 
     await supabase.from("activity_logs").insert({
-      user_id: user.id, action: "Hire Request Sent",
-      detail: `Customer sent hire request to ${hireDialog.name}`, entity_type: "job", entity_id: job.id,
+      user_id: user.id, action: "Worker Selected",
+      detail: `Customer hired ${worker.name} directly`, entity_type: "job", entity_id: job.id,
     });
 
-    toast({ title: "Hire request sent!", description: `${hireDialog.name} will be notified to accept or reject.` });
-    setHireDialog(null);
-    setHiring(false);
+    toast({ title: "Worker hired!", description: `${worker.name} has been notified.` });
+    setSelectedWorker(null);
     navigate("/dashboard/bookings");
   };
 
@@ -217,7 +171,6 @@ export default function FindWorkersPage() {
         </div>
       )}
 
-      {/* Worker Profile Dialog */}
       <Dialog open={!!selectedWorker} onOpenChange={(open) => !open && setSelectedWorker(null)}>
         <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
           {selectedWorker && (
@@ -291,38 +244,10 @@ export default function FindWorkersPage() {
                     </div>
                   </div>
                 )}
-                <Button className="w-full" onClick={() => openHireDialog(selectedWorker)}>Hire Now</Button>
+                <Button className="w-full" onClick={() => hireWorker(selectedWorker)}>Hire Now</Button>
               </div>
             </>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Hire Details Dialog */}
-      <Dialog open={!!hireDialog} onOpenChange={(open) => { if (!open) setHireDialog(null); }}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader><DialogTitle>Hire {hireDialog?.name}</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Fill in the job details. The worker will be notified and can accept or reject.</p>
-            <div className="space-y-2"><Label>Job Title *</Label><Input value={hireTitle} onChange={(e) => setHireTitle(e.target.value)} className="bg-muted/50" /></div>
-            <div className="space-y-2"><Label>Description</Label><Textarea value={hireDescription} onChange={(e) => setHireDescription(e.target.value)} placeholder="Describe the work needed..." className="bg-muted/50" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Price (KSH) *</Label><Input type="number" value={hireBudget} onChange={(e) => setHireBudget(e.target.value)} placeholder="5000" className="bg-muted/50" /></div>
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Select value={hireCategoryId} onValueChange={setHireCategoryId}>
-                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2"><Label>Address / Location</Label><Input value={hireAddress} onChange={(e) => setHireAddress(e.target.value)} placeholder="123 Main St" className="bg-muted/50" /></div>
-            <div className="space-y-2"><Label>Your Phone Number</Label><Input value={hirePhone} onChange={(e) => setHirePhone(e.target.value)} placeholder="0712345678" className="bg-muted/50" /></div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setHireDialog(null)}>Cancel</Button>
-            <Button onClick={hireWorker} disabled={hiring || !hireTitle.trim() || !hireBudget}>{hiring ? "Sending..." : "Send Hire Request"}</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

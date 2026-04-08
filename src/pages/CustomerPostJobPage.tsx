@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil } from "lucide-react";
+import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -29,14 +29,6 @@ export default function CustomerPostJobPage() {
   const [viewAppsJobId, setViewAppsJobId] = useState<string | null>(null);
   const [applications, setApplications] = useState<any[]>([]);
   const [loadingApps, setLoadingApps] = useState(false);
-  // Edit state
-  const [editJob, setEditJob] = useState<any>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [editBudget, setEditBudget] = useState("");
-  const [editAddress, setEditAddress] = useState("");
-  const [editCategoryId, setEditCategoryId] = useState("");
-  const [saving, setSaving] = useState(false);
 
   async function loadData() {
     if (!user) return;
@@ -78,39 +70,6 @@ export default function CustomerPostJobPage() {
       setTitle(""); setDescription(""); setBudget(""); setAddress(""); setCategoryId(""); setIsInstant(false); setDeadline(""); setShowCreate(false);
     }
     setCreating(false); loadData();
-  };
-
-  const openEditJob = (job: any) => {
-    setEditJob(job);
-    setEditTitle(job.title);
-    setEditDescription(job.description || "");
-    setEditBudget(job.budget?.toString() || "");
-    setEditAddress(job.address || "");
-    setEditCategoryId(job.category_id || "");
-  };
-
-  const saveEditJob = async () => {
-    if (!editJob || !editTitle.trim()) return;
-    setSaving(true);
-    const { error } = await supabase.from("jobs").update({
-      title: editTitle.trim(),
-      description: editDescription.trim() || null,
-      budget: editBudget ? Number(editBudget) : null,
-      address: editAddress.trim() || null,
-      category_id: editCategoryId || null,
-    }).eq("id", editJob.id);
-    if (error) {
-      toast({ title: "Update failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Job updated!" });
-      setEditJob(null);
-      loadData();
-    }
-    setSaving(false);
-  };
-
-  const canEditJob = (job: any) => {
-    return ["pending"].includes(job.status) && !job.worker_id;
   };
 
   const viewApplications = async (jobId: string) => {
@@ -185,18 +144,11 @@ export default function CustomerPostJobPage() {
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {canEditJob(job) && (
-                      <Button size="sm" variant="outline" onClick={() => openEditJob(job)} className="active:scale-[0.97]">
-                        <Pencil className="w-4 h-4 mr-1" /> Edit
-                      </Button>
-                    )}
-                    {job.status === "pending" && (
-                      <Button size="sm" variant="outline" onClick={() => viewApplications(job.id)} className="active:scale-[0.97]">
-                        <Users className="w-4 h-4 mr-1" /> Applications
-                      </Button>
-                    )}
-                  </div>
+                  {job.status === "pending" && (
+                    <Button size="sm" variant="outline" onClick={() => viewApplications(job.id)} className="active:scale-[0.97]">
+                      <Users className="w-4 h-4 mr-1" /> Applications
+                    </Button>
+                  )}
                 </div>
               </div>
             )) : (
@@ -209,7 +161,6 @@ export default function CustomerPostJobPage() {
         ))}
       </Tabs>
 
-      {/* Create Job Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader><DialogTitle>Post a New Job</DialogTitle></DialogHeader>
@@ -243,33 +194,6 @@ export default function CustomerPostJobPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Job Dialog */}
-      <Dialog open={!!editJob} onOpenChange={(open) => !open && setEditJob(null)}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader><DialogTitle>Edit Job Post</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2"><Label>Job Title *</Label><Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="bg-muted/50" /></div>
-            <div className="space-y-2"><Label>Description</Label><Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="bg-muted/50" /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Budget (KSH)</Label><Input type="number" value={editBudget} onChange={(e) => setEditBudget(e.target.value)} className="bg-muted/50" /></div>
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Select value={editCategoryId} onValueChange={setEditCategoryId}>
-                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-2"><Label>Address / Location</Label><Input value={editAddress} onChange={(e) => setEditAddress(e.target.value)} className="bg-muted/50" /></div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditJob(null)}>Cancel</Button>
-            <Button onClick={saveEditJob} disabled={saving || !editTitle.trim()}>{saving ? "Saving..." : "Save Changes"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Applications Dialog */}
       <Dialog open={!!viewAppsJobId} onOpenChange={(open) => !open && setViewAppsJobId(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader><DialogTitle>Job Applications</DialogTitle></DialogHeader>

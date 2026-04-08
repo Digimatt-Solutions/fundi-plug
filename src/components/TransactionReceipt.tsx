@@ -36,22 +36,6 @@ function getPaymentMethod(stripePaymentId?: string | null): "mpesa" | "stripe" |
 
 export { getPaymentMethod };
 
-// Convert image URLs to base64 for print
-async function imageToBase64(url: string): Promise<string> {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(url);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return url;
-  }
-}
-
 export default function TransactionReceipt({ open, onClose, data }: Props) {
   const receiptRef = useRef<HTMLDivElement>(null);
 
@@ -60,26 +44,9 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
   const method = data.paymentMethod === "mpesa" ? "mpesa" : data.paymentMethod === "stripe" ? "stripe" : "unknown";
   const totalAmount = data.type === "payment" ? data.amount + (data.commission || 0) : data.amount;
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     const el = receiptRef.current;
     if (!el) return;
-
-    // Convert images to base64 for print
-    const [appLogoB64, mpesaLogoB64, stripeLogoB64] = await Promise.all([
-      imageToBase64(appLogo),
-      imageToBase64(mpesaLogo),
-      imageToBase64(stripeLogo),
-    ]);
-
-    // Clone and replace image srcs
-    const clone = el.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("img").forEach((img) => {
-      const src = img.getAttribute("src") || "";
-      if (src.includes("logo.png") || src.includes("logo")) img.src = appLogoB64;
-      else if (src.includes("mpesa")) img.src = mpesaLogoB64;
-      else if (src.includes("stripe")) img.src = stripeLogoB64;
-    });
-
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
     printWindow.document.write(`
@@ -89,70 +56,29 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 40px; background: #fff; color: #1a1a1a; }
         .receipt { max-width: 440px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 16px; padding: 36px 28px; }
         .header { text-align: center; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 2px dashed #ddd; }
-        .header img.app-logo { height: 40px; margin-bottom: 10px; display: inline-block; }
+        .header .app-logo { height: 40px; margin-bottom: 10px; }
         .header h2 { font-size: 18px; font-weight: 700; margin-bottom: 2px; color: #111; }
         .header p { font-size: 11px; color: #888; }
-        img.method-logo { height: 22px; vertical-align: middle; display: inline-block; }
-        .ids { margin-bottom: 12px; }
+        .method-logo { height: 22px; vertical-align: middle; }
         .row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
         .row .label { color: #777; }
         .row .value { font-weight: 600; text-align: right; max-width: 60%; color: #222; }
-        .row .value.mono { font-family: monospace; font-size: 11px; }
-        .row .value.uuid { font-family: monospace; font-size: 9px; color: #999; word-break: break-all; }
         .divider { border: none; border-top: 1px solid #eee; margin: 10px 0; }
-        .total-row { font-size: 16px; font-weight: 700; padding: 10px 0; display: flex; justify-content: space-between; }
+        .total-row { font-size: 16px; font-weight: 700; padding: 10px 0; }
         .total-row .value { color: #e65100; }
-        .status-badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
-        .status-badge.completed { background: #dcfce7; color: #16a34a; }
-        .status-badge.pending { background: #fef3c7; color: #d97706; }
-        .status-badge.failed { background: #fee2e2; color: #dc2626; }
-        .status-badge.approved { background: #dbeafe; color: #2563eb; }
-        .status-badge.rejected { background: #fee2e2; color: #dc2626; }
-        .method-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
-        .method-row .label { color: #777; }
-        .method-row .value { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #222; }
+        .status { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+        .status.completed { background: #dcfce7; color: #16a34a; }
+        .status.pending { background: #fef3c7; color: #d97706; }
+        .status.failed { background: #fee2e2; color: #dc2626; }
+        .status.approved { background: #dbeafe; color: #2563eb; }
+        .status.rejected { background: #fee2e2; color: #dc2626; }
         .footer { text-align: center; margin-top: 18px; padding-top: 16px; border-top: 2px dashed #ddd; }
         .footer p { font-size: 11px; color: #999; line-height: 1.6; }
         .footer .company { font-weight: 600; color: #666; font-size: 11px; margin-top: 6px; }
         @media print { body { padding: 0; } .receipt { border: none; box-shadow: none; } }
       </style></head><body>
-      <div class="receipt">
-        <div class="header">
-          <img src="${appLogoB64}" alt="FundiPlug" class="app-logo" />
-          <h2>${data.type === "payment" ? "Payment Receipt" : "Withdrawal Receipt"}</h2>
-          <p>${new Date(data.date).toLocaleString()}</p>
-        </div>
-        <div class="ids">
-          <div class="row"><span class="label">Receipt ID</span><span class="value mono">${data.id.slice(0, 8).toUpperCase()}</span></div>
-          <div class="row"><span class="label">Transaction UUID</span><span class="value uuid">${data.id}</span></div>
-        </div>
-        <hr class="divider" />
-        ${data.type === "payment" ? `
-          ${data.jobTitle ? `<div class="row"><span class="label">Service</span><span class="value">${data.jobTitle}</span></div>` : ""}
-          ${data.payerName ? `<div class="row"><span class="label">Paid By</span><span class="value">${data.payerName}</span></div>` : ""}
-          ${data.payeeName ? `<div class="row"><span class="label">Paid To</span><span class="value">${data.payeeName}</span></div>` : ""}
-          <hr class="divider" />
-          <div class="row"><span class="label">Service Amount</span><span class="value">KSH ${data.amount.toLocaleString()}</span></div>
-          ${data.commission && data.commission > 0 ? `<div class="row"><span class="label">Platform Fee</span><span class="value">KSH ${data.commission.toLocaleString()}</span></div>` : ""}
-          <hr class="divider" />
-          <div class="total-row"><span>Total Paid</span><span class="value">KSH ${totalAmount.toLocaleString()}</span></div>
-        ` : `
-          ${data.workerName ? `<div class="row"><span class="label">Worker</span><span class="value">${data.workerName}</span></div>` : ""}
-          ${data.phone ? `<div class="row"><span class="label">Phone</span><span class="value">${data.phone}</span></div>` : ""}
-          ${data.adminNotes ? `<div class="row"><span class="label">Notes</span><span class="value">${data.adminNotes}</span></div>` : ""}
-          <hr class="divider" />
-          <div class="total-row"><span>Amount Disbursed</span><span class="value">KSH ${data.amount.toLocaleString()}</span></div>
-        `}
-        <hr class="divider" />
-        <div class="row"><span class="label">Status</span><span class="value"><span class="status-badge ${data.status}">${data.status}</span></span></div>
-        <div class="method-row"><span class="label">Payment Method</span><span class="value">${method !== "unknown" ? `<img src="${method === "mpesa" ? mpesaLogoB64 : stripeLogoB64}" alt="${method}" class="method-logo" />` : ""}${method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : "Stripe"}</span></div>
-        <div class="footer">
-          <p>Thank you for your business</p>
-          <p>This is a computer-generated receipt</p>
-          <p class="company">Digimatt Solutions Limited</p>
-        </div>
-      </div>
-      <script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };</script>
+      <div class="receipt">${el.innerHTML}</div>
+      <script>window.print(); window.onafterprint = () => window.close();</script>
       </body></html>
     `);
     printWindow.document.close();

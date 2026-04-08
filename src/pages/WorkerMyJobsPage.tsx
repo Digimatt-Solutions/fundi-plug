@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X } from "lucide-react";
+import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -16,7 +16,6 @@ export default function WorkerMyJobsPage() {
   const [availableJobs, setAvailableJobs] = useState<any[]>([]);
   const [myApplications, setMyApplications] = useState<any[]>([]);
   const [assignedJobs, setAssignedJobs] = useState<any[]>([]);
-  const [hireRequests, setHireRequests] = useState<any[]>([]);
   const [applyDialog, setApplyDialog] = useState<any>(null);
   const [coverNote, setCoverNote] = useState("");
   const [proposedRate, setProposedRate] = useState("");
@@ -28,15 +27,13 @@ export default function WorkerMyJobsPage() {
     const { data: wp } = await supabase.from("worker_profiles").select("*").eq("user_id", user.id).maybeSingle();
     setWorkerProfile(wp);
 
-    const [availRes, appsRes, assignedRes, hireRes] = await Promise.all([
-      supabase.from("jobs").select("*, service_categories:category_id(name, icon)").eq("status", "pending").is("worker_id", null).order("created_at", { ascending: false }),
+    const [availRes, appsRes, assignedRes] = await Promise.all([
+      supabase.from("jobs").select("*, service_categories:category_id(name, icon)").eq("status", "pending").order("created_at", { ascending: false }),
       supabase.from("job_applications").select("*, jobs:job_id(title, budget, status, address)").eq("worker_id", user.id).order("created_at", { ascending: false }),
       supabase.from("jobs").select("*, service_categories:category_id(name, icon)").eq("worker_id", user.id).in("status", ["accepted", "in_progress", "completed"]).order("created_at", { ascending: false }),
-      // Hire requests: jobs where worker is assigned but status is still pending (direct hire)
-      supabase.from("jobs").select("*, service_categories:category_id(name, icon)").eq("worker_id", user.id).eq("status", "pending").eq("is_instant", true).order("created_at", { ascending: false }),
     ]);
 
-    const allJobs = [...(availRes.data || []), ...(assignedRes.data || []), ...(hireRes.data || [])];
+    const allJobs = [...(availRes.data || []), ...(assignedRes.data || [])];
     const customerIds = [...new Set(allJobs.map(j => j.customer_id))];
     const { data: profiles } = customerIds.length > 0
       ? await supabase.from("profiles").select("id, name, email, phone").in("id", customerIds)
@@ -46,6 +43,7 @@ export default function WorkerMyJobsPage() {
 
     const appliedJobIds = new Set((appsRes.data || []).map((a: any) => a.job_id));
     
+    // Fetch payment statuses for assigned jobs
     const assignedJobIds = (assignedRes.data || []).map(j => j.id);
     const { data: paymentsData } = assignedJobIds.length > 0
       ? await supabase.from("payments").select("job_id, status").in("job_id", assignedJobIds)
@@ -53,7 +51,7 @@ export default function WorkerMyJobsPage() {
     const paymentMap: Record<string, string> = {};
     (paymentsData || []).forEach(p => { paymentMap[p.job_id] = p.status; });
 
-    setAvailableJobs((availRes.data || []).filter((j: any) => !appliedJobIds.has(j.id) && j.worker_id === null).map(j => ({
+    setAvailableJobs((availRes.data || []).filter((j: any) => !appliedJobIds.has(j.id)).map(j => ({
       ...j, customerName: profileMap[j.customer_id]?.name || "Customer",
     })));
     setMyApplications((appsRes.data || []).map(app => ({
@@ -65,12 +63,6 @@ export default function WorkerMyJobsPage() {
       customerEmail: profileMap[j.customer_id]?.email || "",
       customerPhone: profileMap[j.customer_id]?.phone || "",
       paymentStatus: paymentMap[j.id] || null,
-    })));
-    setHireRequests((hireRes.data || []).map(j => ({
-      ...j,
-      customerName: profileMap[j.customer_id]?.name || "Customer",
-      customerEmail: profileMap[j.customer_id]?.email || "",
-      customerPhone: profileMap[j.customer_id]?.phone || "",
     })));
     setLoading(false);
   }
@@ -106,23 +98,6 @@ export default function WorkerMyJobsPage() {
     setSubmitting(false); loadData();
   };
 
-  const respondToHireRequest = async (jobId: string, accept: boolean) => {
-    if (accept) {
-      await supabase.from("jobs").update({ status: "accepted" }).eq("id", jobId);
-      await supabase.from("activity_logs").insert({
-        user_id: user!.id, action: "Hire Request Accepted", detail: `Worker accepted a direct hire request`, entity_type: "job", entity_id: jobId,
-      });
-      toast({ title: "Hire request accepted!" });
-    } else {
-      await supabase.from("jobs").update({ status: "cancelled", worker_id: null }).eq("id", jobId);
-      await supabase.from("activity_logs").insert({
-        user_id: user!.id, action: "Hire Request Rejected", detail: `Worker rejected a direct hire request`, entity_type: "job", entity_id: jobId,
-      });
-      toast({ title: "Hire request rejected" });
-    }
-    loadData();
-  };
-
   const updateJobStatus = async (jobId: string, status: string) => {
     await supabase.from("jobs").update({ status: status as any }).eq("id", jobId);
     if (status === "completed") {
@@ -156,43 +131,6 @@ export default function WorkerMyJobsPage() {
             <p className="text-sm font-medium text-foreground">Profile not verified</p>
             <p className="text-xs text-muted-foreground">Complete your profile and wait for admin approval before applying to jobs.</p>
           </div>
-        </div>
-      )}
-
-      {/* Hire Requests Banner */}
-      {hireRequests.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">📩 Hire Requests ({hireRequests.length})</h2>
-          {hireRequests.map((job, i) => (
-            <div key={job.id} className="stat-card border-primary/30 bg-primary/5 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
-                      <h3 className="font-semibold text-foreground">{job.title}</h3>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
-                    </div>
-                    {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      {job.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</span>}
-                      <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => respondToHireRequest(job.id, true)}><Check className="w-4 h-4 mr-1" /> Accept</Button>
-                    <Button size="sm" variant="outline" className="text-destructive" onClick={() => respondToHireRequest(job.id, false)}><X className="w-4 h-4 mr-1" /> Reject</Button>
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-                  <p className="text-xs font-medium text-foreground">Customer: {job.customerName}</p>
-                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
-                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {job.customerPhone}</p>}
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       )}
 
@@ -287,6 +225,7 @@ export default function WorkerMyJobsPage() {
                     )}
                   </div>
                 </div>
+                {/* Customer contact details */}
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                   <p className="text-xs font-medium text-foreground">Customer: {job.customerName}</p>
                   {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
