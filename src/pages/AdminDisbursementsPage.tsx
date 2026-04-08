@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowDownCircle, CheckCircle, XCircle, Clock, Search, FileText } from "lucide-react";
@@ -24,7 +24,7 @@ export default function AdminDisbursementsPage() {
   const [processing, setProcessing] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!user) return;
     const { data: wds } = await supabase
       .from("withdrawals")
@@ -70,9 +70,17 @@ export default function AdminDisbursementsPage() {
       workerPhone: profileMap[w.worker_id]?.phone || "",
     })));
     setLoading(false);
-  };
+  }, [user]);
 
-  useEffect(() => { load(); }, [user]);
+  useEffect(() => {
+    load();
+    // Realtime subscription for withdrawals and payments
+    const channel = supabase.channel("admin-disbursements-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "withdrawals" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [load]);
 
   const handleAction = async () => {
     if (!actionDialog) return;
