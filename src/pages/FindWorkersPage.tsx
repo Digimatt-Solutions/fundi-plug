@@ -88,7 +88,6 @@ export default function FindWorkersPage() {
     setHireAddress("");
     setHirePhone(user?.phone || "");
     setHireCategoryId("");
-    setSelectedWorker(null);
   };
 
   const hireWorker = async () => {
@@ -218,7 +217,7 @@ export default function FindWorkersPage() {
       )}
 
       {/* Worker Profile Dialog */}
-      <Dialog open={!!selectedWorker} onOpenChange={(open) => !open && setSelectedWorker(null)}>
+      <Dialog open={!!selectedWorker && !hireDialog} onOpenChange={(open) => !open && setSelectedWorker(null)}>
         <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
           {selectedWorker && (
             <>
@@ -299,7 +298,7 @@ export default function FindWorkersPage() {
       </Dialog>
 
       {/* Hire Details Dialog */}
-      <Dialog open={!!hireDialog} onOpenChange={(open) => { if (!open) setHireDialog(null); }}>
+      <Dialog open={!!hireDialog} onOpenChange={(open) => { if (!open) { setHireDialog(null); setSelectedWorker(null); } }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader><DialogTitle>Hire {hireDialog?.name}</DialogTitle></DialogHeader>
           <div className="space-y-4">
