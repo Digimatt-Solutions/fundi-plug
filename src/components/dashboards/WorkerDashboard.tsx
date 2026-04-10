@@ -72,9 +72,30 @@ export default function WorkerDashboard() {
   }, [user]);
 
   const toggleOnline = async () => {
+    if (!user) return;
     const newStatus = !isOnline;
     setIsOnline(newStatus);
-    await supabase.from("worker_profiles").update({ is_online: newStatus }).eq("user_id", user!.id);
+
+    if (newStatus && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          await supabase.from("worker_profiles").update({
+            is_online: true,
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          }).eq("user_id", user.id);
+        },
+        async () => {
+          await supabase.from("worker_profiles").update({ is_online: true }).eq("user_id", user.id);
+        }
+      );
+    } else {
+      await supabase.from("worker_profiles").update({
+        is_online: false,
+        latitude: null,
+        longitude: null,
+      }).eq("user_id", user.id);
+    }
   };
 
   if (loading) {
@@ -174,49 +195,6 @@ export default function WorkerDashboard() {
         </div>
       </div>
 
-      {/* Online Customers */}
-      <OnlineCustomers />
-    </div>
-  );
-}
-
-function OnlineCustomers() {
-  const [customers, setCustomers] = useState<any[]>([]);
-
-  useEffect(() => {
-    async function load() {
-      const { data } = await (supabase.from("profiles").select("id, name, avatar_url, latitude, longitude") as any).eq("is_online", true).not("latitude", "is", null);
-      setCustomers(data || []);
-    }
-    load();
-    const channel = supabase.channel("online-customers-rt")
-      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, []);
-
-  if (customers.length === 0) return null;
-
-  return (
-    <div className="stat-card animate-fade-in">
-      <h3 className="text-lg font-semibold text-foreground mb-3">📍 Online Customers Nearby</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {customers.map(c => (
-          <div key={c.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            {c.avatar_url ? (
-              <img src={c.avatar_url} alt={c.name} className="w-9 h-9 rounded-full object-cover" />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-xs">
-                {c.name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "C"}
-              </div>
-            )}
-            <div>
-              <p className="text-sm font-medium text-foreground">{c.name}</p>
-              <p className="text-xs text-green-500">● Online</p>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
