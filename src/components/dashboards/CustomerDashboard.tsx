@@ -30,6 +30,7 @@ export default function CustomerDashboard() {
   const [nearbyWorkers, setNearbyWorkers] = useState<any[]>([]);
   const [stats, setStats] = useState({ bookings: 0, spent: 0, avgRating: 0 });
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(false);
 
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
