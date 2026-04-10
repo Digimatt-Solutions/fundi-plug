@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, ToggleLeft, ToggleRight } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,8 +30,6 @@ export default function CustomerDashboard() {
   const [nearbyWorkers, setNearbyWorkers] = useState<any[]>([]);
   const [stats, setStats] = useState({ bookings: 0, spent: 0, avgRating: 0 });
   const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(false);
-
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
   const [hireTitle, setHireTitle] = useState("");
@@ -92,35 +90,10 @@ export default function CustomerDashboard() {
     navigate("/dashboard/bookings");
   };
 
-  const toggleOnline = async () => {
-    if (!user) return;
-    const newStatus = !isOnline;
-    setIsOnline(newStatus);
-
-    if (newStatus && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          await supabase.from("profiles").update({
-            is_online: true,
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          } as any).eq("id", user.id);
-        },
-        async () => {
-          await supabase.from("profiles").update({ is_online: true } as any).eq("id", user.id);
-        }
-      );
-    } else {
-      await supabase.from("profiles").update({ is_online: false, latitude: null, longitude: null } as any).eq("id", user.id);
-    }
-  };
 
   useEffect(() => {
     if (!user) return;
     async function load() {
-      // Get current customer online status
-      const { data: myProfile } = await supabase.from("profiles").select("is_online").eq("id", user!.id).single();
-      setIsOnline((myProfile as any)?.is_online || false);
 
       const { data: cats } = await supabase.from("service_categories").select("*");
       const { data: workers } = await supabase.from("worker_profiles").select("skills");
@@ -194,14 +167,6 @@ export default function CustomerDashboard() {
           <h1 className="text-2xl font-bold text-foreground">Find Skilled Fundis</h1>
           <p className="text-muted-foreground text-sm">Book trusted professionals near you</p>
         </div>
-        <button onClick={toggleOnline}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            isOnline ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
-          }`}
-        >
-          {isOnline ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
-          {isOnline ? "Online" : "Offline"}
-        </button>
       </div>
 
       <div className="relative max-w-2xl animate-fade-in">
