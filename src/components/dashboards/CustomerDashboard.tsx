@@ -168,6 +168,12 @@ export default function CustomerDashboard() {
     load();
   }, [user]);
 
+  const formatDistance = (km: number) => {
+    if (km < 1) return `${Math.round(km * 1000)} m away`;
+    if (km < 10) return `${km.toFixed(1)} km away`;
+    return `~${Math.round(km)} km away`;
+  };
+
   const getWorkerDistance = (w: any) => {
     if (!customerPos || !w.latitude || !w.longitude) return null;
     return getDistanceKm(customerPos.lat, customerPos.lng, w.latitude, w.longitude);
