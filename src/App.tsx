@@ -5,7 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Auth from "@/pages/Auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
@@ -31,6 +31,12 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function ComplaintsRouter() {
+  const { user } = useAuth();
+  if (user?.role === "admin") return <AdminComplaintsPage />;
+  return <CustomerComplaintsPage />;
+}
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
     <QueryClientProvider client={queryClient}>
@@ -50,7 +56,19 @@ const App = () => (
               <Route path="categories" element={<AdminCategoriesPage />} />
               <Route path="disbursements" element={<AdminDisbursementsPage />} />
               <Route path="reports" element={<ReportsPage />} />
+              <Route path="activity" element={<ActivityLogsPage />} />
+              <Route path="user-management" element={<UserManagementPage />} />
+              {/* Worker */}
+              <Route path="my-jobs" element={<WorkerMyJobsPage />} />
+              <Route path="profile" element={<WorkerProfilePage />} />
+              <Route path="earnings" element={<WorkerEarningsPage />} />
+              <Route path="reviews" element={<WorkerReviewsPage />} />
+              {/* Customer */}
+              <Route path="post-job" element={<CustomerPostJobPage />} />
+              <Route path="find-workers" element={<FindWorkersPage />} />
+              <Route path="bookings" element={<CustomerBookingsPage />} />
               {/* Shared */}
+              <Route path="complaints" element={<ComplaintsRouter />} />
               <Route path="payments" element={<PaymentsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
