@@ -172,6 +172,42 @@ export type Database = {
           },
         ]
       }
+      complaints: {
+        Row: {
+          admin_reply: string | null
+          created_at: string
+          customer_id: string
+          fundi_id: string
+          id: string
+          job_id: string
+          message: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          created_at?: string
+          customer_id: string
+          fundi_id: string
+          id?: string
+          job_id: string
+          message: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_reply?: string | null
+          created_at?: string
+          customer_id?: string
+          fundi_id?: string
+          id?: string
+          job_id?: string
+          message?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_applications: {
         Row: {
           cover_note: string | null
@@ -292,6 +328,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      module_settings: {
+        Row: {
+          enabled: boolean
+          id: string
+          label: string
+          module_key: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          label: string
+          module_key: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          label?: string
+          module_key?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       payments: {
         Row: {
