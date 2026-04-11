@@ -226,53 +226,57 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Map View */}
-      {showMap && onlineFundis.length > 0 && (
+      {showMap && customerPos && onlineFundis.length > 0 && (
         <div className="stat-card animate-fade-in">
           <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-primary" /> Online Fundis Map
           </h3>
-          <div className="relative w-full h-72 bg-muted/50 rounded-xl overflow-hidden border border-border">
-            {/* Simple CSS map visualization */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative w-full h-full">
-                {customerPos && (
-                  <div
-                    className="absolute z-10 flex flex-col items-center"
-                    style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
-                  >
-                    <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-lg animate-pulse" />
-                    <span className="text-[10px] font-medium text-blue-500 mt-0.5">You</span>
-                  </div>
-                )}
-                {onlineFundis.map((w, i) => {
-                  const dist = getWorkerDistance(w);
-                  // Position fundis around center based on relative position
-                  const angle = (i / onlineFundis.length) * 2 * Math.PI;
-                  const radius = dist ? Math.min(dist * 3, 40) : 20 + i * 8;
-                  const left = 50 + Math.cos(angle) * radius;
-                  const top = 50 + Math.sin(angle) * radius;
-                  return (
-                    <div
-                      key={w.id}
-                      className="absolute flex flex-col items-center cursor-pointer group"
-                      style={{ left: `${Math.max(5, Math.min(95, left))}%`, top: `${Math.max(5, Math.min(95, top))}%`, transform: "translate(-50%, -50%)" }}
-                      onClick={() => openHireDialog(w)}
-                    >
-                      <div className="w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow group-hover:scale-150 transition-transform" />
-                      <div className="hidden group-hover:block absolute -top-14 bg-popover border border-border rounded-lg px-2 py-1 shadow-lg whitespace-nowrap z-20">
-                        <p className="text-xs font-medium text-foreground">{w.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{w.skill}</p>
-                        {dist != null && <p className="text-[10px] text-primary">{dist.toFixed(1)} km away</p>}
-                      </div>
-                    </div>
-                  );
+          <div className="w-full h-80 rounded-xl overflow-hidden border border-border">
+            <MapContainer
+              center={[customerPos.lat, customerPos.lng]}
+              zoom={13}
+              style={{ width: "100%", height: "100%" }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker
+                position={[customerPos.lat, customerPos.lng]}
+                icon={L.divIcon({
+                  className: "",
+                  html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>',
+                  iconSize: [16, 16],
+                  iconAnchor: [8, 8],
                 })}
-              </div>
-            </div>
-            <div className="absolute bottom-2 left-2 flex items-center gap-3 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" /> You</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Online Fundi</span>
-            </div>
+              >
+                <Popup>You are here</Popup>
+              </Marker>
+              {onlineFundis.map((w) => {
+                const dist = getWorkerDistance(w);
+                return (
+                  <Marker
+                    key={w.id}
+                    position={[w.latitude, w.longitude]}
+                    icon={L.divIcon({
+                      className: "",
+                      html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>',
+                      iconSize: [14, 14],
+                      iconAnchor: [7, 7],
+                    })}
+                  >
+                    <Popup>
+                      <div className="text-sm">
+                        <p className="font-semibold">{w.name}</p>
+                        <p className="text-xs">{w.skill}</p>
+                        {dist != null && <p className="text-xs text-primary font-medium">{formatDistance(dist)}</p>}
+                      </div>
+                    </Popup>
+                  </Marker>
+                );
+              })}
+            </MapContainer>
           </div>
         </div>
       )}
