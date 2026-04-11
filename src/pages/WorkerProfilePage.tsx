@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileText, Trash2, CheckCircle, Clock, XCircle, Camera, AlertTriangle } from "lucide-react";
@@ -15,11 +16,9 @@ const REQUIRED_DOCS = [
   { key: "national_id", label: "National ID", description: "Upload a copy of your National ID (front)" },
   { key: "nca_document", label: "NCA Document", description: "National Construction Authority certificate" },
 ];
-
 const LICENSE_DOCS = [
   { key: "good_conduct", label: "Certificate of Good Conduct", description: "Police clearance certificate" },
 ];
-
 const ACADEMIC_DOCS = [
   { key: "academic", label: "Academic Certificate", description: "Diploma, degree, or trade certificate" },
 ];
@@ -32,6 +31,14 @@ const KENYA_COUNTIES = [
   "Tharaka-Nithi","Trans Nzoia","Turkana","Uasin Gishu","Vihiga","Wajir","West Pokot",
 ];
 
+const PLATFORM_RULES = [
+  "I agree to provide accurate and truthful information in my profile.",
+  "I understand that my documents will be verified before I can receive jobs.",
+  "I agree to maintain professional conduct with all customers.",
+  "I agree to the platform's commission and payment terms.",
+  "I understand that violations may lead to account suspension or termination.",
+];
+
 export default function WorkerProfilePage() {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
@@ -39,6 +46,7 @@ export default function WorkerProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   const [profile, setProfile] = useState<any>(null);
   const [bio, setBio] = useState("");
@@ -50,13 +58,9 @@ export default function WorkerProfilePage() {
   const [certs, setCerts] = useState<any[]>([]);
   const [certName, setCertName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  // Demographics
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
   const [idNumber, setIdNumber] = useState("");
-
-  // Location
   const [country, setCountry] = useState("Kenya");
   const [county, setCounty] = useState("");
   const [constituency, setConstituency] = useState("");
@@ -86,28 +90,21 @@ export default function WorkerProfilePage() {
         setCounty((wp as any).county || "");
         setConstituency((wp as any).constituency || "");
         setWard((wp as any).ward || "");
-
-        const { data: certsData } = await supabase
-          .from("certifications").select("*").eq("worker_id", wp.id)
-          .order("created_at", { ascending: false });
+        const { data: certsData } = await supabase.from("certifications").select("*").eq("worker_id", wp.id).order("created_at", { ascending: false });
         setCerts(certsData || []);
       }
       setCategories(catsRes.data || []);
       setLoading(false);
     }
     load();
-
     const channel = supabase.channel("worker-profile-rt")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "worker_profiles", filter: `user_id=eq.${user.id}` }, (payload) => {
         setProfile((prev: any) => prev ? { ...prev, ...payload.new } : prev);
-      })
-      .subscribe();
+      }).subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  const toggleSkill = (id: string) => {
-    setSelectedSkills((prev) => prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]);
-  };
+  const toggleSkill = (id: string) => setSelectedSkills(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
 
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,17 +123,13 @@ export default function WorkerProfilePage() {
 
   const hasRequiredDocs = () => {
     const certNames = certs.map(c => c.name.toLowerCase());
-    return REQUIRED_DOCS.every(doc =>
-      certNames.some(name => name.includes(doc.key.replace("_", " ")) || name.includes(doc.label.toLowerCase()))
-    );
+    return REQUIRED_DOCS.every(doc => certNames.some(name => name.includes(doc.key.replace("_", " ")) || name.includes(doc.label.toLowerCase())));
   };
 
   const saveProfile = async () => {
     if (!profile) return;
-    if (!hasRequiredDocs()) {
-      toast({ title: "Required documents missing", description: "Please upload your National ID and NCA Document before submitting.", variant: "destructive" });
-      return;
-    }
+    if (!consentChecked) { toast({ title: "Please accept the platform terms", variant: "destructive" }); return; }
+    if (!hasRequiredDocs()) { toast({ title: "Required documents missing", description: "Please upload your National ID and NCA Document.", variant: "destructive" }); return; }
     setSaving(true);
     await supabase.from("worker_profiles").update({
       bio, hourly_rate: hourlyRate ? Number(hourlyRate) : null,
@@ -145,10 +138,8 @@ export default function WorkerProfilePage() {
       gender: gender || null, date_of_birth: dob || null,
       id_number: idNumber || null, country: country || "Kenya",
       county: county || null, constituency: constituency || null,
-      ward: ward || null,
-      verification_status: "pending",
+      ward: ward || null, verification_status: "pending",
     } as any).eq("id", profile.id);
-
     await supabase.from("activity_logs").insert({
       user_id: user!.id, action: "Profile Submitted",
       detail: "Fundi submitted/updated profile for review", entity_type: "worker_profile", entity_id: profile.id,
@@ -193,7 +184,7 @@ export default function WorkerProfilePage() {
     const urlParts = fileUrl.split("/certifications/");
     if (urlParts[1]) await supabase.storage.from("certifications").remove([decodeURIComponent(urlParts[1])]);
     await supabase.from("certifications").delete().eq("id", certId);
-    setCerts((prev) => prev.filter((c) => c.id !== certId));
+    setCerts(prev => prev.filter(c => c.id !== certId));
     toast({ title: "Document removed" });
   };
 
@@ -233,9 +224,7 @@ export default function WorkerProfilePage() {
     );
   };
 
-  if (loading) {
-    return <div className="space-y-6 max-w-3xl"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-48 rounded-xl" /></div>;
-  }
+  if (loading) return <div className="space-y-6"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-48 rounded-xl" /></div>;
 
   const statusConfig: Record<string, { icon: any; color: string; bg: string; label: string }> = {
     pending: { icon: Clock, color: "text-chart-4", bg: "bg-chart-4/10", label: "Pending Review" },
@@ -246,7 +235,7 @@ export default function WorkerProfilePage() {
   const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "F";
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Fundi Profile</h1>
@@ -286,50 +275,34 @@ export default function WorkerProfilePage() {
           <TabsTrigger value="academic">Academic</TabsTrigger>
         </TabsList>
 
-        {/* Tab 1: Personal Details / Demographics */}
         <TabsContent value="demographics" className="space-y-4">
           <div className="stat-card animate-fade-in space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Personal Information</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Full Name</Label>
-                <Input value={user?.name || ""} disabled className="bg-muted/50" />
-                <p className="text-xs text-muted-foreground">Update in Settings</p>
-              </div>
+              <div className="space-y-2"><Label>Full Name</Label><Input value={user?.name || ""} disabled className="bg-muted/50" /><p className="text-xs text-muted-foreground">Update in Settings</p></div>
               <div className="space-y-2">
                 <Label>Gender</Label>
                 <Select value={gender} onValueChange={setGender}>
                   <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Select gender" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
+                  <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Date of Birth</Label>
-                <Input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="bg-muted/50" />
-              </div>
-              <div className="space-y-2">
-                <Label>National ID Number</Label>
-                <Input value={idNumber} onChange={(e) => setIdNumber(e.target.value)} placeholder="e.g. 12345678" className="bg-muted/50" />
-              </div>
+              <div className="space-y-2"><Label>Date of Birth</Label><Input type="date" value={dob} onChange={e => setDob(e.target.value)} className="bg-muted/50" /></div>
+              <div className="space-y-2"><Label>National ID Number</Label><Input value={idNumber} onChange={e => setIdNumber(e.target.value)} placeholder="e.g. 12345678" className="bg-muted/50" /></div>
             </div>
             <div className="space-y-2">
               <Label>Bio / About You</Label>
-              <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tell customers about your experience..." className="bg-muted/50 min-h-[100px]" />
+              <Textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell customers about your experience..." className="bg-muted/50 min-h-[100px]" />
             </div>
           </div>
         </TabsContent>
 
-        {/* Tab 2: Skills & Services */}
         <TabsContent value="skills" className="space-y-4">
           <div className="stat-card animate-fade-in space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Skills & Services</h3>
             <p className="text-sm text-muted-foreground">Select the services you offer</p>
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
+              {categories.map(cat => (
                 <button key={cat.id} onClick={() => toggleSkill(cat.id)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200 active:scale-[0.97] ${selectedSkills.includes(cat.id) ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}>
                   {cat.icon} {cat.name}
@@ -338,27 +311,17 @@ export default function WorkerProfilePage() {
               {categories.length === 0 && <p className="text-sm text-muted-foreground">No categories available yet.</p>}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Hourly Rate (KSH)</Label>
-                <Input type="number" value={hourlyRate} onChange={(e) => setHourlyRate(e.target.value)} placeholder="500" className="bg-muted/50" />
-              </div>
-              <div className="space-y-2">
-                <Label>Years of Experience</Label>
-                <Input type="number" value={yearsExperience} onChange={(e) => setYearsExperience(e.target.value)} placeholder="5" className="bg-muted/50" />
-              </div>
+              <div className="space-y-2"><Label>Hourly Rate (KSH)</Label><Input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} placeholder="500" className="bg-muted/50" /></div>
+              <div className="space-y-2"><Label>Years of Experience</Label><Input type="number" value={yearsExperience} onChange={e => setYearsExperience(e.target.value)} placeholder="5" className="bg-muted/50" /></div>
             </div>
           </div>
         </TabsContent>
 
-        {/* Tab 3: Location */}
         <TabsContent value="location" className="space-y-4">
           <div className="stat-card animate-fade-in space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Location Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Country</Label>
-                <Input value={country} onChange={(e) => setCountry(e.target.value)} className="bg-muted/50" />
-              </div>
+              <div className="space-y-2"><Label>Country</Label><Input value={country} onChange={e => setCountry(e.target.value)} className="bg-muted/50" /></div>
               <div className="space-y-2">
                 <Label>County</Label>
                 <Select value={county} onValueChange={setCounty}>
@@ -366,24 +329,17 @@ export default function WorkerProfilePage() {
                   <SelectContent>{KENYA_COUNTIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Constituency</Label>
-                <Input value={constituency} onChange={(e) => setConstituency(e.target.value)} placeholder="e.g. Westlands" className="bg-muted/50" />
-              </div>
-              <div className="space-y-2">
-                <Label>Ward / Location</Label>
-                <Input value={ward} onChange={(e) => setWard(e.target.value)} placeholder="e.g. Kangemi" className="bg-muted/50" />
-              </div>
+              <div className="space-y-2"><Label>Constituency</Label><Input value={constituency} onChange={e => setConstituency(e.target.value)} placeholder="e.g. Westlands" className="bg-muted/50" /></div>
+              <div className="space-y-2"><Label>Ward / Location</Label><Input value={ward} onChange={e => setWard(e.target.value)} placeholder="e.g. Kangemi" className="bg-muted/50" /></div>
             </div>
             <div className="space-y-2">
               <Label>Service Area</Label>
-              <Input value={serviceArea} onChange={(e) => setServiceArea(e.target.value)} placeholder="e.g. Nairobi CBD, Westlands" className="bg-muted/50" />
+              <Input value={serviceArea} onChange={e => setServiceArea(e.target.value)} placeholder="e.g. Nairobi CBD, Westlands" className="bg-muted/50" />
               <p className="text-xs text-muted-foreground">Areas where you're available to work</p>
             </div>
           </div>
         </TabsContent>
 
-        {/* Tab 4: Certifications / Licenses */}
         <TabsContent value="certifications" className="space-y-4">
           <div className="stat-card animate-fade-in space-y-4">
             <div className="flex items-center gap-2">
@@ -391,26 +347,22 @@ export default function WorkerProfilePage() {
               {!hasRequiredDocs() && <AlertTriangle className="w-4 h-4 text-chart-4" />}
             </div>
             <p className="text-sm text-muted-foreground">You must upload these for verification</p>
-            <div className="space-y-3">
-              {REQUIRED_DOCS.map(doc => renderDocRow(doc, true))}
-            </div>
+            <div className="space-y-3">{REQUIRED_DOCS.map(doc => renderDocRow(doc, true))}</div>
           </div>
           <div className="stat-card animate-fade-in space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Licenses & Clearances</h3>
-            <div className="space-y-3">
-              {LICENSE_DOCS.map(doc => renderDocRow(doc, false))}
-            </div>
+            <div className="space-y-3">{LICENSE_DOCS.map(doc => renderDocRow(doc, false))}</div>
           </div>
           <div className="stat-card animate-fade-in space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Other Certifications</h3>
             <div className="flex gap-2">
-              <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certificate name (e.g. Electrical License)" className="bg-muted/50 flex-1" />
+              <Input value={certName} onChange={e => setCertName(e.target.value)} placeholder="Certificate name (e.g. Electrical License)" className="bg-muted/50 flex-1" />
               <label className="cursor-pointer">
                 <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={uploadCertification} />
                 <Button asChild variant="outline" disabled={uploading === "custom" || !certName.trim()}><span><Upload className="w-4 h-4 mr-2" /> {uploading === "custom" ? "Uploading..." : "Upload"}</span></Button>
               </label>
             </div>
-            {certs.filter(c => ![...REQUIRED_DOCS, ...LICENSE_DOCS, ...ACADEMIC_DOCS].some(d => d.label.toLowerCase() === c.name.toLowerCase())).map((cert) => (
+            {certs.filter(c => ![...REQUIRED_DOCS, ...LICENSE_DOCS, ...ACADEMIC_DOCS].some(d => d.label.toLowerCase() === c.name.toLowerCase())).map(cert => (
               <div key={cert.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-3">
                   <FileText className="w-5 h-5 text-primary" />
@@ -425,19 +377,32 @@ export default function WorkerProfilePage() {
           </div>
         </TabsContent>
 
-        {/* Tab 5: Academic */}
         <TabsContent value="academic" className="space-y-4">
           <div className="stat-card animate-fade-in space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Academic Documents</h3>
             <p className="text-sm text-muted-foreground">Upload academic certificates, diplomas, or trade certificates</p>
-            <div className="space-y-3">
-              {ACADEMIC_DOCS.map(doc => renderDocRow(doc, false))}
-            </div>
+            <div className="space-y-3">{ACADEMIC_DOCS.map(doc => renderDocRow(doc, false))}</div>
           </div>
         </TabsContent>
       </Tabs>
 
-      <Button onClick={saveProfile} disabled={saving} className="active:scale-[0.97]">
+      {/* Consent / Agreement */}
+      <div className="stat-card animate-fade-in space-y-4 border-primary/20">
+        <h3 className="text-lg font-semibold text-foreground">Platform Agreement</h3>
+        <div className="space-y-2">
+          {PLATFORM_RULES.map((rule, i) => (
+            <p key={i} className="text-sm text-muted-foreground">• {rule}</p>
+          ))}
+        </div>
+        <div className="flex items-center gap-3 pt-2">
+          <Checkbox id="consent" checked={consentChecked} onCheckedChange={(v) => setConsentChecked(!!v)} />
+          <label htmlFor="consent" className="text-sm font-medium text-foreground cursor-pointer">
+            I have read and agree to the platform terms and conditions
+          </label>
+        </div>
+      </div>
+
+      <Button onClick={saveProfile} disabled={saving || !consentChecked} className="active:scale-[0.97] w-full sm:w-auto">
         {saving ? "Saving..." : "Save & Submit for Review"}
       </Button>
     </div>

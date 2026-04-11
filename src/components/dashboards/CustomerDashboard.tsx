@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,14 @@ const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Cleaner": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop",
 };
 
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 export default function CustomerDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -30,6 +38,9 @@ export default function CustomerDashboard() {
   const [nearbyWorkers, setNearbyWorkers] = useState<any[]>([]);
   const [stats, setStats] = useState({ bookings: 0, spent: 0, avgRating: 0 });
   const [loading, setLoading] = useState(true);
+  const [customerPos, setCustomerPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [showMap, setShowMap] = useState(false);
+
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
   const [hireTitle, setHireTitle] = useState("");
@@ -56,11 +67,9 @@ export default function CustomerDashboard() {
       return;
     }
     setHiring(true);
-
     if (hirePhone && hirePhone !== user.phone) {
       await supabase.from("profiles").update({ phone: hirePhone }).eq("id", user.id);
     }
-
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
       description: hireDescription.trim() || `Customer hired ${hireDialog.name} directly`,
@@ -72,29 +81,34 @@ export default function CustomerDashboard() {
       status: "pending",
       is_instant: true,
     }).select().single();
-
     if (error) {
       toast({ title: "Failed to hire", description: error.message, variant: "destructive" });
       setHiring(false);
       return;
     }
-
     await supabase.from("activity_logs").insert({
       user_id: user.id, action: "Hire Request Sent",
       detail: `Customer sent hire request to ${hireDialog.name}`, entity_type: "job", entity_id: job.id,
     });
-
     toast({ title: "Hire request sent!", description: `${hireDialog.name} will be notified to accept or reject.` });
     setHireDialog(null);
     setHiring(false);
     navigate("/dashboard/bookings");
   };
 
+  useEffect(() => {
+    // Get customer GPS for distance calc
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setCustomerPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {}
+      );
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
     async function load() {
-
       const { data: cats } = await supabase.from("service_categories").select("*");
       const { data: workers } = await supabase.from("worker_profiles").select("skills");
       const skillCounts: Record<string, number> = {};
@@ -145,12 +159,16 @@ export default function CustomerDashboard() {
       const totalSpent = (paymentsRes.data || []).reduce((s, p) => s + Number(p.amount), 0);
       const reviews = givenReviews.data || [];
       const avg = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
-
       setStats({ bookings: bookingsRes.count ?? 0, spent: totalSpent, avgRating: Math.round(avg * 10) / 10 });
       setLoading(false);
     }
     load();
   }, [user]);
+
+  const getWorkerDistance = (w: any) => {
+    if (!customerPos || !w.latitude || !w.longitude) return null;
+    return getDistanceKm(customerPos.lat, customerPos.lng, w.latitude, w.longitude);
+  };
 
   if (loading) {
     return (
@@ -160,6 +178,8 @@ export default function CustomerDashboard() {
     );
   }
 
+  const onlineFundis = nearbyWorkers.filter(w => w.available && w.latitude && w.longitude);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -167,6 +187,11 @@ export default function CustomerDashboard() {
           <h1 className="text-2xl font-bold text-foreground">Find Skilled Fundis</h1>
           <p className="text-muted-foreground text-sm">Book trusted professionals near you</p>
         </div>
+        {onlineFundis.length > 0 && (
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowMap(!showMap)}>
+            <MapPin className="w-4 h-4" /> {showMap ? "Hide Map" : "Map View"}
+          </Button>
+        )}
       </div>
 
       <div className="relative max-w-2xl animate-fade-in">
@@ -190,6 +215,58 @@ export default function CustomerDashboard() {
           </div>
         </Button>
       </div>
+
+      {/* Map View */}
+      {showMap && onlineFundis.length > 0 && (
+        <div className="stat-card animate-fade-in">
+          <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" /> Online Fundis Map
+          </h3>
+          <div className="relative w-full h-72 bg-muted/50 rounded-xl overflow-hidden border border-border">
+            {/* Simple CSS map visualization */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative w-full h-full">
+                {customerPos && (
+                  <div
+                    className="absolute z-10 flex flex-col items-center"
+                    style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)" }}
+                  >
+                    <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-lg animate-pulse" />
+                    <span className="text-[10px] font-medium text-blue-500 mt-0.5">You</span>
+                  </div>
+                )}
+                {onlineFundis.map((w, i) => {
+                  const dist = getWorkerDistance(w);
+                  // Position fundis around center based on relative position
+                  const angle = (i / onlineFundis.length) * 2 * Math.PI;
+                  const radius = dist ? Math.min(dist * 3, 40) : 20 + i * 8;
+                  const left = 50 + Math.cos(angle) * radius;
+                  const top = 50 + Math.sin(angle) * radius;
+                  return (
+                    <div
+                      key={w.id}
+                      className="absolute flex flex-col items-center cursor-pointer group"
+                      style={{ left: `${Math.max(5, Math.min(95, left))}%`, top: `${Math.max(5, Math.min(95, top))}%`, transform: "translate(-50%, -50%)" }}
+                      onClick={() => openHireDialog(w)}
+                    >
+                      <div className="w-3 h-3 rounded-full bg-green-500 border-2 border-white shadow group-hover:scale-150 transition-transform" />
+                      <div className="hidden group-hover:block absolute -top-14 bg-popover border border-border rounded-lg px-2 py-1 shadow-lg whitespace-nowrap z-20">
+                        <p className="text-xs font-medium text-foreground">{w.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{w.skill}</p>
+                        {dist != null && <p className="text-[10px] text-primary">{dist.toFixed(1)} km away</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="absolute bottom-2 left-2 flex items-center gap-3 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500" /> You</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Online Fundi</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
         <h2 className="text-lg font-semibold text-foreground mb-3">Service Categories</h2>
@@ -221,32 +298,40 @@ export default function CustomerDashboard() {
         <h2 className="text-lg font-semibold text-foreground mb-3">Available Fundis</h2>
         {nearbyWorkers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {nearbyWorkers.map((worker) => (
-              <div key={worker.id} className="stat-card space-y-3">
-                <div className="flex items-center gap-3">
-                  {worker.avatar_url ? (
-                    <img src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
-                  ) : (
-                    <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
-                      {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+            {nearbyWorkers.map((worker) => {
+              const dist = getWorkerDistance(worker);
+              return (
+                <div key={worker.id} className="stat-card space-y-3">
+                  <div className="flex items-center gap-3">
+                    {worker.avatar_url ? (
+                      <img src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+                        {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{worker.name}</p>
+                      <p className="text-xs text-muted-foreground">{worker.skill}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1 text-chart-4">
+                      <Star className="w-3 h-3 fill-current" /> {worker.rating > 0 ? worker.rating : "New"}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full ${worker.available ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                      {worker.available ? "Online" : "Offline"}
+                    </span>
+                  </div>
+                  {dist != null && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Navigation className="w-3 h-3" /> {dist.toFixed(1)} km away
                     </div>
                   )}
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{worker.name}</p>
-                    <p className="text-xs text-muted-foreground">{worker.skill}</p>
-                  </div>
+                  <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={() => openHireDialog(worker)}>Hire Now</Button>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="flex items-center gap-1 text-chart-4">
-                    <Star className="w-3 h-3 fill-current" /> {worker.rating > 0 ? worker.rating : "New"}
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-full ${worker.available ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
-                    {worker.available ? "Online" : "Offline"}
-                  </span>
-                </div>
-                <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={() => openHireDialog(worker)}>Hire Now</Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="stat-card flex flex-col items-center justify-center py-12 text-center">
