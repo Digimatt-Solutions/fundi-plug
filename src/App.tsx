@@ -25,6 +25,8 @@ import PaymentsPage from "@/pages/PaymentsPage";
 import AdminJobsPage from "@/pages/AdminJobsPage";
 import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
+import CustomerComplaintsPage from "@/pages/CustomerComplaintsPage";
+import AdminComplaintsPage from "@/pages/AdminComplaintsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();

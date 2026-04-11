@@ -1,9 +1,12 @@
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList, MapPin, Star, Briefcase, Search,
   BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, UserCog, ArrowDownCircle,
+  MessageSquareWarning,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -12,35 +15,37 @@ import {
 import logo from "@/assets/logo.png";
 
 const adminNav = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Verification", url: "/dashboard/verification", icon: Shield },
-  { title: "Jobs", url: "/dashboard/jobs", icon: Briefcase },
-  { title: "Categories", url: "/dashboard/categories", icon: ClipboardList },
-  { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
-  { title: "Disbursements", url: "/dashboard/disbursements", icon: ArrowDownCircle },
-  { title: "Reports", url: "/dashboard/reports", icon: BarChart3 },
-  { title: "Activity Logs", url: "/dashboard/activity", icon: Activity },
-  { title: "User Management", url: "/dashboard/user-management", icon: UserCog },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
+  { title: "Verification", url: "/dashboard/verification", icon: Shield, key: "verification" },
+  { title: "Jobs", url: "/dashboard/jobs", icon: Briefcase, key: "jobs" },
+  { title: "Categories", url: "/dashboard/categories", icon: ClipboardList, key: "categories" },
+  { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
+  { title: "Disbursements", url: "/dashboard/disbursements", icon: ArrowDownCircle, key: "disbursements" },
+  { title: "Complaints", url: "/dashboard/complaints", icon: MessageSquareWarning, key: "complaints" },
+  { title: "Reports", url: "/dashboard/reports", icon: BarChart3, key: "reports" },
+  { title: "Activity Logs", url: "/dashboard/activity", icon: Activity, key: "activity" },
+  { title: "User Management", url: "/dashboard/user-management", icon: UserCog, key: "user-management" },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
 const workerNav = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase },
-  { title: "Profile", url: "/dashboard/profile", icon: UserCog },
-  { title: "Earnings", url: "/dashboard/earnings", icon: CreditCard },
-  { title: "Reviews", url: "/dashboard/reviews", icon: Star },
-  { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
+  { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase, key: "my-jobs" },
+  { title: "Profile", url: "/dashboard/profile", icon: UserCog, key: "profile" },
+  { title: "Earnings", url: "/dashboard/earnings", icon: CreditCard, key: "earnings" },
+  { title: "Reviews", url: "/dashboard/reviews", icon: Star, key: "reviews" },
+  { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
 const customerNav = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Post a Job", url: "/dashboard/post-job", icon: Briefcase },
-  { title: "Find Fundis", url: "/dashboard/find-workers", icon: Search },
-  { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays },
-  { title: "Payments", url: "/dashboard/payments", icon: CreditCard },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
+  { title: "Post a Job", url: "/dashboard/post-job", icon: Briefcase, key: "post-job" },
+  { title: "Find Fundis", url: "/dashboard/find-workers", icon: Search, key: "find-workers" },
+  { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays, key: "bookings" },
+  { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
+  { title: "Complaints", url: "/dashboard/complaints", icon: MessageSquareWarning, key: "complaints" },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
 export function AppSidebar() {
@@ -48,8 +53,20 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { user } = useAuth();
+  const [disabledModules, setDisabledModules] = useState<Set<string>>(new Set());
 
-  const navItems = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
+  useEffect(() => {
+    if (!user || user.role === "admin") return;
+    const role = user.role === "worker" ? "worker" : "customer";
+    supabase.from("module_settings").select("module_key, enabled").eq("role", role).then(({ data }) => {
+      const disabled = new Set<string>();
+      (data || []).forEach((m: any) => { if (!m.enabled) disabled.add(m.module_key); });
+      setDisabledModules(disabled);
+    });
+  }, [user]);
+
+  const allNav = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
+  const navItems = user?.role === "admin" ? allNav : allNav.filter(item => !disabledModules.has(item.key));
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
