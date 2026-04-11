@@ -338,7 +338,7 @@ export default function CustomerDashboard() {
                   </div>
                   {dist != null && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Navigation className="w-3 h-3" /> {dist.toFixed(1)} km away
+                      <Navigation className="w-3 h-3" /> {formatDistance(dist)}
                     </div>
                   )}
                   <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={() => openHireDialog(worker)}>Hire Now</Button>
