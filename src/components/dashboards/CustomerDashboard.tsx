@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
+import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
