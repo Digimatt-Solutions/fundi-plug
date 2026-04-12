@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, type UserRole } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Phone, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/workers-hero.jpg";
 import logo from "@/assets/logo.png";
 
@@ -22,12 +23,83 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Navigate to dashboard once authenticated
+  // Phone OTP state
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       navigate("/dashboard", { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
+
+  // Resend timer countdown
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const interval = setInterval(() => setResendTimer((t) => t - 1), 1000);
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  // Reset OTP state when switching tabs
+  const resetOtpState = useCallback(() => {
+    setOtpSent(false);
+    setOtpCode("");
+    setOtpVerified(false);
+    setResendTimer(0);
+    setPhoneNumber("");
+  }, []);
+
+  const handleSendOtp = async () => {
+    const kenyanRegex = /^2547\d{8}$/;
+    if (!kenyanRegex.test(phoneNumber)) {
+      setError("Invalid phone number. Use format 2547XXXXXXXX");
+      return;
+    }
+    setError("");
+    setOtpLoading(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("send-otp", {
+        body: { phone_number: phoneNumber },
+      });
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+      setOtpSent(true);
+      setResendTimer(60);
+      toast({ title: "Code sent", description: "Check your phone for the verification code." });
+    } catch (err: any) {
+      setError(err.message || "Failed to send code");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!/^\d{6}$/.test(otpCode)) {
+      setError("Enter a valid 6-digit code");
+      return;
+    }
+    setError("");
+    setOtpLoading(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("verify-otp", {
+        body: { phone_number: phoneNumber, otp: otpCode },
+      });
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+      if (data?.verified) {
+        setOtpVerified(true);
+        toast({ title: "Phone verified", description: "You can now create your account." });
+      }
+    } catch (err: any) {
+      setError(err.message || "Verification failed");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,14 +108,17 @@ const Auth = () => {
     try {
       if (isSignIn) {
         await login(email, password);
-        // Navigation handled by useEffect watching isAuthenticated
       } else {
         await signup(email, password, name, role);
+        // Update phone on profile after signup
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("profiles").update({ phone: phoneNumber }).eq("id", user.id);
+        }
         toast({
           title: "Account created",
           description: "Please check your email for verification, or sign in if auto-confirmed.",
         });
-        // Navigation handled by useEffect watching isAuthenticated
       }
     } catch (err: any) {
       const msg = err.message || "Something went wrong";
@@ -52,6 +127,8 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const signupDisabled = !isSignIn && !otpVerified;
 
   return (
     <div className="flex min-h-screen">
@@ -81,7 +158,7 @@ const Auth = () => {
 
             <div className="flex bg-muted rounded-lg p-1 mb-6">
               <button
-                onClick={() => { setIsSignIn(true); setError(""); }}
+                onClick={() => { setIsSignIn(true); setError(""); resetOtpState(); }}
                 className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                   isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -89,7 +166,7 @@ const Auth = () => {
                 Sign In
               </button>
               <button
-                onClick={() => { setIsSignIn(false); setError(""); }}
+                onClick={() => { setIsSignIn(false); setError(""); resetOtpState(); }}
                 className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                   !isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -139,6 +216,65 @@ const Auth = () => {
                 </div>
               </div>
 
+              {/* Phone OTP Section - Sign Up only */}
+              {!isSignIn && (
+                <div className="space-y-3 animate-fade-in">
+                  <Label className="text-foreground font-medium">Phone Number</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="2547XXXXXXXX"
+                        className="pl-10 h-12 bg-muted/50 border-border"
+                        disabled={otpVerified}
+                        required
+                      />
+                    </div>
+                    {!otpVerified && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleSendOtp}
+                        disabled={otpLoading || resendTimer > 0 || !phoneNumber}
+                        className="h-12 px-4 whitespace-nowrap"
+                      >
+                        {otpLoading ? "Sending..." : resendTimer > 0 ? `Resend (${resendTimer}s)` : otpSent ? "Resend" : "Send Code"}
+                      </Button>
+                    )}
+                    {otpVerified && (
+                      <div className="flex items-center gap-1 text-green-600 px-3">
+                        <ShieldCheck className="w-5 h-5" />
+                        <span className="text-sm font-medium">Verified</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {otpSent && !otpVerified && (
+                    <div className="flex gap-2 animate-fade-in">
+                      <div className="relative flex-1">
+                        <Input
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="Enter 6-digit code"
+                          className="h-12 bg-muted/50 border-border text-center tracking-widest text-lg"
+                          maxLength={6}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={handleVerifyOtp}
+                        disabled={otpLoading || otpCode.length !== 6}
+                        className="h-12 px-4"
+                      >
+                        {otpLoading ? "Verifying..." : "Verify"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {!isSignIn && (
                 <div className="space-y-2 animate-fade-in">
                   <Label className="text-foreground font-medium">I am a</Label>
@@ -149,16 +285,24 @@ const Auth = () => {
                           role === r ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
                         }`}
                       >
-                        {r}
+                        {r === "worker" ? "Fundi" : r}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} className="w-full h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform">
+              <Button
+                type="submit"
+                disabled={loading || signupDisabled}
+                className="w-full h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
+              >
                 {loading ? "Please wait..." : isSignIn ? "Sign In" : "Create Account"}
               </Button>
+
+              {signupDisabled && !isSignIn && (
+                <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
+              )}
             </form>
 
             <div className="mt-6 text-center space-y-1">
