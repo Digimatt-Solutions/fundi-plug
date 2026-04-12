@@ -208,24 +208,32 @@ export default function WorkerMyJobsPage() {
         <TabsContent value="available" className="space-y-4">
           {availableJobs.length > 0 ? availableJobs.map((job, i) => (
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
-                    <h3 className="font-semibold text-foreground">{job.title}</h3>
+              <div className="flex gap-4">
+                {job.image_url ? (
+                  <img src={job.image_url} alt="Job" className="w-28 h-28 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setImagePreview(job.image_url)} />
+                ) : (
+                  <div className="w-28 h-28 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                    <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
                   </div>
-                  {job.image_url && <img src={job.image_url} alt="Job" className="w-full max-w-xs rounded-lg" />}
-                  {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                )}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                      <h3 className="font-semibold text-foreground">{job.title}</h3>
+                    </div>
+                    <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97]">
+                      <Send className="w-4 h-4 mr-1" /> Apply
+                    </Button>
+                  </div>
+                  {job.description && <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address || "No location"}</span>
                     <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
                     <span>by {job.customerName}</span>
                   </div>
                 </div>
-                <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97]">
-                  <Send className="w-4 h-4 mr-1" /> Apply
-                </Button>
               </div>
             </div>
           )) : (
