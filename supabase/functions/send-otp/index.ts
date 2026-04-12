@@ -30,10 +30,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Validate Kenyan format: 2547XXXXXXXX (12 digits starting with 2547)
-    const kenyanRegex = /^2547\d{8}$/;
+    // Validate Kenyan format: 2547XXXXXXXX or 2541XXXXXXXX
+    const kenyanRegex = /^254[17]\d{8}$/;
     if (!kenyanRegex.test(phone_number)) {
-      return new Response(JSON.stringify({ error: "Invalid Kenyan phone number. Use format 2547XXXXXXXX" }), {
+      return new Response(JSON.stringify({ error: "Invalid Kenyan phone number. Use format 2547XXXXXXXX or 2541XXXXXXXX" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

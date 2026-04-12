@@ -54,9 +54,9 @@ const Auth = () => {
   }, []);
 
   const handleSendOtp = async () => {
-    const kenyanRegex = /^2547\d{8}$/;
+    const kenyanRegex = /^254[17]\d{8}$/;
     if (!kenyanRegex.test(phoneNumber)) {
-      setError("Invalid phone number. Use format 2547XXXXXXXX");
+      setError("Invalid phone number. Use format 2547XXXXXXXX or 2541XXXXXXXX");
       return;
     }
     setError("");
