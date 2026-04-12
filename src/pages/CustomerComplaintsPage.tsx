@@ -23,7 +23,7 @@ export default function CustomerComplaintsPage() {
     async function load() {
       const [jobsRes, complaintsRes] = await Promise.all([
         supabase.from("jobs").select("id, title, worker_id, profiles!jobs_worker_id_fkey(name)").eq("customer_id", user!.id).not("worker_id", "is", null),
-        supabase.from("complaints").select("*, profiles:fundi_id(name), jobs:job_id(title)").eq("customer_id", user!.id).order("created_at", { ascending: false }),
+        supabase.from("complaints").select("*, fundi:complaints_fundi_id_fkey(name), jobs:complaints_job_id_fkey(title)").eq("customer_id", user!.id).order("created_at", { ascending: false }),
       ]);
       setJobs(jobsRes.data || []);
       setComplaints(complaintsRes.data || []);
@@ -51,7 +51,7 @@ export default function CustomerComplaintsPage() {
       toast({ title: "Complaint submitted", description: "Admin will review and respond." });
       setMessage("");
       setSelectedJobId("");
-      const { data } = await supabase.from("complaints").select("*, profiles:fundi_id(name), jobs:job_id(title)").eq("customer_id", user!.id).order("created_at", { ascending: false });
+      const { data } = await supabase.from("complaints").select("*, fundi:complaints_fundi_id_fkey(name), jobs:complaints_job_id_fkey(title)").eq("customer_id", user!.id).order("created_at", { ascending: false });
       setComplaints(data || []);
     }
     setSubmitting(false);
@@ -102,7 +102,7 @@ export default function CustomerComplaintsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-foreground">{(c as any).jobs?.title || "Job"}</p>
-                  <p className="text-xs text-muted-foreground">Fundi: {(c as any).profiles?.name || "—"} · {new Date(c.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">Fundi: {(c as any).fundi?.name || "—"} · {new Date(c.created_at).toLocaleDateString()}</p>
                 </div>
                 <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${c.status === "open" ? "bg-chart-4/10 text-chart-4" : c.status === "resolved" ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
                   {c.status}

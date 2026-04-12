@@ -17,7 +17,7 @@ export default function AdminComplaintsPage() {
   const load = async () => {
     const { data } = await supabase
       .from("complaints")
-      .select("*, customer:customer_id(name, email), fundi:fundi_id(name), jobs:job_id(title)")
+      .select("*, customer:complaints_customer_id_fkey(name, email), fundi:complaints_fundi_id_fkey(name), jobs:complaints_job_id_fkey(title)")
       .order("created_at", { ascending: false });
     setComplaints(data || []);
     setLoading(false);
