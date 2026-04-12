@@ -5,9 +5,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const MPESA_SHORTCODE = "174379";
-const MPESA_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
-const MPESA_BASE_URL = "https://sandbox.safaricom.co.ke";
+const MPESA_SHORTCODE = Deno.env.get("MPESA_SHORTCODE") || "";
+const MPESA_PASSKEY = Deno.env.get("MPESA_PASSKEY") || "";
+const MPESA_BASE_URL = "https://api.safaricom.co.ke";
 
 async function getMpesaToken(): Promise<string> {
   const consumerKey = Deno.env.get("MPESA_CONSUMER_KEY") || "";
