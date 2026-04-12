@@ -353,6 +353,12 @@ export default function WorkerMyJobsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!imagePreview} onOpenChange={(o) => !o && setImagePreview(null)}>
+        <DialogContent className="sm:max-w-lg p-2">
+          {imagePreview && <img src={imagePreview} alt="Job" className="w-full rounded-lg" />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
