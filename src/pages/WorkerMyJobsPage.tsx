@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X } from "lucide-react";
+import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, ImageIcon } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -22,6 +22,7 @@ export default function WorkerMyJobsPage() {
   const [proposedRate, setProposedRate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [workerProfile, setWorkerProfile] = useState<any>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   async function loadData() {
     if (!user) return;
@@ -166,24 +167,32 @@ export default function WorkerMyJobsPage() {
           {hireRequests.map((job, i) => (
             <div key={job.id} className="stat-card border-primary/30 bg-primary/5 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="space-y-2">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
-                      <h3 className="font-semibold text-foreground">{job.title}</h3>
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
+                <div className="flex gap-4">
+                  {job.image_url ? (
+                    <img src={job.image_url} alt="Job" className="w-28 h-28 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setImagePreview(job.image_url)} />
+                  ) : (
+                    <div className="w-28 h-28 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                      <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
                     </div>
-                    {job.image_url && <img src={job.image_url} alt="Job" className="w-full max-w-xs rounded-lg mt-2" />}
-                    {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  )}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                        <h3 className="font-semibold text-foreground">{job.title}</h3>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => respondToHireRequest(job.id, true)}><Check className="w-4 h-4 mr-1" /> Accept</Button>
+                        <Button size="sm" variant="outline" className="text-destructive" onClick={() => respondToHireRequest(job.id, false)}><X className="w-4 h-4 mr-1" /> Reject</Button>
+                      </div>
+                    </div>
+                    {job.description && <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                       {job.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</span>}
                       <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => respondToHireRequest(job.id, true)}><Check className="w-4 h-4 mr-1" /> Accept</Button>
-                    <Button size="sm" variant="outline" className="text-destructive" onClick={() => respondToHireRequest(job.id, false)}><X className="w-4 h-4 mr-1" /> Reject</Button>
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
@@ -207,24 +216,32 @@ export default function WorkerMyJobsPage() {
         <TabsContent value="available" className="space-y-4">
           {availableJobs.length > 0 ? availableJobs.map((job, i) => (
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
-                    <h3 className="font-semibold text-foreground">{job.title}</h3>
+              <div className="flex gap-4">
+                {job.image_url ? (
+                  <img src={job.image_url} alt="Job" className="w-28 h-28 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setImagePreview(job.image_url)} />
+                ) : (
+                  <div className="w-28 h-28 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                    <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
                   </div>
-                  {job.image_url && <img src={job.image_url} alt="Job" className="w-full max-w-xs rounded-lg" />}
-                  {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                )}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                      <h3 className="font-semibold text-foreground">{job.title}</h3>
+                    </div>
+                    <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97]">
+                      <Send className="w-4 h-4 mr-1" /> Apply
+                    </Button>
+                  </div>
+                  {job.description && <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>}
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address || "No location"}</span>
                     <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
                     <span>by {job.customerName}</span>
                   </div>
                 </div>
-                <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97]">
-                  <Send className="w-4 h-4 mr-1" /> Apply
-                </Button>
               </div>
             </div>
           )) : (
@@ -266,34 +283,45 @@ export default function WorkerMyJobsPage() {
           {assignedJobs.length > 0 ? assignedJobs.map((job, i) => (
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="space-y-2">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div>
-                    <p className="font-medium text-foreground">{job.title}</p>
-                    <p className="text-xs text-muted-foreground">KSH {job.budget ? job.budget.toLocaleString() : "No budget"} - {new Date(job.created_at).toLocaleString()}</p>
+                <div className="flex gap-4">
+                  {job.image_url ? (
+                    <img src={job.image_url} alt="Job" className="w-24 h-24 rounded-lg object-cover shrink-0 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setImagePreview(job.image_url)} />
+                  ) : (
+                    <div className="w-24 h-24 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+                      <ImageIcon className="w-7 h-7 text-muted-foreground/40" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                      <div>
+                        <p className="font-medium text-foreground">{job.title}</p>
+                        <p className="text-xs text-muted-foreground">KSH {job.budget ? job.budget.toLocaleString() : "No budget"} - {new Date(job.created_at).toLocaleString()}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                          job.status === "completed" ? "bg-green-500/10 text-green-500" :
+                          job.status === "in_progress" ? "bg-primary/10 text-primary" : "bg-chart-4/10 text-chart-4"
+                        }`}>{job.status.replace("_", " ")}</span>
+                        {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")}>Start</Button>}
+                        {job.status === "in_progress" && <Button size="sm" onClick={() => updateJobStatus(job.id, "completed")}>Complete</Button>}
+                        {job.status === "completed" && job.paymentStatus && (
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
+                            job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
+                            job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
+                          }`}>💰 {job.paymentStatus}</span>
+                        )}
+                        {job.status === "completed" && !job.paymentStatus && (
+                          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                      <p className="text-xs font-medium text-foreground">Customer: {job.customerName}</p>
+                      {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
+                      {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {job.customerPhone}</p>}
+                      {job.address && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</p>}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                      job.status === "completed" ? "bg-green-500/10 text-green-500" :
-                      job.status === "in_progress" ? "bg-primary/10 text-primary" : "bg-chart-4/10 text-chart-4"
-                    }`}>{job.status.replace("_", " ")}</span>
-                    {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")}>Start</Button>}
-                    {job.status === "in_progress" && <Button size="sm" onClick={() => updateJobStatus(job.id, "completed")}>Complete</Button>}
-                    {job.status === "completed" && job.paymentStatus && (
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                        job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
-                        job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
-                      }`}>💰 {job.paymentStatus}</span>
-                    )}
-                    {job.status === "completed" && !job.paymentStatus && (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
-                    )}
-                  </div>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-                  <p className="text-xs font-medium text-foreground">Customer: {job.customerName}</p>
-                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
-                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {job.customerPhone}</p>}
-                  {job.address && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</p>}
                 </div>
               </div>
             </div>
@@ -323,6 +351,12 @@ export default function WorkerMyJobsPage() {
             <Button variant="outline" onClick={() => setApplyDialog(null)}>Cancel</Button>
             <Button onClick={applyToJob} disabled={submitting}>{submitting ? "Sending..." : "Send Application"}</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!imagePreview} onOpenChange={(o) => !o && setImagePreview(null)}>
+        <DialogContent className="sm:max-w-lg p-2">
+          {imagePreview && <img src={imagePreview} alt="Job" className="w-full rounded-lg" />}
         </DialogContent>
       </Dialog>
     </div>
