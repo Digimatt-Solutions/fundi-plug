@@ -286,6 +286,7 @@ const Auth = () => {
                         }`}
                       >
                         {r === "worker" ? "Fundi" : r}
+                        {r === "customer" ? "Client" : r}
                       </button>
                     ))}
                   </div>
