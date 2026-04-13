@@ -68,7 +68,7 @@ export default function FindWorkersPage() {
 
       setWorkers(wps.map(w => ({
         ...w,
-        name: (w as any).profiles?.name || "Worker",
+        name: (w as any).profiles?.name || "Fundi",
         email: (w as any).profiles?.email || "",
         avatar_url: (w as any).profiles?.avatar_url || null,
         skillNames: (w.skills || []).map((s: string) => catMap[s] || "").filter(Boolean),
@@ -97,14 +97,14 @@ export default function FindWorkersPage() {
     }
     setHiring(true);
 
-    // Save customer phone if provided
-    if (hirePhone && hirePhone !== user.phone) {
+     // Save client phone if provided
+     if (hirePhone && hirePhone !== user.phone) {
       await supabase.from("profiles").update({ phone: hirePhone }).eq("id", user.id);
     }
 
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
-      description: hireDescription.trim() || `Customer hired ${hireDialog.name} directly`,
+      description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
       budget: Number(hireBudget),
       address: hireAddress.trim() || null,
       category_id: hireCategoryId || null,
@@ -121,8 +121,8 @@ export default function FindWorkersPage() {
     }
 
     await supabase.from("activity_logs").insert({
-      user_id: user.id, action: "Hire Request Sent",
-      detail: `Customer sent hire request to ${hireDialog.name}`, entity_type: "job", entity_id: job.id,
+       user_id: user.id, action: "Hire Request Sent",
+       detail: `Client sent hire request to ${hireDialog.name}`, entity_type: "job", entity_id: job.id,
     });
 
     toast({ title: "Hire request sent!", description: `${hireDialog.name} will be notified to accept or reject.` });
@@ -147,7 +147,7 @@ export default function FindWorkersPage() {
     (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
 
     setWorkerCerts(certsRes.data || []);
-    setWorkerReviews((reviewsRes.data || []).map(r => ({ ...r, reviewerName: nameMap[r.reviewer_id] || "Customer" })));
+    setWorkerReviews((reviewsRes.data || []).map(r => ({ ...r, reviewerName: nameMap[r.reviewer_id] || "Client" })));
   };
 
   const filtered = workers.filter(w =>

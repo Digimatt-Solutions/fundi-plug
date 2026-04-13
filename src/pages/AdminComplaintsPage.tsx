@@ -73,7 +73,7 @@ export default function AdminComplaintsPage() {
               <div>
                 <p className="text-sm font-medium text-foreground">{(c as any).jobs?.title || "Job"}</p>
                 <p className="text-xs text-muted-foreground">
-                  Customer: {(c as any).customer?.name} ({(c as any).customer?.email}) · Fundi: {(c as any).fundi?.name || "—"}
+                  Client: {(c as any).customer?.name} ({(c as any).customer?.email}) · Fundi: {(c as any).fundi?.name || "—"}
                 </p>
                 <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</p>
               </div>

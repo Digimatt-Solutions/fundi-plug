@@ -149,8 +149,8 @@ export default function UserManagementPage() {
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-muted capitalize">
-                      {roleIcon(u.role)} {u.role}
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-muted">
+                      {roleIcon(u.role)} {u.role === "worker" ? "Fundi" : u.role === "customer" ? "Client" : "Admin"}
                     </span>
                   </td>
                   <td className="p-4">
@@ -204,8 +204,8 @@ export default function UserManagementPage() {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="worker">Worker</SelectItem>
-              <SelectItem value="customer">Customer</SelectItem>
+              <SelectItem value="worker">Fundi</SelectItem>
+              <SelectItem value="customer">Client</SelectItem>
             </SelectContent>
           </Select>
           <DialogFooter>

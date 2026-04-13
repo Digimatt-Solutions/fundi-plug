@@ -66,7 +66,7 @@ export default function PaymentsPage() {
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (error) throw error;
-      toast({ title: "Payment reset", description: "Customer can now retry payment." });
+      toast({ title: "Payment reset", description: "Client can now retry payment." });
       load();
     } catch (err: any) {
       toast({ title: "Reset failed", description: err.message, variant: "destructive" });

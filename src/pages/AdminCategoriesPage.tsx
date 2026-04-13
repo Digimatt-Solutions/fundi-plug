@@ -89,7 +89,7 @@ export default function AdminCategoriesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Service Categories</h1>
-          <p className="text-muted-foreground text-sm">Manage skill categories for workers</p>
+          <p className="text-muted-foreground text-sm">Manage skill categories for fundis</p>
         </div>
         <Button onClick={openCreate} className="active:scale-[0.97]"><Plus className="w-4 h-4 mr-2" /> Add Category</Button>
       </div>
@@ -128,7 +128,7 @@ export default function AdminCategoriesPage() {
       ) : (
         <div className="stat-card flex flex-col items-center py-16 text-center">
           <p className="text-foreground font-medium">No categories yet</p>
-          <p className="text-sm text-muted-foreground">Add service categories for workers to select</p>
+          <p className="text-sm text-muted-foreground">Add service categories for fundis to select</p>
         </div>
       )}
 

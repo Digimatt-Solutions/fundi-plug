@@ -162,7 +162,7 @@ export default function SettingsPage() {
                 <div className="space-y-2"><Label>Platform Name</Label><Input value={platformName} onChange={e => setPlatformName(e.target.value)} className="bg-muted/50 max-w-sm" /></div>
                 <div className="space-y-2">
                   <Label>Commission Rate (%)</Label>
-                  <p className="text-xs text-muted-foreground">Percentage deducted from each customer payment as platform commission</p>
+                  <p className="text-xs text-muted-foreground">Percentage deducted from each client payment as platform commission</p>
                   <Input type="number" min="0" max="100" value={commissionRate} onChange={e => setCommissionRate(e.target.value)} className="bg-muted/50 max-w-sm" />
                 </div>
                 <Button size="sm" onClick={savePlatformSettings} disabled={saving}>{saving ? "Saving..." : "Save Platform Settings"}</Button>
@@ -195,7 +195,7 @@ export default function SettingsPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50"><span className="text-sm text-muted-foreground">Current Rate</span><span className="text-lg font-bold text-foreground">{commissionRate}%</span></div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50"><span className="text-sm text-muted-foreground">Total Earned</span><span className="text-lg font-bold text-primary">KSH {totalCommission.toLocaleString()}</span></div>
-                  <p className="text-xs text-muted-foreground">Commission is automatically deducted from each payment. Workers receive the remaining amount.</p>
+                  <p className="text-xs text-muted-foreground">Commission is automatically deducted from each payment. Fundis receive the remaining amount.</p>
                 </div>
               </div>
             </div>
@@ -205,7 +205,7 @@ export default function SettingsPage() {
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <ToggleRight className="w-5 h-5 text-primary" /> Module Management
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">Enable or disable modules for Fundi and Customer accounts</p>
+              <p className="text-sm text-muted-foreground mb-4">Enable or disable modules for Fundi and Client accounts</p>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-3">Fundi Modules</h4>
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-3">Customer Modules</h4>
+                  <h4 className="text-sm font-semibold text-foreground mb-3">Client Modules</h4>
                   <div className="space-y-2">
                     {customerModules.map(m => (
                       <div key={m.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
@@ -255,7 +255,7 @@ export default function SettingsPage() {
           <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Security</h3>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Email: {user?.email}</p>
-            <p className="text-sm text-muted-foreground">Role: <span className="capitalize font-medium text-foreground">{user?.role}</span></p>
+            <p className="text-sm text-muted-foreground">Role: <span className="font-medium text-foreground">{user?.role === "worker" ? "Fundi" : user?.role === "customer" ? "Client" : "Admin"}</span></p>
           </div>
         </div>
       </div>
@@ -270,7 +270,7 @@ export default function SettingsPage() {
                 <li>All jobs, bookings, and applications</li>
                 <li>All payments and withdrawal records</li>
                 <li>All reviews and activity logs</li>
-                <li>All worker profiles and certifications</li>
+                <li>All fundi profiles and certifications</li>
                 <li>All non-admin user accounts</li>
               </ul>
               <p className="text-xs text-destructive font-semibold mt-3">Admin accounts will be preserved.</p>

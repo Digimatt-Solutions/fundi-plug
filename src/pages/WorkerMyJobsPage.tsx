@@ -54,23 +54,23 @@ export default function WorkerMyJobsPage() {
     (paymentsData || []).forEach(p => { paymentMap[p.job_id] = p.status; });
 
     setAvailableJobs((availRes.data || []).filter((j: any) => !appliedJobIds.has(j.id) && j.worker_id === null).map(j => ({
-      ...j, customerName: profileMap[j.customer_id]?.name || "Customer",
+      ...j, customerName: profileMap[j.customer_id]?.name || "Client",
     })));
     setMyApplications((appsRes.data || []).map(app => ({
       ...app, jobTitle: (app as any).jobs?.title || "Job",
     })));
     setAssignedJobs((assignedRes.data || []).map(j => ({
-      ...j,
-      customerName: profileMap[j.customer_id]?.name || "Customer",
-      customerEmail: profileMap[j.customer_id]?.email || "",
-      customerPhone: profileMap[j.customer_id]?.phone || "",
+       ...j,
+       customerName: profileMap[j.customer_id]?.name || "Client",
+       customerEmail: profileMap[j.customer_id]?.email || "",
+       customerPhone: profileMap[j.customer_id]?.phone || "",
       paymentStatus: paymentMap[j.id] || null,
     })));
     setHireRequests((hireRes.data || []).map(j => ({
-      ...j,
-      customerName: profileMap[j.customer_id]?.name || "Customer",
-      customerEmail: profileMap[j.customer_id]?.email || "",
-      customerPhone: profileMap[j.customer_id]?.phone || "",
+       ...j,
+       customerName: profileMap[j.customer_id]?.name || "Client",
+       customerEmail: profileMap[j.customer_id]?.email || "",
+       customerPhone: profileMap[j.customer_id]?.phone || "",
     })));
     setLoading(false);
   }
@@ -187,7 +187,7 @@ export default function WorkerMyJobsPage() {
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-                  <p className="text-xs font-medium text-foreground">Customer: {job.customerName}</p>
+                   <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
                   {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
                   {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {job.customerPhone}</p>}
                 </div>
@@ -231,7 +231,7 @@ export default function WorkerMyJobsPage() {
             <div className="stat-card flex flex-col items-center py-16 text-center">
               <Search className="w-10 h-10 text-muted-foreground mb-3" />
               <p className="text-foreground font-medium">No available jobs</p>
-              <p className="text-sm text-muted-foreground">New jobs posted by customers will appear here in real-time</p>
+              <p className="text-sm text-muted-foreground">New jobs posted by clients will appear here in real-time</p>
             </div>
           )}
         </TabsContent>
@@ -290,7 +290,7 @@ export default function WorkerMyJobsPage() {
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-                  <p className="text-xs font-medium text-foreground">Customer: {job.customerName}</p>
+                  <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
                   {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
                   {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {job.customerPhone}</p>}
                   {job.address && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</p>}

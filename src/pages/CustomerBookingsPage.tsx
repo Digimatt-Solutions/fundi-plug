@@ -60,7 +60,7 @@ export default function CustomerBookingsPage() {
 
     setJobs((data || []).map(j => ({
       ...j,
-      workerName: nameMap[j.worker_id] || "Assigned Worker",
+      workerName: nameMap[j.worker_id] || "Assigned Fundi",
       hasReview: reviewedJobIds.has(j.id),
       paymentStatus: paidJobMap[j.id]?.status || null,
       paymentRecord: paidJobMap[j.id] || null,
@@ -184,7 +184,7 @@ export default function CustomerBookingsPage() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Worker: {job.workerName} - KSH {job.budget ? job.budget.toLocaleString() : "Open"} - {new Date(job.created_at).toLocaleString()}
+                    Fundi: {job.workerName} - KSH {job.budget ? job.budget.toLocaleString() : "Open"} - {new Date(job.created_at).toLocaleString()}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -220,7 +220,7 @@ export default function CustomerBookingsPage() {
         <div className="stat-card flex flex-col items-center py-16 text-center">
           <CalendarDays className="w-10 h-10 text-muted-foreground mb-3" />
           <p className="text-foreground font-medium">No bookings yet</p>
-          <p className="text-sm text-muted-foreground">When you hire a worker, your bookings will appear here</p>
+          <p className="text-sm text-muted-foreground">When you hire a fundi, your bookings will appear here</p>
         </div>
       )}
 
@@ -278,7 +278,7 @@ export default function CustomerBookingsPage() {
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground">A platform commission will be deducted. The worker receives the net amount.</p>
+            <p className="text-xs text-muted-foreground">A platform commission will be deducted. The fundi receives the net amount.</p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); }}>Later</Button>
@@ -295,7 +295,7 @@ export default function CustomerBookingsPage() {
       {/* Review Dialog */}
       <Dialog open={!!reviewDialog} onOpenChange={(open) => !open && setReviewDialog(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Rate Worker</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Rate Fundi</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-1 justify-center">
               {[1, 2, 3, 4, 5].map((s) => (

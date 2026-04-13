@@ -34,7 +34,7 @@ const KENYA_COUNTIES = [
 const PLATFORM_RULES = [
   "I agree to provide accurate and truthful information in my profile.",
   "I understand that my documents will be verified before I can receive jobs.",
-  "I agree to maintain professional conduct with all customers.",
+  "I agree to maintain professional conduct with all clients.",
   "I agree to the platform's commission and payment terms.",
   "I understand that violations may lead to account suspension or termination.",
 ];
@@ -292,7 +292,7 @@ export default function WorkerProfilePage() {
             </div>
             <div className="space-y-2">
               <Label>Bio / About You</Label>
-              <Textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell customers about your experience..." className="bg-muted/50 min-h-[100px]" />
+              <Textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell clients about your experience..." className="bg-muted/50 min-h-[100px]" />
             </div>
           </div>
         </TabsContent>

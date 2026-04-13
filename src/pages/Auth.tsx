@@ -281,12 +281,11 @@ const Auth = () => {
                   <div className="grid grid-cols-2 gap-2">
                     {(["customer", "worker"] as UserRole[]).map((r) => (
                       <button key={r} type="button" onClick={() => setRole(r)}
-                        className={`py-2.5 px-3 rounded-lg text-sm font-medium border transition-all duration-200 capitalize ${
+                        className={`py-2.5 px-3 rounded-lg text-sm font-medium border transition-all duration-200 ${
                           role === r ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
                         }`}
                       >
-                        {r === "worker" ? "Fundi" : r}
-                        {r === "customer" ? "Client" : r}
+                        {r === "worker" ? "Fundi" : "Client"}
                       </button>
                     ))}
                   </div>

@@ -27,7 +27,7 @@ export default function AdminDashboard() {
     const commission = (commRes.data || []).reduce((sum, p) => sum + Number(p.commission || 0), 0);
     setStats([
       { label: "Total Users", value: profilesRes.count ?? 0, icon: Users, color: "text-chart-3", bg: "bg-chart-3/10" },
-      { label: "Active Workers", value: workersRes.count ?? 0, icon: Wrench, color: "text-chart-2", bg: "bg-chart-2/10" },
+      { label: "Active Fundis", value: workersRes.count ?? 0, icon: Wrench, color: "text-chart-2", bg: "bg-chart-2/10" },
       { label: "Jobs Completed", value: jobsRes.count ?? 0, icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
       { label: "Revenue", value: `KSH ${revenue.toLocaleString()}`, icon: CreditCard, color: "text-chart-4", bg: "bg-chart-4/10" },
       { label: "Commission", value: `KSH ${commission.toLocaleString()}`, icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },

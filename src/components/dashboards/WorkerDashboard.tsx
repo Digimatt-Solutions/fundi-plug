@@ -175,7 +175,7 @@ export default function WorkerDashboard() {
                   <div>
                     <p className="text-sm font-medium text-foreground">{job.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {(job as any).profiles?.name || "Customer"} - {new Date(job.created_at).toLocaleDateString()}
+                      {(job as any).profiles?.name || "Client"} - {new Date(job.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">

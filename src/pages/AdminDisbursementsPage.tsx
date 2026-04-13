@@ -65,7 +65,7 @@ export default function AdminDisbursementsPage() {
     setWorkerFinancials(financials);
     setWithdrawals((wds || []).map((w: any) => ({
       ...w,
-      workerName: profileMap[w.worker_id]?.name || "Unknown",
+      workerName: profileMap[w.worker_id]?.name || "Unknown Fundi",
       workerEmail: profileMap[w.worker_id]?.email || "",
       workerPhone: profileMap[w.worker_id]?.phone || "",
     })));
@@ -157,7 +157,7 @@ export default function AdminDisbursementsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Disbursements</h1>
-        <p className="text-muted-foreground text-sm">Manage worker withdrawal requests</p>
+        <p className="text-muted-foreground text-sm">Manage fundi withdrawal requests</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -200,7 +200,7 @@ export default function AdminDisbursementsPage() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search by worker name..." className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input placeholder="Search by fundi name..." className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <div className="flex gap-1.5">
           {["all", "pending", "approved", "completed", "rejected"].map(s => (
@@ -217,7 +217,7 @@ export default function AdminDisbursementsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left p-4 text-muted-foreground font-medium">Worker</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">Fundi</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Amount</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Earnings</th>
                   <th className="text-left p-4 text-muted-foreground font-medium">Balance</th>
@@ -291,7 +291,7 @@ export default function AdminDisbursementsPage() {
         <div className="stat-card flex flex-col items-center py-16 text-center">
           <ArrowDownCircle className="w-10 h-10 text-muted-foreground mb-3" />
           <p className="text-foreground font-medium">No withdrawal requests</p>
-          <p className="text-sm text-muted-foreground">Worker withdrawal requests will appear here</p>
+          <p className="text-sm text-muted-foreground">Fundi withdrawal requests will appear here</p>
         </div>
       )}
 
@@ -305,7 +305,7 @@ export default function AdminDisbursementsPage() {
           {actionDialog && (
             <div className="space-y-4 py-2">
               <div className="p-4 rounded-lg bg-muted/50 space-y-1">
-                <p className="text-sm text-muted-foreground">Worker: <span className="text-foreground font-medium">{actionDialog.withdrawal.workerName}</span></p>
+                <p className="text-sm text-muted-foreground">Fundi: <span className="text-foreground font-medium">{actionDialog.withdrawal.workerName}</span></p>
                 <p className="text-sm text-muted-foreground">Amount: <span className="text-foreground font-bold">KSH {Number(actionDialog.withdrawal.amount).toLocaleString()}</span></p>
                 {actionDialog.withdrawal.workerPhone && (
                   <p className="text-sm text-muted-foreground">Phone: <span className="text-foreground">{actionDialog.withdrawal.workerPhone}</span></p>

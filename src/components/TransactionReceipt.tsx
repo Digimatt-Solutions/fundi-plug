@@ -137,7 +137,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
           <hr class="divider" />
           <div class="total-row"><span>Total Paid</span><span class="value">KSH ${totalAmount.toLocaleString()}</span></div>
         ` : `
-          ${data.workerName ? `<div class="row"><span class="label">Worker</span><span class="value">${data.workerName}</span></div>` : ""}
+          ${data.workerName ? `<div class="row"><span class="label">Fundi</span><span class="value">${data.workerName}</span></div>` : ""}
           ${data.phone ? `<div class="row"><span class="label">Phone</span><span class="value">${data.phone}</span></div>` : ""}
           ${data.adminNotes ? `<div class="row"><span class="label">Notes</span><span class="value">${data.adminNotes}</span></div>` : ""}
           <hr class="divider" />
@@ -240,7 +240,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
             <>
               {data.workerName && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Worker</span>
+                  <span className="text-muted-foreground">Fundi</span>
                   <span className="font-medium text-foreground">{data.workerName}</span>
                 </div>
               )}

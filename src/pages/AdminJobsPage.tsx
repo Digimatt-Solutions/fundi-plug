@@ -79,7 +79,7 @@ export default function AdminJobsPage() {
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="text-left p-4 text-muted-foreground font-medium">Job</th>
-                <th className="text-left p-4 text-muted-foreground font-medium">Customer</th>
+                <th className="text-left p-4 text-muted-foreground font-medium">Client</th>
                 <th className="text-left p-4 text-muted-foreground font-medium">Fundi</th>
                 <th className="text-left p-4 text-muted-foreground font-medium">Category</th>
                 <th className="text-left p-4 text-muted-foreground font-medium">Budget</th>

@@ -29,7 +29,7 @@ export default function WorkerReviewsPage() {
       const nameMap: Record<string, string> = {};
       (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
 
-      const enriched = all.map(r => ({ ...r, reviewerName: nameMap[r.reviewer_id] || "Customer" }));
+      const enriched = all.map(r => ({ ...r, reviewerName: nameMap[r.reviewer_id] || "Client" }));
       setReviews(enriched);
       if (enriched.length) setAvg(Math.round(enriched.reduce((s, r) => s + r.rating, 0) / enriched.length * 10) / 10);
       setLoading(false);
@@ -43,7 +43,7 @@ export default function WorkerReviewsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">My Reviews</h1>
-        <p className="text-muted-foreground text-sm">Feedback from customers</p>
+        <p className="text-muted-foreground text-sm">Feedback from clients</p>
       </div>
 
       <div className="stat-card animate-fade-in">
@@ -86,7 +86,7 @@ export default function WorkerReviewsPage() {
         <div className="stat-card flex flex-col items-center py-16 text-center">
           <Star className="w-10 h-10 text-muted-foreground mb-3" />
           <p className="text-foreground font-medium">No reviews yet</p>
-          <p className="text-sm text-muted-foreground">Complete jobs to receive reviews from customers</p>
+          <p className="text-sm text-muted-foreground">Complete jobs to receive reviews from clients</p>
         </div>
       )}
     </div>

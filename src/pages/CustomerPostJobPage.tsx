@@ -167,9 +167,9 @@ export default function CustomerPostJobPage() {
       await supabase.from("jobs").update({ worker_id: workerId, status: "accepted" }).eq("id", jobId);
       await supabase.from("job_applications").update({ status: "rejected" }).eq("job_id", jobId).neq("id", appId);
       await supabase.from("activity_logs").insert([
-        { user_id: user!.id, action: "Worker Selected", detail: `Customer selected a worker for job`, entity_type: "job", entity_id: jobId },
+        { user_id: user!.id, action: "Fundi Selected", detail: `Client selected a fundi for job`, entity_type: "job", entity_id: jobId },
       ]);
-      toast({ title: "Worker hired!" });
+      toast({ title: "Fundi hired!" });
     } else {
       toast({ title: "Application rejected" });
     }
@@ -207,7 +207,7 @@ export default function CustomerPostJobPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Jobs</h1>
-          <p className="text-muted-foreground text-sm">Post jobs and manage worker applications</p>
+          <p className="text-muted-foreground text-sm">Post jobs and manage fundi applications</p>
         </div>
         <Button onClick={() => setShowCreate(true)} className="active:scale-[0.97]"><Plus className="w-4 h-4 mr-2" /> Post a Job</Button>
       </div>
@@ -345,7 +345,7 @@ export default function CustomerPostJobPage() {
                 <div key={app.id} className="p-3 rounded-lg bg-muted/50 space-y-2">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-foreground text-sm">{(app as any).profiles?.name || "Worker"}</p>
+                      <p className="font-medium text-foreground text-sm">{(app as any).profiles?.name || "Fundi"}</p>
                       <p className="text-xs text-muted-foreground">{(app as any).profiles?.email}</p>
                       {(app as any).profiles?.phone && <p className="text-xs text-muted-foreground">Tel: {(app as any).profiles?.phone}</p>}
                     </div>

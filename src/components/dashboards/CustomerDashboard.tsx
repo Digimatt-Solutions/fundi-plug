@@ -75,7 +75,7 @@ export default function CustomerDashboard() {
     }
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
-      description: hireDescription.trim() || `Customer hired ${hireDialog.name} directly`,
+      description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
       budget: Number(hireBudget),
       address: hireAddress.trim() || null,
       category_id: hireCategoryId || null,
@@ -90,8 +90,8 @@ export default function CustomerDashboard() {
       return;
     }
     await supabase.from("activity_logs").insert({
-      user_id: user.id, action: "Hire Request Sent",
-      detail: `Customer sent hire request to ${hireDialog.name}`, entity_type: "job", entity_id: job.id,
+       user_id: user.id, action: "Hire Request Sent",
+       detail: `Client sent hire request to ${hireDialog.name}`, entity_type: "job", entity_id: job.id,
     });
     toast({ title: "Hire request sent!", description: `${hireDialog.name} will be notified to accept or reject.` });
     setHireDialog(null);
