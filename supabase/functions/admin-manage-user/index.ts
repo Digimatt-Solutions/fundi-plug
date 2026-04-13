@@ -48,7 +48,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === "delete_user") {
-      // Delete from auth (cascades to profiles, user_roles via FK)
+      // Clean up availability (references auth.users directly)
+      await adminClient.from("availability").delete().eq("worker_id", userId);
+      // Clean up withdrawals
+      await adminClient.from("withdrawals").delete().eq("worker_id", userId);
+      // Delete from auth (cascades to profiles -> jobs, bookings, payments, reviews, complaints)
       const { error } = await adminClient.auth.admin.deleteUser(userId);
       if (error) throw error;
       await adminClient.from("activity_logs").insert({
