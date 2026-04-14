@@ -25,17 +25,10 @@ import PaymentsPage from "@/pages/PaymentsPage";
 import AdminJobsPage from "@/pages/AdminJobsPage";
 import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
-import CustomerComplaintsPage from "@/pages/CustomerComplaintsPage";
-import AdminComplaintsPage from "@/pages/AdminComplaintsPage";
+import CommunityPage from "@/pages/CommunityPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
-
-function ComplaintsRouter() {
-  const { user } = useAuth();
-  if (user?.role === "admin") return <AdminComplaintsPage />;
-  return <CustomerComplaintsPage />;
-}
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
@@ -68,7 +61,7 @@ const App = () => (
               <Route path="find-workers" element={<FindWorkersPage />} />
               <Route path="bookings" element={<CustomerBookingsPage />} />
               {/* Shared */}
-              <Route path="complaints" element={<ComplaintsRouter />} />
+              <Route path="community" element={<CommunityPage />} />
               <Route path="payments" element={<PaymentsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
