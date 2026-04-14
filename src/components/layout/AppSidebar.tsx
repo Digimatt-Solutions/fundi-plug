@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList, MapPin, Star, Briefcase, Search,
   BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, UserCog, ArrowDownCircle,
-  Sparkles,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
