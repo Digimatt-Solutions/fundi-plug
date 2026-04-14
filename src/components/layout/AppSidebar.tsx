@@ -25,7 +25,7 @@ const adminNav = [
   { title: "Categories", url: "/dashboard/categories", icon: ClipboardList, key: "categories" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
   { title: "Disbursements", url: "/dashboard/disbursements", icon: ArrowDownCircle, key: "disbursements" },
-  { title: "Community", url: "/dashboard/community", icon: Sparkles, key: "community" },
+  { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Reports", url: "/dashboard/reports", icon: BarChart3, key: "reports" },
   { title: "Activity Logs", url: "/dashboard/activity", icon: Activity, key: "activity" },
   { title: "User Management", url: "/dashboard/user-management", icon: UserCog, key: "user-management" },
@@ -39,7 +39,7 @@ const workerNav = [
   { title: "Earnings", url: "/dashboard/earnings", icon: CreditCard, key: "earnings" },
   { title: "Reviews", url: "/dashboard/reviews", icon: Star, key: "reviews" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
-  { title: "Community", url: "/dashboard/community", icon: Sparkles, key: "community" },
+  { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
@@ -49,7 +49,7 @@ const customerNav = [
   { title: "Find Fundis", url: "/dashboard/find-workers", icon: Search, key: "find-workers" },
   { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays, key: "bookings" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
-  { title: "Community", url: "/dashboard/community", icon: Sparkles, key: "community" },
+  { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
