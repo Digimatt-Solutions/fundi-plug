@@ -179,26 +179,36 @@ export default function CommunityPage() {
   // Optimistic like toggle
   const toggleLike = async (postId: string, liked: boolean) => {
     if (!user) return;
+    const currentCount = posts.find(p => p.id === postId)?.likes_count ?? 0;
+    const newCount = liked ? Math.max(0, currentCount - 1) : currentCount + 1;
     // Optimistic update
     setPosts(prev => prev.map(p =>
-      p.id === postId
-        ? { ...p, liked: !liked, likes_count: liked ? Math.max(0, p.likes_count - 1) : p.likes_count + 1 }
-        : p
+      p.id === postId ? { ...p, liked: !liked, likes_count: newCount } : p
     ));
     if (liked) {
       await supabase.from("community_likes").delete().eq("post_id", postId).eq("user_id", user.id);
-      await supabase.from("community_posts").update({ likes_count: Math.max(0, (posts.find(p => p.id === postId)?.likes_count || 1) - 1) } as any).eq("id", postId);
+      await supabase.from("community_posts").update({ likes_count: newCount } as any).eq("id", postId);
     } else {
       await supabase.from("community_likes").insert({ post_id: postId, user_id: user.id } as any);
-      await supabase.from("community_posts").update({ likes_count: (posts.find(p => p.id === postId)?.likes_count || 0) + 1 } as any).eq("id", postId);
+      await supabase.from("community_posts").update({ likes_count: newCount } as any).eq("id", postId);
     }
   };
 
   const addComment = async (postId: string) => {
     const text = commentTexts[postId]?.trim();
     if (!text || !user) return;
-    await supabase.from("community_comments").insert({ post_id: postId, author_id: user.id, content: text } as any);
+    // Optimistic: add comment instantly
+    const tempId = `temp-${Date.now()}`;
+    const optimisticComment: Comment = {
+      id: tempId, post_id: postId, author_id: user.id, content: text,
+      created_at: new Date().toISOString(),
+      author: { name: user.name, avatar_url: user.avatar_url || null },
+    };
+    setPosts(prev => prev.map(p =>
+      p.id === postId ? { ...p, comments: [...p.comments, optimisticComment] } : p
+    ));
     setCommentTexts(prev => ({ ...prev, [postId]: "" }));
+    await supabase.from("community_comments").insert({ post_id: postId, author_id: user.id, content: text } as any);
   };
 
   const deletePost = async (postId: string) => {
