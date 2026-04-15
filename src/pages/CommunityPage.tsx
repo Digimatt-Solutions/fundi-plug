@@ -197,8 +197,18 @@ export default function CommunityPage() {
   const addComment = async (postId: string) => {
     const text = commentTexts[postId]?.trim();
     if (!text || !user) return;
-    await supabase.from("community_comments").insert({ post_id: postId, author_id: user.id, content: text } as any);
+    // Optimistic: add comment instantly
+    const tempId = `temp-${Date.now()}`;
+    const optimisticComment: Comment = {
+      id: tempId, post_id: postId, author_id: user.id, content: text,
+      created_at: new Date().toISOString(),
+      author: { name: user.name, avatar_url: user.avatar_url || null },
+    };
+    setPosts(prev => prev.map(p =>
+      p.id === postId ? { ...p, comments: [...p.comments, optimisticComment] } : p
+    ));
     setCommentTexts(prev => ({ ...prev, [postId]: "" }));
+    await supabase.from("community_comments").insert({ post_id: postId, author_id: user.id, content: text } as any);
   };
 
   const deletePost = async (postId: string) => {
