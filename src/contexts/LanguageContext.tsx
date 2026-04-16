@@ -71,6 +71,9 @@ const translations: Record<string, Record<Language, string>> = {
   // Notifications
   "New Job Posted": { en: "New Job Posted", sw: "Kazi Mpya Imetumwa" },
   "A new job has been posted": { en: "A new job has been posted", sw: "Kazi mpya imetumwa" },
+  "Notifications": { en: "Notifications", sw: "Arifa" },
+  "Mark all read": { en: "Mark all read", sw: "Soma zote" },
+  "No notifications": { en: "No notifications", sw: "Hakuna arifa" },
 
   // Worker dashboard
   "You are here": { en: "You are here", sw: "Uko hapa" },
