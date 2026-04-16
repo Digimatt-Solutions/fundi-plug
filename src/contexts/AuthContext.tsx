@@ -57,6 +57,28 @@ async function fetchAppUser(userId: string): Promise<AppUser | null> {
   };
 }
 
+// Set worker online status and location
+async function setWorkerOnline(userId: string, role: string, online: boolean) {
+  if (role !== "worker") return;
+
+  const updates: any = { is_online: online };
+
+  if (online && navigator.geolocation) {
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
+      );
+      updates.latitude = pos.coords.latitude;
+      updates.longitude = pos.coords.longitude;
+    } catch {
+      // Location unavailable, just toggle online
+    }
+  }
+
+  await supabase.from("worker_profiles").update(updates).eq("user_id", userId);
+  await supabase.from("profiles").update({ is_online: online, ...(updates.latitude ? { latitude: updates.latitude, longitude: updates.longitude } : {}) }).eq("id", userId);
+}
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -92,8 +114,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    // Log login to activity_logs
+
     if (data.user) {
+      // Fetch role to set online
+      const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).single();
+      const role = roleData?.role || "customer";
+      
+      // Set worker online with location on login
+      await setWorkerOnline(data.user.id, role, true);
+
       supabase.from("activity_logs").insert({
         user_id: data.user.id, action: "User Login",
         detail: "User signed in", entity_type: "user", entity_id: data.user.id,
@@ -113,10 +142,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
+    // Set worker offline before logging out
+    if (user) {
+      await setWorkerOnline(user.id, user.role, false);
+    }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
-  }, []);
+  }, [user]);
 
   const refreshProfile = useCallback(async () => {
     if (session?.user) {

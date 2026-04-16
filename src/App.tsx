@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Auth from "@/pages/Auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
@@ -34,43 +35,45 @@ const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/auth" replace />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              {/* Admin */}
-              <Route path="verification" element={<VerificationPage />} />
-              <Route path="jobs" element={<AdminJobsPage />} />
-              <Route path="categories" element={<AdminCategoriesPage />} />
-              <Route path="disbursements" element={<AdminDisbursementsPage />} />
-              <Route path="reports" element={<ReportsPage />} />
-              <Route path="activity" element={<ActivityLogsPage />} />
-              <Route path="user-management" element={<UserManagementPage />} />
-              {/* Worker */}
-              <Route path="my-jobs" element={<WorkerMyJobsPage />} />
-              <Route path="profile" element={<WorkerProfilePage />} />
-              <Route path="earnings" element={<WorkerEarningsPage />} />
-              <Route path="reviews" element={<WorkerReviewsPage />} />
-              {/* Customer */}
-              <Route path="post-job" element={<CustomerPostJobPage />} />
-              <Route path="find-workers" element={<FindWorkersPage />} />
-              <Route path="bookings" element={<CustomerBookingsPage />} />
-              {/* Shared */}
-              <Route path="community" element={<CommunityPage />} />
-              <Route path="payments" element={<PaymentsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+        <LanguageProvider>
+          <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/auth" replace />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                {/* Admin */}
+                <Route path="verification" element={<VerificationPage />} />
+                <Route path="jobs" element={<AdminJobsPage />} />
+                <Route path="categories" element={<AdminCategoriesPage />} />
+                <Route path="disbursements" element={<AdminDisbursementsPage />} />
+                <Route path="reports" element={<ReportsPage />} />
+                <Route path="activity" element={<ActivityLogsPage />} />
+                <Route path="user-management" element={<UserManagementPage />} />
+                {/* Worker */}
+                <Route path="my-jobs" element={<WorkerMyJobsPage />} />
+                <Route path="profile" element={<WorkerProfilePage />} />
+                <Route path="earnings" element={<WorkerEarningsPage />} />
+                <Route path="reviews" element={<WorkerReviewsPage />} />
+                {/* Customer */}
+                <Route path="post-job" element={<CustomerPostJobPage />} />
+                <Route path="find-workers" element={<FindWorkersPage />} />
+                <Route path="bookings" element={<CustomerBookingsPage />} />
+                {/* Shared */}
+                <Route path="community" element={<CommunityPage />} />
+                <Route path="payments" element={<PaymentsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+        </LanguageProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   </ThemeProvider>
 );
 

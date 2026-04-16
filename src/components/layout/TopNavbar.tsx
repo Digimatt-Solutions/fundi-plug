@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
-import { Bell, LogOut, Sun, Moon, User, Settings } from "lucide-react";
+import { Bell, LogOut, Sun, Moon, User, Settings, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useState } from "react";
@@ -11,6 +12,7 @@ import {
 
 export function TopNavbar() {
   const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const [dark, setDark] = useState(document.documentElement.classList.contains("dark"));
 
@@ -34,10 +36,27 @@ export function TopNavbar() {
       <div className="flex items-center gap-3">
         <SidebarTrigger className="lg:hidden" />
         <span className="text-sm text-muted-foreground">
-          Welcome, <span className="text-foreground font-medium">{user?.name || "User"}</span>
+          {t("Welcome")}, <span className="text-foreground font-medium">{user?.name || "User"}</span>
         </span>
       </div>
       <div className="flex items-center gap-2">
+        {/* Language Toggle */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+              <Globe className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem onClick={() => setLanguage("en")} className={language === "en" ? "bg-primary/10 text-primary" : ""}>
+              🇬🇧 English
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setLanguage("sw")} className={language === "sw" ? "bg-primary/10 text-primary" : ""}>
+              🇰🇪 Kiswahili
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground hover:text-foreground">
           {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </Button>
@@ -63,14 +82,14 @@ export function TopNavbar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
-              <User className="w-4 h-4 mr-2" /> Profile
+              <User className="w-4 h-4 mr-2" /> {t("Profile")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
-              <Settings className="w-4 h-4 mr-2" /> Settings
+              <Settings className="w-4 h-4 mr-2" /> {t("Settings")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-              <LogOut className="w-4 h-4 mr-2" /> Logout
+              <LogOut className="w-4 h-4 mr-2" /> {t("Logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
