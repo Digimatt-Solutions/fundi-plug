@@ -1,7 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
-import { Bell, LogOut, Sun, Moon, User, Settings, Globe } from "lucide-react";
+import { Bell, LogOut, Sun, Moon, User, Settings, Globe, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function TopNavbar() {
   const { user, logout } = useAuth();
