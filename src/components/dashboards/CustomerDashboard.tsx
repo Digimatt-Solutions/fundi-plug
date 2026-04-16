@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Input } from "@/components/ui/input";
@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -25,6 +27,8 @@ const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Cleaner": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop",
 };
 
+const FUNDIS_PER_PAGE = 12;
+
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -35,6 +39,7 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [categories, setCategories] = useState<any[]>([]);
@@ -43,6 +48,8 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
   const [customerPos, setCustomerPos] = useState<{ lat: number; lng: number } | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
@@ -56,7 +63,7 @@ export default function CustomerDashboard() {
 
   const openHireDialog = (worker: any) => {
     setHireDialog(worker);
-    setHireTitle(`Hire: ${worker.name}`);
+    setHireTitle(`${t("Hire")}: ${worker.name}`);
     setHireDescription("");
     setHireBudget(worker.hourly_rate?.toString() || "");
     setHireAddress("");
@@ -100,7 +107,6 @@ export default function CustomerDashboard() {
   };
 
   useEffect(() => {
-    // Get customer GPS for distance calc
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setCustomerPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -108,6 +114,36 @@ export default function CustomerDashboard() {
       );
     }
   }, []);
+
+  // Realtime: listen for new job postings and show notification
+  useEffect(() => {
+    const channel = supabase
+      .channel('new-jobs-notify')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'jobs' }, (payload) => {
+        const newJob = payload.new as any;
+        // Show in-app notification
+        sonnerToast(t("New Job Posted"), {
+          description: `${newJob.title}${newJob.budget ? ` - KSH ${newJob.budget}` : ""}`,
+          duration: 8000,
+        });
+
+        // Browser push notification if permitted
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(t("New Job Posted"), {
+            body: `${newJob.title}${newJob.budget ? ` - KSH ${newJob.budget}` : ""}`,
+            icon: "/favicon.ico",
+          });
+        }
+      })
+      .subscribe();
+
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    return () => { supabase.removeChannel(channel); };
+  }, [t]);
 
   useEffect(() => {
     if (!user) return;
@@ -123,8 +159,7 @@ export default function CustomerDashboard() {
       const { data: onlineWorkers } = await supabase
         .from("worker_profiles")
         .select("*, profiles!worker_profiles_user_id_fkey(name, avatar_url)")
-        .eq("verification_status", "approved")
-        .limit(8);
+        .eq("verification_status", "approved");
 
       const workerIds = (onlineWorkers || []).map(w => w.user_id);
       const { data: reviewsData } = workerIds.length > 0
@@ -149,7 +184,8 @@ export default function CustomerDashboard() {
         ...w,
         name: (w as any).profiles?.name || "Fundi",
         avatar_url: (w as any).profiles?.avatar_url || null,
-        skill: (w.skills || []).map((s: string) => skillMap[s] || "").filter(Boolean).join(", ") || "General",
+        skill: (w.skills || []).map((s: string) => skillMap[s] || "").filter(Boolean).join(", ") || t("General"),
+        skillIds: w.skills || [],
         rating: ratingMap[w.user_id] ? Math.round(ratingMap[w.user_id].sum / ratingMap[w.user_id].count * 10) / 10 : 0,
         available: w.is_online,
       })));
@@ -167,6 +203,22 @@ export default function CustomerDashboard() {
     }
     load();
   }, [user]);
+
+  // Filter workers by selected category
+  const filteredWorkers = useMemo(() => {
+    if (selectedCategory === "all") return nearbyWorkers;
+    return nearbyWorkers.filter(w => (w.skillIds || []).includes(selectedCategory));
+  }, [nearbyWorkers, selectedCategory]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredWorkers.length / FUNDIS_PER_PAGE);
+  const paginatedWorkers = useMemo(() => {
+    const start = (currentPage - 1) * FUNDIS_PER_PAGE;
+    return filteredWorkers.slice(start, start + FUNDIS_PER_PAGE);
+  }, [filteredWorkers, currentPage]);
+
+  // Reset page when category changes
+  useEffect(() => { setCurrentPage(1); }, [selectedCategory]);
 
   const formatDistance = (km: number) => {
     if (km < 1) return `${Math.round(km * 1000)} m away`;
@@ -193,34 +245,34 @@ export default function CustomerDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Find Skilled Fundis</h1>
-          <p className="text-muted-foreground text-sm">Book trusted professionals near you</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("Find Skilled Fundis")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Book trusted professionals near you")}</p>
         </div>
         {onlineFundis.length > 0 && (
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowMap(!showMap)}>
-            <MapPin className="w-4 h-4" /> {showMap ? "Hide Map" : "Map View"}
+            <MapPin className="w-4 h-4" /> {showMap ? t("Hide Map") : t("Map View")}
           </Button>
         )}
       </div>
 
       <div className="relative max-w-2xl animate-fade-in">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <Input placeholder="What service do you need?" className="pl-12 h-14 text-base bg-card border-border rounded-xl" />
+        <Input placeholder={t("What service do you need?")} className="pl-12 h-14 text-base bg-card border-border rounded-xl" />
       </div>
 
       <div className="grid grid-cols-2 gap-3 max-w-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
         <Button variant="outline" className="h-14 justify-start gap-3 bg-primary/5 border-primary/20 hover:bg-primary/10 text-foreground">
           <Zap className="w-5 h-5 text-primary" />
           <div className="text-left">
-            <p className="text-sm font-medium">Instant Service</p>
-            <p className="text-xs text-muted-foreground">Request now</p>
+            <p className="text-sm font-medium">{t("Instant Service")}</p>
+            <p className="text-xs text-muted-foreground">{t("Request now")}</p>
           </div>
         </Button>
         <Button variant="outline" className="h-14 justify-start gap-3 bg-card border-border hover:bg-muted text-foreground">
           <CalendarDays className="w-5 h-5 text-chart-3" />
           <div className="text-left">
-            <p className="text-sm font-medium">Schedule</p>
-            <p className="text-xs text-muted-foreground">Book ahead</p>
+            <p className="text-sm font-medium">{t("Schedule")}</p>
+            <p className="text-xs text-muted-foreground">{t("Book ahead")}</p>
           </div>
         </Button>
       </div>
@@ -229,43 +281,18 @@ export default function CustomerDashboard() {
       {showMap && customerPos && onlineFundis.length > 0 && (
         <div className="stat-card animate-fade-in">
           <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary" /> Online Fundis Map
+            <MapPin className="w-5 h-5 text-primary" /> {t("Online Fundis Map")}
           </h3>
           <div className="w-full h-80 rounded-xl overflow-hidden border border-border">
-            <MapContainer
-              center={[customerPos.lat, customerPos.lng]}
-              zoom={13}
-              style={{ width: "100%", height: "100%" }}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker
-                position={[customerPos.lat, customerPos.lng]}
-                icon={L.divIcon({
-                  className: "",
-                  html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>',
-                  iconSize: [16, 16],
-                  iconAnchor: [8, 8],
-                })}
-              >
-                <Popup>You are here</Popup>
+            <MapContainer center={[customerPos.lat, customerPos.lng]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={true}>
+              <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
+                <Popup>{t("You are here")}</Popup>
               </Marker>
               {onlineFundis.map((w) => {
                 const dist = getWorkerDistance(w);
                 return (
-                  <Marker
-                    key={w.id}
-                    position={[w.latitude, w.longitude]}
-                    icon={L.divIcon({
-                      className: "",
-                      html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>',
-                      iconSize: [14, 14],
-                      iconAnchor: [7, 7],
-                    })}
-                  >
+                  <Marker key={w.id} position={[w.latitude, w.longitude]} icon={L.divIcon({ className: "", html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })}>
                     <Popup>
                       <div className="text-sm">
                         <p className="font-semibold">{w.name}</p>
@@ -282,12 +309,17 @@ export default function CustomerDashboard() {
       )}
 
       <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
-        <h2 className="text-lg font-semibold text-foreground mb-3">Service Categories</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-3">{t("Service Categories")}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {categories.map((cat) => {
             const img = cat.image_url || DEFAULT_CATEGORY_IMAGES[cat.name] || "";
+            const isSelected = selectedCategory === cat.id;
             return (
-              <button key={cat.id} className="stat-card overflow-hidden p-0 flex flex-col items-center hover:border-primary/40 cursor-pointer transition-colors active:scale-[0.97]">
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(isSelected ? "all" : cat.id)}
+                className={`stat-card overflow-hidden p-0 flex flex-col items-center cursor-pointer transition-colors active:scale-[0.97] ${isSelected ? "border-primary ring-2 ring-primary/30" : "hover:border-primary/40"}`}
+              >
                 {img ? (
                   <div className="w-full h-20 overflow-hidden">
                     <img src={img} alt={cat.name} className="w-full h-full object-cover" />
@@ -299,66 +331,95 @@ export default function CustomerDashboard() {
                 )}
                 <div className="p-2 text-center">
                   <span className="text-xs font-medium text-foreground">{cat.name}</span>
-                  <span className="text-[10px] text-muted-foreground block">{cat.count} available</span>
+                  <span className="text-[10px] text-muted-foreground block">{cat.count} {t("available")}</span>
                 </div>
               </button>
             );
           })}
         </div>
+        {selectedCategory !== "all" && (
+          <Button variant="ghost" size="sm" className="mt-2 text-xs" onClick={() => setSelectedCategory("all")}>
+            ✕ {t("All Categories")}
+          </Button>
+        )}
       </div>
 
       <div className="animate-fade-in" style={{ animationDelay: "300ms" }}>
-        <h2 className="text-lg font-semibold text-foreground mb-3">Available Fundis</h2>
-        {nearbyWorkers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {nearbyWorkers.map((worker) => {
-              const dist = getWorkerDistance(worker);
-              return (
-                <div key={worker.id} className="stat-card space-y-3">
-                  <div className="flex items-center gap-3">
-                    {worker.avatar_url ? (
-                      <img src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
-                        {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-foreground">
+            {t("Available Fundis")}
+            <span className="text-sm font-normal text-muted-foreground ml-2">({filteredWorkers.length})</span>
+          </h2>
+        </div>
+        {paginatedWorkers.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {paginatedWorkers.map((worker) => {
+                const dist = getWorkerDistance(worker);
+                return (
+                  <div key={worker.id} className="stat-card space-y-3">
+                    <div className="flex items-center gap-3">
+                      {worker.avatar_url ? (
+                        <img src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+                          {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{worker.name}</p>
+                        <p className="text-xs text-muted-foreground">{worker.skill}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1 text-chart-4">
+                        <Star className="w-3 h-3 fill-current" /> {worker.rating > 0 ? worker.rating : t("New")}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full ${worker.available ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                        {worker.available ? t("Online") : t("Offline")}
+                      </span>
+                    </div>
+                    {dist != null && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Navigation className="w-3 h-3" /> {formatDistance(dist)}
                       </div>
                     )}
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{worker.name}</p>
-                      <p className="text-xs text-muted-foreground">{worker.skill}</p>
-                    </div>
+                    <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={() => openHireDialog(worker)}>{t("Hire Now")}</Button>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-1 text-chart-4">
-                      <Star className="w-3 h-3 fill-current" /> {worker.rating > 0 ? worker.rating : "New"}
-                    </span>
-                    <span className={`px-2 py-0.5 rounded-full ${worker.available ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
-                      {worker.available ? "Online" : "Offline"}
-                    </span>
-                  </div>
-                  {dist != null && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Navigation className="w-3 h-3" /> {formatDistance(dist)}
-                    </div>
-                  )}
-                  <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={() => openHireDialog(worker)}>Hire Now</Button>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" className="w-9" onClick={() => setCurrentPage(page)}>
+                    {page}
+                  </Button>
+                ))}
+                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="stat-card flex flex-col items-center justify-center py-12 text-center">
             <MapPin className="w-10 h-10 text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">No fundis available right now. Check back soon!</p>
+            <p className="text-sm text-muted-foreground">{t("No fundis available right now. Check back soon!")}</p>
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
         {[
-          { label: "My Bookings", value: String(stats.bookings), icon: Briefcase, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Total Spent", value: `KSH ${stats.spent.toLocaleString()}`, icon: CreditCard, color: "text-chart-2", bg: "bg-chart-2/10" },
-          { label: "Avg. Rating Given", value: stats.avgRating > 0 ? String(stats.avgRating) : "N/A", icon: Star, color: "text-chart-4", bg: "bg-chart-4/10" },
+          { label: t("My Bookings"), value: String(stats.bookings), icon: Briefcase, color: "text-primary", bg: "bg-primary/10" },
+          { label: t("Total Spent"), value: `KSH ${stats.spent.toLocaleString()}`, icon: CreditCard, color: "text-chart-2", bg: "bg-chart-2/10" },
+          { label: t("Avg. Rating Given"), value: stats.avgRating > 0 ? String(stats.avgRating) : "N/A", icon: Star, color: "text-chart-4", bg: "bg-chart-4/10" },
         ].map((s) => (
           <div key={s.label} className="stat-card">
             <div className="flex items-center justify-between">
@@ -377,27 +438,27 @@ export default function CustomerDashboard() {
       {/* Hire Details Dialog */}
       <Dialog open={!!hireDialog} onOpenChange={(open) => { if (!open) setHireDialog(null); }}>
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader><DialogTitle>Hire {hireDialog?.name}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("Hire")} {hireDialog?.name}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Fill in the job details. The fundi will be notified and can accept or reject.</p>
-            <div className="space-y-2"><Label>Job Title *</Label><Input value={hireTitle} onChange={(e) => setHireTitle(e.target.value)} className="bg-muted/50" /></div>
-            <div className="space-y-2"><Label>Description</Label><Textarea value={hireDescription} onChange={(e) => setHireDescription(e.target.value)} placeholder="Describe the work needed..." className="bg-muted/50" /></div>
+            <p className="text-sm text-muted-foreground">{t("Fill in the job details. The fundi will be notified and can accept or reject.")}</p>
+            <div className="space-y-2"><Label>{t("Job Title")} *</Label><Input value={hireTitle} onChange={(e) => setHireTitle(e.target.value)} className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Description")}</Label><Textarea value={hireDescription} onChange={(e) => setHireDescription(e.target.value)} placeholder={t("Describe the work needed...")} className="bg-muted/50" /></div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Price (KSH) *</Label><Input type="number" value={hireBudget} onChange={(e) => setHireBudget(e.target.value)} placeholder="5000" className="bg-muted/50" /></div>
+              <div className="space-y-2"><Label>{t("Price (KSH)")} *</Label><Input type="number" value={hireBudget} onChange={(e) => setHireBudget(e.target.value)} placeholder="5000" className="bg-muted/50" /></div>
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>{t("Category")}</Label>
                 <Select value={hireCategoryId} onValueChange={setHireCategoryId}>
-                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder={t("Select")} /></SelectTrigger>
                   <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="space-y-2"><Label>Address / Location</Label><Input value={hireAddress} onChange={(e) => setHireAddress(e.target.value)} placeholder="123 Main St" className="bg-muted/50" /></div>
-            <div className="space-y-2"><Label>Your Phone Number</Label><Input value={hirePhone} onChange={(e) => setHirePhone(e.target.value)} placeholder="0712345678" className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Address / Location")}</Label><Input value={hireAddress} onChange={(e) => setHireAddress(e.target.value)} placeholder="123 Main St" className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Your Phone Number")}</Label><Input value={hirePhone} onChange={(e) => setHirePhone(e.target.value)} placeholder="0712345678" className="bg-muted/50" /></div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setHireDialog(null)}>Cancel</Button>
-            <Button onClick={hireWorker} disabled={hiring || !hireTitle.trim() || !hireBudget}>{hiring ? "Sending..." : "Send Hire Request"}</Button>
+            <Button variant="outline" onClick={() => setHireDialog(null)}>{t("Cancel")}</Button>
+            <Button onClick={hireWorker} disabled={hiring || !hireTitle.trim() || !hireBudget}>{hiring ? t("Sending...") : t("Send Hire Request")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
