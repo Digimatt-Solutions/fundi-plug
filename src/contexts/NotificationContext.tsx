@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { playNotificationSound } from "@/lib/sound";
 
 interface Notification {
   id: string;
@@ -9,6 +10,7 @@ interface Notification {
   body: string;
   time: string;
   read: boolean;
+  link?: string;
 }
 
 interface NotificationContextType {
@@ -27,17 +29,13 @@ const NotificationContext = createContext<NotificationContextType>({
 
 export const useNotifications = () => useContext(NotificationContext);
 
-const notificationSound = new Audio("/notification.wav");
-notificationSound.volume = 0.5;
-
-function playNotificationSound() {
-  notificationSound.currentTime = 0;
-  notificationSound.play().catch(() => {});
-}
-
 function showBrowserNotification(title: string, body: string) {
   if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, { body, icon: "/favicon.ico" });
+    try {
+      new Notification(title, { body, icon: "/favicon.png" });
+    } catch {
+      // ignore (some mobile browsers restrict)
+    }
   }
 }
 
@@ -49,12 +47,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission();
+      Notification.requestPermission().catch(() => {});
     }
   }, []);
 
   useEffect(() => {
     if (!user) return;
+
+    const pushNotif = (notif: Notification) => {
+      setNotifications((prev) => [notif, ...prev].slice(0, 50));
+      playNotificationSound();
+      showBrowserNotification(notif.title, notif.body);
+      toast.info(notif.title, { description: notif.body });
+    };
 
     const channel = supabase
       .channel("global-notifications")
@@ -63,20 +68,31 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         { event: "INSERT", schema: "public", table: "jobs" },
         (payload: any) => {
           const job = payload.new;
-          // Don't notify the person who posted the job
           if (job.customer_id === user.id) return;
-
-          const notif: Notification = {
-            id: job.id + "-" + Date.now(),
+          pushNotif({
+            id: "job-" + job.id + "-" + Date.now(),
             title: "New Job Posted",
             body: job.title || "A new job is available",
             time: new Date().toLocaleTimeString(),
             read: false,
-          };
-          setNotifications((prev) => [notif, ...prev].slice(0, 50));
-          playNotificationSound();
-          showBrowserNotification(notif.title, notif.body);
-          toast.info(notif.title, { description: notif.body });
+            link: user.role === "worker" ? "/dashboard/my-jobs" : "/dashboard",
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "community_posts" },
+        (payload: any) => {
+          const post = payload.new;
+          if (post.author_id === user.id) return;
+          pushNotif({
+            id: "post-" + post.id + "-" + Date.now(),
+            title: "New Community Post",
+            body: (post.content || "").slice(0, 80) || "Someone shared a new post",
+            time: new Date().toLocaleTimeString(),
+            read: false,
+            link: "/dashboard/community",
+          });
         }
       )
       .subscribe();
