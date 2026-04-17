@@ -89,7 +89,7 @@ const translations: Record<string, Record<Language, string>> = {
   "No jobs yet - set yourself online to start receiving requests": { en: "No jobs yet - set yourself online to start receiving requests", sw: "Hakuna kazi bado - jiweke mtandaoni kuanza kupokea maombi" },
 
   // Find Fundis page
-  "Find Fundis": { en: "Find Fundis", sw: "Tafuta Mafundi" },
+  "Browse verified": { en: "Browse verified", sw: "Vinjari walioidhinishwa" },
   "Browse verified skilled professionals": { en: "Browse verified skilled professionals", sw: "Vinjari wataalamu walioidhinishwa" },
   "Search by name or skill...": { en: "Search by name or skill...", sw: "Tafuta kwa jina au ujuzi..." },
   "No fundis found": { en: "No fundis found", sw: "Hakuna fundi aliyepatikana" },
@@ -99,9 +99,9 @@ const translations: Record<string, Record<Language, string>> = {
   "Per Hour": { en: "Per Hour", sw: "Kwa Saa" },
   "About": { en: "About", sw: "Kuhusu" },
   "Certifications": { en: "Certifications", sw: "Vyeti" },
-  "Reviews": { en: "Reviews", sw: "Maoni" },
+  "Customer Reviews": { en: "Customer Reviews", sw: "Maoni ya Wateja" },
   "View": { en: "View", sw: "Tazama" },
-  "Hire Now": { en: "Hire Now", sw: "Ajiri Sasa" },
+  "Hire This Fundi": { en: "Hire This Fundi", sw: "Ajiri Fundi Huyu" },
   "Job Title *": { en: "Job Title *", sw: "Jina la Kazi *" },
   "Price (KSH) *": { en: "Price (KSH) *", sw: "Bei (KSH) *" },
   "Hire request sent!": { en: "Hire request sent!", sw: "Ombi la kuajiri limetumwa!" },
