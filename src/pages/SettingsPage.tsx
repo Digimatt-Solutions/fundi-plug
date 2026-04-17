@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleLeft, ToggleRight, RefreshCw, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { isSoundEnabled, setSoundEnabled, playNotificationSound } from "@/lib/sound";
 
 export default function SettingsPage() {
   const { user, refreshProfile } = useAuth();
@@ -26,6 +27,36 @@ export default function SettingsPage() {
   const [flushing, setFlushing] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
   const [moduleSettings, setModuleSettings] = useState<any[]>([]);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleSoundToggle = (v: boolean) => {
+    setSoundOn(v);
+    setSoundEnabled(v);
+    if (v) playNotificationSound();
+    toast({ title: v ? "Sounds enabled" : "Sounds muted" });
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Clear caches and force a hard reload to pick up latest deployment
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+    } catch {
+      // ignore
+    }
+    // Bust query cache by appending a timestamp param then reload
+    const url = new URL(window.location.href);
+    url.searchParams.set("_r", Date.now().toString());
+    window.location.replace(url.toString());
+  };
 
   useEffect(() => {
     async function load() {
