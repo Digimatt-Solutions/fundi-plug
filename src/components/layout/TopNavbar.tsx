@@ -92,7 +92,10 @@ export function TopNavbar() {
                 notifications.map((n) => (
                   <DropdownMenuItem
                     key={n.id}
-                    onClick={() => markRead(n.id)}
+                    onClick={() => {
+                      markRead(n.id);
+                      if (n.link) navigate(n.link);
+                    }}
                     className={`flex flex-col items-start gap-0.5 px-3 py-2 cursor-pointer ${!n.read ? "bg-primary/5" : ""}`}
                   >
                     <span className="text-sm font-medium">{n.title}</span>
