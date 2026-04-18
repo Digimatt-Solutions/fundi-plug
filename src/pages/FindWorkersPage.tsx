@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Search, Star, MapPin, CheckCircle, Phone, Mail, Briefcase, Navigation } from "lucide-react";
+import { Search, Star, MapPin, CheckCircle, Phone, Mail, Briefcase, Navigation, ShieldCheck, Lock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { maskEmail, maskPhone } from "@/lib/mask";
+import { MapPreview } from "@/components/MapPreview";
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -19,6 +21,8 @@ function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
+
+const ALL_TAB = "__all__";
 
 export default function FindWorkersPage() {
   const { user } = useAuth();
@@ -29,10 +33,12 @@ export default function FindWorkersPage() {
   const [workers, setWorkers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
-  const [workerCerts, setWorkerCerts] = useState<any[]>([]);
   const [workerReviews, setWorkerReviews] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>(ALL_TAB);
   const [customerPos, setCustomerPos] = useState<{ lat: number; lng: number } | null>(null);
+  // Set of worker user_ids that this customer has an active/successful hire with
+  const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
 
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
@@ -52,6 +58,23 @@ export default function FindWorkersPage() {
       );
     }
   }, []);
+
+  // Load existing hires so we can reveal contacts of fundis already engaged
+  useEffect(() => {
+    async function loadUnlocked() {
+      if (!user) return;
+      const { data } = await supabase
+        .from("jobs")
+        .select("worker_id, status")
+        .eq("customer_id", user.id)
+        .in("status", ["accepted", "in_progress", "completed"])
+        .not("worker_id", "is", null);
+      const ids = new Set<string>();
+      (data || []).forEach((j: any) => j.worker_id && ids.add(j.worker_id));
+      setUnlockedWorkerIds(ids);
+    }
+    loadUnlocked();
+  }, [user]);
 
   useEffect(() => {
     async function load() {
@@ -150,10 +173,12 @@ export default function FindWorkersPage() {
 
   const openWorkerProfile = async (worker: any) => {
     setSelectedWorker(worker);
-    const [certsRes, reviewsRes] = await Promise.all([
-      supabase.from("certifications").select("*").eq("worker_id", worker.id),
-      supabase.from("reviews").select("*, jobs:job_id(title)").eq("reviewee_id", worker.user_id).order("created_at", { ascending: false }).limit(10),
-    ]);
+    const reviewsRes = await supabase
+      .from("reviews")
+      .select("*, jobs:job_id(title)")
+      .eq("reviewee_id", worker.user_id)
+      .order("created_at", { ascending: false })
+      .limit(10);
 
     const reviewerIds = [...new Set((reviewsRes.data || []).map(r => r.reviewer_id))];
     const { data: profiles } = reviewerIds.length > 0
@@ -162,7 +187,6 @@ export default function FindWorkersPage() {
     const nameMap: Record<string, string> = {};
     (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
 
-    setWorkerCerts(certsRes.data || []);
     setWorkerReviews((reviewsRes.data || []).map(r => ({ ...r, reviewerName: nameMap[r.reviewer_id] || t("Client") })));
   };
 
@@ -182,17 +206,29 @@ export default function FindWorkersPage() {
     w.skillNames.some((s: string) => s.toLowerCase().includes(search.toLowerCase()))
   ), [workers, search]);
 
-  // Group by category
-  const grouped = useMemo(() => {
-    const groups: { category: any; workers: any[] }[] = [];
-    categories.forEach((cat) => {
-      const ws = filtered.filter((w) => (w.skillIds || []).includes(cat.id));
-      if (ws.length > 0) groups.push({ category: cat, workers: ws });
-    });
-    const uncategorized = filtered.filter((w) => !(w.skillIds || []).some((s: string) => categories.find((c) => c.id === s)));
-    if (uncategorized.length > 0) groups.push({ category: { id: "other", name: t("General"), icon: "🔧" }, workers: uncategorized });
-    return groups;
+  // Categories that actually have workers (for tab visibility)
+  const tabCategories = useMemo(() => {
+    const list = categories
+      .map((c) => ({ ...c, count: filtered.filter((w) => (w.skillIds || []).includes(c.id)).length }))
+      .filter((c) => c.count > 0);
+    const otherCount = filtered.filter(
+      (w) => !(w.skillIds || []).some((s: string) => categories.find((c) => c.id === s))
+    ).length;
+    if (otherCount > 0) {
+      list.push({ id: "other", name: t("General"), icon: "🔧", count: otherCount } as any);
+    }
+    return list;
   }, [filtered, categories, t]);
+
+  const visibleWorkers = useMemo(() => {
+    if (activeCategory === ALL_TAB) return filtered;
+    if (activeCategory === "other") {
+      return filtered.filter(
+        (w) => !(w.skillIds || []).some((s: string) => categories.find((c) => c.id === s))
+      );
+    }
+    return filtered.filter((w) => (w.skillIds || []).includes(activeCategory));
+  }, [filtered, activeCategory, categories]);
 
   const renderWorkerCard = (w: any, i: number) => {
     const dist = getDist(w);
@@ -252,25 +288,46 @@ export default function FindWorkersPage() {
         <h1 className="text-2xl font-bold text-foreground">{t("Find Fundis")}</h1>
         <p className="text-muted-foreground text-sm">{t("Browse verified skilled professionals")}</p>
       </div>
+
+      {/* Horizontal category tabs (sticky on top, like dashboard) */}
+      <div className="sticky top-0 z-10 -mx-4 px-4 bg-background/80 backdrop-blur-md border-b border-border py-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+          <button
+            onClick={() => setActiveCategory(ALL_TAB)}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+              activeCategory === ALL_TAB
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-foreground border-border hover:border-primary/40"
+            }`}
+          >
+            {t("All")} ({filtered.length})
+          </button>
+          {tabCategories.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setActiveCategory(c.id)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border flex items-center gap-1.5 ${
+                activeCategory === c.id
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card text-foreground border-border hover:border-primary/40"
+              }`}
+            >
+              <span>{c.icon || "🔧"}</span>
+              <span>{c.name}</span>
+              <span className="opacity-70">({c.count})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input placeholder={t("Search by name or skill...")} className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
-      {grouped.length > 0 ? (
-        <div className="space-y-8">
-          {grouped.map(({ category, workers: ws }) => (
-            <div key={category.id} className="space-y-3 animate-fade-in">
-              <div className="flex items-center gap-2 border-b border-border pb-2">
-                <span className="text-xl">{category.icon || "🔧"}</span>
-                <h2 className="text-lg font-semibold text-foreground">{category.name}</h2>
-                <span className="text-xs text-muted-foreground">({ws.length})</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {ws.map((w, i) => renderWorkerCard(w, i))}
-              </div>
-            </div>
-          ))}
+      {visibleWorkers.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {visibleWorkers.map((w, i) => renderWorkerCard(w, i))}
         </div>
       ) : (
         <div className="stat-card flex flex-col items-center py-16 text-center">
@@ -285,6 +342,9 @@ export default function FindWorkersPage() {
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           {selectedWorker && (() => {
             const dist = getDist(selectedWorker);
+            const unlocked = unlockedWorkerIds.has(selectedWorker.user_id);
+            const phoneShown = unlocked ? selectedWorker.phone : maskPhone(selectedWorker.phone);
+            const emailShown = unlocked ? selectedWorker.email : maskEmail(selectedWorker.email);
             return (
               <>
                 <DialogHeader>
@@ -324,13 +384,42 @@ export default function FindWorkersPage() {
                     </div>
                   </div>
 
+                  {/* Digimatt verified badge (replaces certs list for clients) */}
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/5 border border-primary/20">
+                    <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+                    <p className="text-sm text-foreground"><span className="font-medium">{t("Certified by Digimatt")}</span> — {t("This fundi has been vetted and approved.")}</p>
+                  </div>
+
+                  {/* Live map preview */}
+                  {customerPos && selectedWorker.latitude && selectedWorker.longitude && (
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground mb-1.5 flex items-center gap-1.5">
+                        <Navigation className="w-3.5 h-3.5 text-primary" /> {t("Live Location")}
+                      </h4>
+                      <MapPreview
+                        customer={customerPos}
+                        worker={{ lat: selectedWorker.latitude, lng: selectedWorker.longitude }}
+                        distanceLabel={dist != null ? formatDistance(dist) : undefined}
+                      />
+                    </div>
+                  )}
+
                   {/* Contact & Location details */}
                   <div className="space-y-2 text-sm">
                     {selectedWorker.phone && (
-                      <div className="flex items-center gap-2 text-foreground"><Phone className="w-3.5 h-3.5 text-muted-foreground" /> {selectedWorker.phone}</div>
+                      <div className="flex items-center gap-2 text-foreground">
+                        {unlocked ? <Phone className="w-3.5 h-3.5 text-muted-foreground" /> : <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+                        {phoneShown}
+                      </div>
                     )}
                     {selectedWorker.email && (
-                      <div className="flex items-center gap-2 text-foreground"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> {selectedWorker.email}</div>
+                      <div className="flex items-center gap-2 text-foreground">
+                        {unlocked ? <Mail className="w-3.5 h-3.5 text-muted-foreground" /> : <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+                        {emailShown}
+                      </div>
+                    )}
+                    {!unlocked && (
+                      <p className="text-xs text-muted-foreground italic">{t("Contact details are revealed once your hire request is accepted.")}</p>
                     )}
                     {(selectedWorker.county || selectedWorker.constituency || selectedWorker.ward) && (
                       <div className="flex items-start gap-2 text-foreground">
@@ -341,11 +430,6 @@ export default function FindWorkersPage() {
                     {selectedWorker.service_area && (
                       <div className="flex items-center gap-2 text-muted-foreground text-xs">{t("Service Area")}: {selectedWorker.service_area}</div>
                     )}
-                    {dist != null && selectedWorker.is_online && (
-                      <div className="flex items-center gap-2 text-primary font-medium">
-                        <Navigation className="w-3.5 h-3.5" /> {t("Live Location")}: {formatDistance(dist)} {t("Distance").toLowerCase()}
-                      </div>
-                    )}
                   </div>
 
                   {selectedWorker.bio && (
@@ -354,19 +438,7 @@ export default function FindWorkersPage() {
                       <p className="text-sm text-muted-foreground">{selectedWorker.bio}</p>
                     </div>
                   )}
-                  {workerCerts.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-foreground mb-2">{t("Certifications")}</h4>
-                      <div className="space-y-1">
-                        {workerCerts.map((cert) => (
-                          <div key={cert.id} className="flex items-center justify-between p-2 rounded bg-muted/50 text-sm">
-                            <span className="text-foreground">{cert.name}</span>
-                            {cert.file_url && <a href={cert.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">{t("View")}</a>}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+
                   {workerReviews.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-foreground mb-2">{t("Customer Reviews")}</h4>
