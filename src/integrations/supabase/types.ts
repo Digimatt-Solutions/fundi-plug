@@ -136,29 +136,35 @@ export type Database = {
       }
       certifications: {
         Row: {
+          cert_number: string | null
           created_at: string
           expires_at: string | null
           file_url: string | null
           id: string
           issued_at: string | null
+          issuer: string | null
           name: string
           worker_id: string
         }
         Insert: {
+          cert_number?: string | null
           created_at?: string
           expires_at?: string | null
           file_url?: string | null
           id?: string
           issued_at?: string | null
+          issuer?: string | null
           name: string
           worker_id: string
         }
         Update: {
+          cert_number?: string | null
           created_at?: string
           expires_at?: string | null
           file_url?: string | null
           id?: string
           issued_at?: string | null
+          issuer?: string | null
           name?: string
           worker_id?: string
         }
@@ -816,71 +822,221 @@ export type Database = {
         }
         Relationships: []
       }
+      worker_education: {
+        Row: {
+          course: string | null
+          created_at: string
+          end_date: string | null
+          file_url: string | null
+          id: string
+          institution: string
+          level: string
+          start_date: string | null
+          status: string | null
+          worker_id: string
+        }
+        Insert: {
+          course?: string | null
+          created_at?: string
+          end_date?: string | null
+          file_url?: string | null
+          id?: string
+          institution: string
+          level: string
+          start_date?: string | null
+          status?: string | null
+          worker_id: string
+        }
+        Update: {
+          course?: string | null
+          created_at?: string
+          end_date?: string | null
+          file_url?: string | null
+          id?: string
+          institution?: string
+          level?: string
+          start_date?: string | null
+          status?: string | null
+          worker_id?: string
+        }
+        Relationships: []
+      }
       worker_profiles: {
         Row: {
+          alt_phone: string | null
+          availability_days: number[] | null
+          availability_type: string | null
+          bank_account: string | null
+          bank_name: string | null
           bio: string | null
+          consent_background_check: boolean | null
+          consent_data_usage: boolean | null
+          consented_at: string | null
           constituency: string | null
           country: string | null
           county: string | null
           created_at: string
+          daily_rate: number | null
           date_of_birth: string | null
+          exact_address: string | null
+          experience_level: string | null
+          first_name: string | null
           gender: string | null
           hourly_rate: number | null
           id: string
+          id_back_url: string | null
+          id_front_url: string | null
           id_number: string | null
           is_online: boolean
+          kra_pin: string | null
+          landmark: string | null
+          last_name: string | null
           latitude: number | null
           longitude: number | null
+          max_travel_km: number | null
+          middle_name: string | null
+          mpesa_name: string | null
+          mpesa_number: string | null
+          nca_number: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
+          onboarding_completed_at: string | null
+          onboarding_step: number
+          other_skill: string | null
+          portfolio_urls: string[] | null
+          profile_photo_url: string | null
+          rejection_reason: string | null
+          selfie_with_id_url: string | null
           service_area: string | null
+          service_radius_km: number | null
           skills: string[] | null
+          sub_skills: string[] | null
+          submitted_for_review: boolean
+          tools_owned: string[] | null
           updated_at: string
           user_id: string
           verification_status: Database["public"]["Enums"]["verification_status"]
           ward: string | null
+          willing_to_travel: boolean | null
           years_experience: number | null
         }
         Insert: {
+          alt_phone?: string | null
+          availability_days?: number[] | null
+          availability_type?: string | null
+          bank_account?: string | null
+          bank_name?: string | null
           bio?: string | null
+          consent_background_check?: boolean | null
+          consent_data_usage?: boolean | null
+          consented_at?: string | null
           constituency?: string | null
           country?: string | null
           county?: string | null
           created_at?: string
+          daily_rate?: number | null
           date_of_birth?: string | null
+          exact_address?: string | null
+          experience_level?: string | null
+          first_name?: string | null
           gender?: string | null
           hourly_rate?: number | null
           id?: string
+          id_back_url?: string | null
+          id_front_url?: string | null
           id_number?: string | null
           is_online?: boolean
+          kra_pin?: string | null
+          landmark?: string | null
+          last_name?: string | null
           latitude?: number | null
           longitude?: number | null
+          max_travel_km?: number | null
+          middle_name?: string | null
+          mpesa_name?: string | null
+          mpesa_number?: string | null
+          nca_number?: string | null
+          next_of_kin_name?: string | null
+          next_of_kin_phone?: string | null
+          next_of_kin_relationship?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_step?: number
+          other_skill?: string | null
+          portfolio_urls?: string[] | null
+          profile_photo_url?: string | null
+          rejection_reason?: string | null
+          selfie_with_id_url?: string | null
           service_area?: string | null
+          service_radius_km?: number | null
           skills?: string[] | null
+          sub_skills?: string[] | null
+          submitted_for_review?: boolean
+          tools_owned?: string[] | null
           updated_at?: string
           user_id: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
           ward?: string | null
+          willing_to_travel?: boolean | null
           years_experience?: number | null
         }
         Update: {
+          alt_phone?: string | null
+          availability_days?: number[] | null
+          availability_type?: string | null
+          bank_account?: string | null
+          bank_name?: string | null
           bio?: string | null
+          consent_background_check?: boolean | null
+          consent_data_usage?: boolean | null
+          consented_at?: string | null
           constituency?: string | null
           country?: string | null
           county?: string | null
           created_at?: string
+          daily_rate?: number | null
           date_of_birth?: string | null
+          exact_address?: string | null
+          experience_level?: string | null
+          first_name?: string | null
           gender?: string | null
           hourly_rate?: number | null
           id?: string
+          id_back_url?: string | null
+          id_front_url?: string | null
           id_number?: string | null
           is_online?: boolean
+          kra_pin?: string | null
+          landmark?: string | null
+          last_name?: string | null
           latitude?: number | null
           longitude?: number | null
+          max_travel_km?: number | null
+          middle_name?: string | null
+          mpesa_name?: string | null
+          mpesa_number?: string | null
+          nca_number?: string | null
+          next_of_kin_name?: string | null
+          next_of_kin_phone?: string | null
+          next_of_kin_relationship?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_step?: number
+          other_skill?: string | null
+          portfolio_urls?: string[] | null
+          profile_photo_url?: string | null
+          rejection_reason?: string | null
+          selfie_with_id_url?: string | null
           service_area?: string | null
+          service_radius_km?: number | null
           skills?: string[] | null
+          sub_skills?: string[] | null
+          submitted_for_review?: boolean
+          tools_owned?: string[] | null
           updated_at?: string
           user_id?: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
           ward?: string | null
+          willing_to_travel?: boolean | null
           years_experience?: number | null
         }
         Relationships: [
@@ -892,6 +1048,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      worker_work_history: {
+        Row: {
+          company: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          reference_name: string | null
+          reference_phone: string | null
+          role: string
+          start_date: string | null
+          worker_id: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          reference_name?: string | null
+          reference_phone?: string | null
+          role: string
+          start_date?: string | null
+          worker_id: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          reference_name?: string | null
+          reference_phone?: string | null
+          role?: string
+          start_date?: string | null
+          worker_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
