@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { maskEmail, maskPhone } from "@/lib/mask";
 
 export default function WorkerMyJobsPage() {
   const { user } = useAuth();
@@ -192,8 +193,9 @@ export default function WorkerMyJobsPage() {
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                    <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
-                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
-                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {job.customerPhone}</p>}
+                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {maskEmail(job.customerEmail)}</p>}
+                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {maskPhone(job.customerPhone)}</p>}
+                  <p className="text-[10px] text-muted-foreground italic">Full contact details revealed once you accept the request.</p>
                 </div>
               </div>
             </div>
