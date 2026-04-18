@@ -17,6 +17,7 @@ import UserManagementPage from "@/pages/UserManagementPage";
 import SettingsPage from "@/pages/SettingsPage";
 import VerificationPage from "@/pages/VerificationPage";
 import WorkerProfilePage from "@/pages/WorkerProfilePage";
+import FundiOnboardingPage from "@/pages/FundiOnboardingPage";
 import WorkerMyJobsPage from "@/pages/WorkerMyJobsPage";
 import WorkerEarningsPage from "@/pages/WorkerEarningsPage";
 import WorkerReviewsPage from "@/pages/WorkerReviewsPage";
@@ -57,7 +58,8 @@ const App = () => (
                 <Route path="user-management" element={<UserManagementPage />} />
                 {/* Worker */}
                 <Route path="my-jobs" element={<WorkerMyJobsPage />} />
-                <Route path="profile" element={<WorkerProfilePage />} />
+                <Route path="profile" element={<FundiOnboardingPage />} />
+                <Route path="profile-legacy" element={<WorkerProfilePage />} />
                 <Route path="earnings" element={<WorkerEarningsPage />} />
                 <Route path="reviews" element={<WorkerReviewsPage />} />
                 {/* Customer */}
