@@ -12,9 +12,10 @@ import AcademicStep from "@/components/onboarding/steps/AcademicStep";
 import PaymentStep from "@/components/onboarding/steps/PaymentStep";
 import WorkHistoryStep from "@/components/onboarding/steps/WorkHistoryStep";
 import AgreementsStep from "@/components/onboarding/steps/AgreementsStep";
+import ReviewStep from "@/components/onboarding/steps/ReviewStep";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, ShieldAlert, ShieldX, User, Briefcase, MapPin, FileText, GraduationCap, CreditCard, History, FileSignature } from "lucide-react";
+import { ShieldCheck, ShieldAlert, ShieldX, User, Briefcase, MapPin, FileText, GraduationCap, CreditCard, History, FileSignature, ClipboardCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const STEPS = [
@@ -25,6 +26,7 @@ const STEPS = [
   { key: "academic", label: "Academic", icon: <GraduationCap className="w-3.5 h-3.5" /> },
   { key: "payment", label: "Payment", icon: <CreditCard className="w-3.5 h-3.5" /> },
   { key: "history", label: "Work History", icon: <History className="w-3.5 h-3.5" /> },
+  { key: "review", label: "Review", icon: <ClipboardCheck className="w-3.5 h-3.5" /> },
   { key: "agreement", label: "Agreements", icon: <FileSignature className="w-3.5 h-3.5" /> },
 ];
 
@@ -185,6 +187,7 @@ export default function FundiOnboardingPage() {
     () => null, // academic — multi-row, validated separately if needed
     validatePayment,
     () => null, // work history — optional
+    () => null, // review — read-only summary
     validateAgreements,
   ];
 
@@ -323,7 +326,8 @@ export default function FundiOnboardingPage() {
         {currentStep === 4 && <AcademicStep data={data} setData={patch} userId={user!.id} />}
         {currentStep === 5 && <PaymentStep data={data} setData={patch} userId={user!.id} />}
         {currentStep === 6 && <WorkHistoryStep data={data} setData={patch} userId={user!.id} />}
-        {currentStep === 7 && <AgreementsStep data={data} setData={patch} userId={user!.id} />}
+        {currentStep === 7 && <ReviewStep data={data} userId={user!.id} />}
+        {currentStep === 8 && <AgreementsStep data={data} setData={patch} userId={user!.id} />}
       </StepShell>
     </div>
   );
