@@ -7,6 +7,11 @@ import StepShell from "@/components/onboarding/StepShell";
 import PersonalStep from "@/components/onboarding/steps/PersonalStep";
 import SkillsStep from "@/components/onboarding/steps/SkillsStep";
 import LocationStep from "@/components/onboarding/steps/LocationStep";
+import DocumentsStep from "@/components/onboarding/steps/DocumentsStep";
+import AcademicStep from "@/components/onboarding/steps/AcademicStep";
+import PaymentStep from "@/components/onboarding/steps/PaymentStep";
+import WorkHistoryStep from "@/components/onboarding/steps/WorkHistoryStep";
+import AgreementsStep from "@/components/onboarding/steps/AgreementsStep";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, ShieldAlert, ShieldX, User, Briefcase, MapPin, FileText, GraduationCap, CreditCard, History, FileSignature } from "lucide-react";
@@ -16,7 +21,6 @@ const STEPS = [
   { key: "personal", label: "Personal", icon: <User className="w-3.5 h-3.5" /> },
   { key: "skills", label: "Skills & Experience", icon: <Briefcase className="w-3.5 h-3.5" /> },
   { key: "location", label: "Location", icon: <MapPin className="w-3.5 h-3.5" /> },
-  // Phase B (placeholders so the progress bar reflects the full flow)
   { key: "documents", label: "Documents", icon: <FileText className="w-3.5 h-3.5" /> },
   { key: "academic", label: "Academic", icon: <GraduationCap className="w-3.5 h-3.5" /> },
   { key: "payment", label: "Payment", icon: <CreditCard className="w-3.5 h-3.5" /> },
@@ -47,6 +51,21 @@ function validateLocation(d: any): string | null {
   if (!d.county || !d.constituency || !d.ward) return "County, constituency and ward are required";
   if (!d.exact_address) return "Exact address is required";
   if (!d.service_area) return "Service area is required";
+  return null;
+}
+function validateDocuments(d: any): string | null {
+  if (!d.id_front_url) return "Upload the front side of your ID";
+  if (!d.id_back_url) return "Upload the back side of your ID";
+  return null;
+}
+function validatePayment(d: any): string | null {
+  if (!d.mpesa_number || d.mpesa_number.length < 10) return "Enter a valid M-Pesa number";
+  if (!d.mpesa_name) return "Enter the registered M-Pesa name";
+  return null;
+}
+function validateAgreements(d: any): string | null {
+  if (!d.consent_background_check) return "You must consent to the background check";
+  if (!d.consent_data_usage) return "You must accept the data usage terms";
   return null;
 }
 
@@ -83,9 +102,8 @@ export default function FundiOnboardingPage() {
     dirtyRef.current = true;
   }, []);
 
-  // Autosave on step change
   const persist = useCallback(
-    async (overrideStep?: number) => {
+    async (overrideStep?: number, extra?: any) => {
       if (!user) return;
       setSaving(true);
       try {
@@ -129,9 +147,17 @@ export default function FundiOnboardingPage() {
           max_travel_km: data.max_travel_km,
           latitude: data.latitude,
           longitude: data.longitude,
+          nca_number: data.nca_number,
+          kra_pin: data.kra_pin,
+          mpesa_number: data.mpesa_number,
+          mpesa_name: data.mpesa_name,
+          bank_name: data.bank_name,
+          bank_account: data.bank_account,
+          consent_background_check: data.consent_background_check,
+          consent_data_usage: data.consent_data_usage,
           onboarding_step: overrideStep ?? currentStep,
+          ...(extra || {}),
         };
-        // Sync the merged "name" on profiles for backwards compatibility
         const fullName = [data.first_name, data.middle_name, data.last_name].filter(Boolean).join(" ").trim();
 
         const { error } = await supabase.from("worker_profiles").upsert(payload, { onConflict: "user_id" });
@@ -151,9 +177,48 @@ export default function FundiOnboardingPage() {
     [user, data, currentStep, toast]
   );
 
+  const validators: Array<(d: any) => string | null> = [
+    validatePersonal,
+    validateSkills,
+    validateLocation,
+    validateDocuments,
+    () => null, // academic — multi-row, validated separately if needed
+    validatePayment,
+    () => null, // work history — optional
+    validateAgreements,
+  ];
+
+  const submitForReview = async () => {
+    // Re-run all hard validators
+    for (let i = 0; i < validators.length; i++) {
+      const err = validators[i](data);
+      if (err) {
+        toast({ title: `Fix step ${i + 1}: ${STEPS[i].label}`, description: err, variant: "destructive" });
+        setCurrentStep(i);
+        return;
+      }
+    }
+    try {
+      await persist(STEPS.length - 1, {
+        submitted_for_review: true,
+        consented_at: new Date().toISOString(),
+        verification_status: data.verification_status === "approved" ? "approved" : "pending",
+        rejection_reason: null,
+      });
+      await supabase.from("activity_logs").insert({
+        user_id: user!.id,
+        action: "Fundi Submitted For Verification",
+        detail: "Worker profile submitted for admin review",
+        entity_type: "worker_profile",
+        entity_id: user!.id,
+      });
+      setData((prev: any) => ({ ...prev, submitted_for_review: true, rejection_reason: null }));
+      toast({ title: "Submitted for verification", description: "We'll notify you once an admin reviews your profile." });
+      navigate("/dashboard");
+    } catch {}
+  };
+
   const goNext = async () => {
-    // validate current step
-    const validators: Array<(d: any) => string | null> = [validatePersonal, validateSkills, validateLocation];
     const v = validators[currentStep];
     if (v) {
       const err = v(data);
@@ -162,15 +227,8 @@ export default function FundiOnboardingPage() {
         return;
       }
     }
-    // Phase A: cap navigation at the Location step until Phase B is built
-    if (currentStep >= 2) {
-      toast({
-        title: "Phase B coming soon",
-        description: "Documents, academic, payment, work history and agreements steps will be available next.",
-      });
-      try {
-        await persist(2);
-      } catch {}
+    if (currentStep === STEPS.length - 1) {
+      await submitForReview();
       return;
     }
     const next = currentStep + 1;
@@ -183,9 +241,7 @@ export default function FundiOnboardingPage() {
   const goPrev = async () => {
     const prev = Math.max(0, currentStep - 1);
     if (dirtyRef.current) {
-      try {
-        await persist(prev);
-      } catch {}
+      try { await persist(prev); } catch {}
     }
     setCurrentStep(prev);
   };
@@ -211,6 +267,7 @@ export default function FundiOnboardingPage() {
   const isApproved = data.verification_status === "approved";
   const isRejected = data.verification_status === "rejected";
   const submitted = !!data.submitted_for_review;
+  const isFinalStep = currentStep === STEPS.length - 1;
 
   return (
     <div className="space-y-4">
@@ -255,17 +312,18 @@ export default function FundiOnboardingPage() {
         onNext={goNext}
         onSaveExit={saveAndExit}
         saving={saving}
+        nextLabel={isFinalStep ? "Submit for Verification" : "Next"}
         title="Fundi Verification"
         subtitle={`Step ${currentStep + 1} of ${STEPS.length} — ${STEPS[currentStep].label}`}
       >
         {currentStep === 0 && <PersonalStep data={data} setData={patch} userId={user!.id} />}
         {currentStep === 1 && <SkillsStep data={data} setData={patch} userId={user!.id} />}
         {currentStep === 2 && <LocationStep data={data} setData={patch} userId={user!.id} />}
-        {currentStep > 2 && (
-          <div className="text-center py-12 text-sm text-muted-foreground">
-            This step will be available in Phase B.
-          </div>
-        )}
+        {currentStep === 3 && <DocumentsStep data={data} setData={patch} userId={user!.id} />}
+        {currentStep === 4 && <AcademicStep data={data} setData={patch} userId={user!.id} />}
+        {currentStep === 5 && <PaymentStep data={data} setData={patch} userId={user!.id} />}
+        {currentStep === 6 && <WorkHistoryStep data={data} setData={patch} userId={user!.id} />}
+        {currentStep === 7 && <AgreementsStep data={data} setData={patch} userId={user!.id} />}
       </StepShell>
     </div>
   );
