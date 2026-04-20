@@ -401,6 +401,24 @@ export default function CustomerPostJobPage() {
           ) : <p className="text-sm text-muted-foreground text-center py-8">No applications yet</p>}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Job Confirmation */}
+      <AlertDialog open={!!deleteJobConfirm} onOpenChange={(open) => !open && setDeleteJobConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{deleteJobConfirm?.title}" and all its applications will be permanently removed. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteJob} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
