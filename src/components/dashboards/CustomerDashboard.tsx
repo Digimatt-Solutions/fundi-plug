@@ -415,7 +415,7 @@ export default function CustomerDashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
         {[
           { label: t("My Bookings"), value: String(stats.bookings), icon: Briefcase, color: "text-primary", bg: "bg-primary/10" },
           { label: t("Total Spent"), value: `KSH ${stats.spent.toLocaleString()}`, icon: CreditCard, color: "text-chart-2", bg: "bg-chart-2/10" },
@@ -423,11 +423,11 @@ export default function CustomerDashboard() {
         ].map((s) => (
           <div key={s.label} className="stat-card">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{s.label}</p>
-                <p className="text-3xl font-bold text-foreground mt-1 tabular-nums">{s.value}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{s.label}</p>
+                <p className="text-xl sm:text-3xl font-bold text-foreground mt-1 tabular-nums break-all">{s.value}</p>
               </div>
-              <div className={`w-12 h-12 rounded-xl ${s.bg} flex items-center justify-center`}>
+              <div className={`hidden sm:flex w-12 h-12 rounded-xl ${s.bg} items-center justify-center shrink-0`}>
                 <s.icon className={`w-6 h-6 ${s.color}`} />
               </div>
             </div>

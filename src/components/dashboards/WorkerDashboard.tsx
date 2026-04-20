@@ -132,15 +132,15 @@ export default function WorkerDashboard() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((stat, i) => (
           <div key={stat.label} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-3xl font-bold text-foreground mt-1 tabular-nums">{stat.value}</p>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{stat.label}</p>
+                <p className="text-xl sm:text-3xl font-bold text-foreground mt-1 tabular-nums break-all">{stat.value}</p>
               </div>
-              <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
+              <div className={`hidden sm:flex w-12 h-12 rounded-xl ${stat.bg} items-center justify-center shrink-0`}>
                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
             </div>

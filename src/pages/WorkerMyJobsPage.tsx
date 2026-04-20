@@ -167,24 +167,24 @@ export default function WorkerMyJobsPage() {
           {hireRequests.map((job, i) => (
             <div key={job.id} className="stat-card border-primary/30 bg-primary/5 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="space-y-2">
-                <div className="flex items-start gap-4 flex-wrap">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                   {job.image_url && (
-                    <img src={job.image_url} alt="Job" className="w-32 h-32 rounded-lg object-cover shrink-0" />
+                    <img src={job.image_url} alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
                   )}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0 space-y-2 w-full">
+                    <div className="flex items-start justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
                         <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
-                        <h3 className="font-semibold text-foreground">{job.title}</h3>
+                        <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={() => respondToHireRequest(job.id, true)}><Check className="w-4 h-4 mr-1" /> Accept</Button>
-                        <Button size="sm" variant="outline" className="text-destructive" onClick={() => respondToHireRequest(job.id, false)}><X className="w-4 h-4 mr-1" /> Reject</Button>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <Button size="sm" className="flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, true)}><Check className="w-4 h-4 mr-1" /> Accept</Button>
+                        <Button size="sm" variant="outline" className="text-destructive flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, false)}><X className="w-4 h-4 mr-1" /> Reject</Button>
                       </div>
                     </div>
-                    {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    {job.description && <p className="text-sm text-muted-foreground break-words">{job.description}</p>}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       {job.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</span>}
                       <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
@@ -193,8 +193,8 @@ export default function WorkerMyJobsPage() {
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                    <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
-                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {maskEmail(job.customerEmail)}</p>}
-                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {maskPhone(job.customerPhone)}</p>}
+                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3 shrink-0" /> <span className="truncate">{maskEmail(job.customerEmail)}</span></p>}
+                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" /> {maskPhone(job.customerPhone)}</p>}
                   <p className="text-[10px] text-muted-foreground italic">Full contact details revealed once you accept the request.</p>
                 </div>
               </div>
@@ -213,22 +213,22 @@ export default function WorkerMyJobsPage() {
         <TabsContent value="available" className="space-y-4">
           {availableJobs.length > 0 ? availableJobs.map((job, i) => (
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="flex items-start gap-4 flex-wrap">
+              <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                 {job.image_url && (
-                  <img src={job.image_url} alt="Job" className="w-32 h-32 rounded-lg object-cover shrink-0" />
+                  <img src={job.image_url} alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
                 )}
-                <div className="flex-1 min-w-0 space-y-1.5">
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2">
+                <div className="flex-1 min-w-0 space-y-2 w-full">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
-                      <h3 className="font-semibold text-foreground">{job.title}</h3>
+                      <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
                     </div>
-                    <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97]">
+                    <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97] shrink-0">
                       <Send className="w-4 h-4 mr-1" /> Apply
                     </Button>
                   </div>
-                  {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  {job.description && <p className="text-sm text-muted-foreground break-words">{job.description}</p>}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address || "No location"}</span>
                     <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
@@ -275,13 +275,13 @@ export default function WorkerMyJobsPage() {
         <TabsContent value="assigned" className="space-y-4">
           {assignedJobs.length > 0 ? assignedJobs.map((job, i) => (
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div>
-                    <p className="font-medium text-foreground">{job.title}</p>
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-foreground break-words">{job.title}</p>
                     <p className="text-xs text-muted-foreground">KSH {job.budget ? job.budget.toLocaleString() : "No budget"} - {new Date(job.created_at).toLocaleString()}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
                       job.status === "completed" ? "bg-green-500/10 text-green-500" :
                       job.status === "in_progress" ? "bg-primary/10 text-primary" : "bg-chart-4/10 text-chart-4"
@@ -301,9 +301,9 @@ export default function WorkerMyJobsPage() {
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                   <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
-                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3" /> {job.customerEmail}</p>}
-                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {job.customerPhone}</p>}
-                  {job.address && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</p>}
+                  {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3 shrink-0" /> <span className="truncate">{job.customerEmail}</span></p>}
+                  {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" /> {job.customerPhone}</p>}
+                  {job.address && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3 shrink-0" /> <span className="break-words">{job.address}</span></p>}
                 </div>
               </div>
             </div>

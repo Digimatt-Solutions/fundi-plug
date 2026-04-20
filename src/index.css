@@ -102,7 +102,7 @@
 
 @layer components {
   .stat-card {
-    @apply bg-card border border-border rounded-xl p-6 relative overflow-hidden transition-shadow duration-200;
+    @apply bg-card border border-border rounded-xl p-4 sm:p-6 relative overflow-hidden transition-shadow duration-200;
   }
   .stat-card:hover {
     box-shadow: 0 4px 24px -4px hsl(var(--primary) / 0.1);
