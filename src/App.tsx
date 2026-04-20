@@ -21,6 +21,7 @@ import FundiOnboardingPage from "@/pages/FundiOnboardingPage";
 import WorkerMyJobsPage from "@/pages/WorkerMyJobsPage";
 import WorkerEarningsPage from "@/pages/WorkerEarningsPage";
 import WorkerReviewsPage from "@/pages/WorkerReviewsPage";
+import PublicReviewsPage from "@/pages/PublicReviewsPage";
 import CustomerPostJobPage from "@/pages/CustomerPostJobPage";
 import CustomerBookingsPage from "@/pages/CustomerBookingsPage";
 import FindWorkersPage from "@/pages/FindWorkersPage";
@@ -46,6 +47,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reviews/:workerId" element={<PublicReviewsPage />} />
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Dashboard />} />
                 {/* Admin */}
