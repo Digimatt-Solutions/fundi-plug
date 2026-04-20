@@ -148,9 +148,9 @@ const Auth = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center bg-card p-8 dark:bg-background">
+      <div className="flex-1 flex items-center justify-center bg-card p-3 sm:p-6 md:p-8 dark:bg-background">
         <div className="w-full max-w-md animate-fade-in">
-          <div className="border border-border rounded-2xl p-6 bg-card/50">
+          <div className="border border-border rounded-2xl p-4 sm:p-6 bg-card/50">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden mb-4">
                 <img src={logo} alt="FundiPlug" className="w-full h-full object-cover" />
