@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, ImagePlus } from "lucide-react";
+import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, ImagePlus, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -153,6 +154,34 @@ export default function CustomerPostJobPage() {
     return ["pending"].includes(job.status) && !job.worker_id;
   };
 
+  const canDeleteJob = (job: any) => {
+    // Allow deletion when no fundi is actively working: pending (no worker), cancelled, or completed
+    return ["pending", "cancelled", "completed"].includes(job.status) && !["accepted", "in_progress"].includes(job.status);
+  };
+
+  const [deleteJobConfirm, setDeleteJobConfirm] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteJob = async () => {
+    if (!deleteJobConfirm) return;
+    setDeleting(true);
+    // Clean up dependent rows that may reference the job
+    await supabase.from("job_applications").delete().eq("job_id", deleteJobConfirm.id);
+    await supabase.from("bookings").delete().eq("job_id", deleteJobConfirm.id);
+    const { error } = await supabase.from("jobs").delete().eq("id", deleteJobConfirm.id);
+    if (error) {
+      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Job deleted" });
+      await supabase.from("activity_logs").insert({
+        user_id: user!.id, action: "Job Deleted", detail: `Deleted "${deleteJobConfirm.title}"`, entity_type: "job", entity_id: deleteJobConfirm.id,
+      });
+      setDeleteJobConfirm(null);
+      loadData();
+    }
+    setDeleting(false);
+  };
+
   const viewApplications = async (jobId: string) => {
     setViewAppsJobId(jobId);
     setLoadingApps(true);
@@ -254,6 +283,11 @@ export default function CustomerPostJobPage() {
                     {job.status === "pending" && (
                       <Button size="sm" variant="outline" onClick={() => viewApplications(job.id)} className="active:scale-[0.97]">
                         <Users className="w-4 h-4 mr-1" /> Applications
+                      </Button>
+                    )}
+                    {canDeleteJob(job) && (
+                      <Button size="sm" variant="outline" className="text-destructive hover:text-destructive active:scale-[0.97]" onClick={() => setDeleteJobConfirm(job)}>
+                        <Trash2 className="w-4 h-4 mr-1" /> Delete
                       </Button>
                     )}
                   </div>
