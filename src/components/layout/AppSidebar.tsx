@@ -29,6 +29,7 @@ const adminNav = [
   { title: "Reports", url: "/dashboard/reports", icon: BarChart3, key: "reports" },
   { title: "Activity Logs", url: "/dashboard/activity", icon: Activity, key: "activity" },
   { title: "User Management", url: "/dashboard/user-management", icon: UserCog, key: "user-management" },
+  { title: "Profile", url: "/dashboard/account", icon: UserCog, key: "account" },
   { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
@@ -50,6 +51,7 @@ const customerNav = [
   { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays, key: "bookings" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
   { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
+  { title: "Profile", url: "/dashboard/account", icon: UserCog, key: "account" },
   { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 

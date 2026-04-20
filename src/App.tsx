@@ -18,6 +18,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import VerificationPage from "@/pages/VerificationPage";
 import WorkerProfilePage from "@/pages/WorkerProfilePage";
 import FundiOnboardingPage from "@/pages/FundiOnboardingPage";
+import AccountProfilePage from "@/pages/AccountProfilePage";
 import WorkerMyJobsPage from "@/pages/WorkerMyJobsPage";
 import WorkerEarningsPage from "@/pages/WorkerEarningsPage";
 import WorkerReviewsPage from "@/pages/WorkerReviewsPage";
@@ -69,6 +70,7 @@ const App = () => (
                 <Route path="find-workers" element={<FindWorkersPage />} />
                 <Route path="bookings" element={<CustomerBookingsPage />} />
                 {/* Shared */}
+                <Route path="account" element={<AccountProfilePage />} />
                 <Route path="community" element={<CommunityPage />} />
                 <Route path="payments" element={<PaymentsPage />} />
                 <Route path="settings" element={<SettingsPage />} />
