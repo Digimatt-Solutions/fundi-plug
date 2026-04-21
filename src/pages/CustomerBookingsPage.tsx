@@ -94,7 +94,52 @@ export default function CustomerBookingsPage() {
     }
   }, [jobs, loading]);
 
-  const handlePay = async (job: any, method: "stripe" | "mpesa") => {
+  const handlePay = async (job: any, method: "stripe" | "mpesa" | "pesapal") => {
+    setPaying(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (method === "stripe") {
+        const { data, error } = await supabase.functions.invoke("create-payment", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        if (data?.url) window.location.href = data.url;
+      } else if (method === "pesapal") {
+        const { data, error } = await supabase.functions.invoke("pesapal-initiate-payment", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        if (data?.url) window.location.href = data.url;
+      } else {
+        if (!mpesaPhone) {
+          toast({ title: "Phone number required", description: "Enter your M-Pesa phone number", variant: "destructive" });
+          setPaying(false);
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id, phoneNumber: mpesaPhone },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        toast({ title: "M-Pesa prompt sent!", description: data?.message || "Check your phone to complete payment." });
+        setPayDialog(null);
+        setPaymentMethod(null);
+        setMpesaPhone("");
+        const pollForCompletion = async (attempts: number = 0) => {
+          if (attempts > 12) return;
+          await new Promise(r => setTimeout(r, 5000));
+          await loadData();
+        };
+        pollForCompletion();
+      }
+    } catch (err: any) {
+      toast({ title: "Payment failed", description: err.message, variant: "destructive" });
+    } finally {
+      setPaying(false);
+    }
+  };
     setPaying(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -241,20 +286,27 @@ export default function CustomerBookingsPage() {
             {!paymentMethod ? (
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">Choose payment method:</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setPaymentMethod("stripe")}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={stripeLogo} alt="Stripe" className="h-8 w-auto object-contain" />
-                    <span className="text-sm font-medium text-foreground">Card (Stripe)</span>
+                    <img src={stripeLogo} alt="Stripe" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-medium text-foreground">Card</span>
                   </button>
                   <button
                     onClick={() => setPaymentMethod("mpesa")}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={mpesaLogo} alt="M-Pesa" className="h-8 w-auto object-contain" />
-                    <span className="text-sm font-medium text-foreground">M-Pesa</span>
+                    <img src={mpesaLogo} alt="M-Pesa" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-medium text-foreground">M-Pesa</span>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("pesapal")}
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                  >
+                    <img src={pesapalLogo} alt="Pesapal" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-medium text-foreground">Pesapal</span>
                   </button>
                 </div>
               </div>
@@ -272,10 +324,15 @@ export default function CustomerBookingsPage() {
                 />
                 <p className="text-xs text-muted-foreground">You'll receive an STK push on your phone to complete payment.</p>
               </div>
-            ) : (
+            ) : paymentMethod === "stripe" ? (
               <div className="flex items-center gap-2">
                 <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
                 <span className="text-sm font-medium text-foreground">Pay with Card (Stripe)</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
+                <span className="text-sm font-medium text-foreground">Pay with Pesapal (Card / Mobile / Bank)</span>
               </div>
             )}
 
