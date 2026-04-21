@@ -17,8 +17,14 @@ async function getAuthToken() {
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ consumer_key: consumerKey, consumer_secret: consumerSecret }),
   });
-  const data = await res.json();
-  if (!data?.token) throw new Error(data?.error?.message || "Failed to get Pesapal token");
+  const text = await res.text();
+  let data: any = {};
+  try { data = JSON.parse(text); } catch { /* noop */ }
+  if (!data?.token) {
+    console.error("Pesapal auth failed:", res.status, text);
+    const msg = data?.error?.message || data?.error?.code || data?.message || text || "Failed to get Pesapal token";
+    throw new Error(`Pesapal auth failed (${res.status}): ${msg}`);
+  }
   return data.token as string;
 }
 
