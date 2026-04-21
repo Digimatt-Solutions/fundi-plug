@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarDays, Star, CreditCard, Smartphone, FileText } from "lucide-react";
+import { CalendarDays, Star, CreditCard, Smartphone, FileText, Globe } from "lucide-react";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
+import pesapalLogo from "@/assets/pesapal-logo.jpg";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ export default function CustomerBookingsPage() {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [paying, setPaying] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | "pesapal" | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState("");
   const [receiptData, setReceiptData] = useState<any>(null);
 
