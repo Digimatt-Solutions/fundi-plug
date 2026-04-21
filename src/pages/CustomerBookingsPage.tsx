@@ -140,46 +140,6 @@ export default function CustomerBookingsPage() {
       setPaying(false);
     }
   };
-    setPaying(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (method === "stripe") {
-        const { data, error } = await supabase.functions.invoke("create-payment", {
-          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
-          headers: { Authorization: `Bearer ${session?.access_token}` },
-        });
-        if (error || data?.error) throw new Error(data?.error || error?.message);
-        if (data?.url) window.location.href = data.url;
-      } else {
-        if (!mpesaPhone) {
-          toast({ title: "Phone number required", description: "Enter your M-Pesa phone number", variant: "destructive" });
-          setPaying(false);
-          return;
-        }
-        const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
-          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id, phoneNumber: mpesaPhone },
-          headers: { Authorization: `Bearer ${session?.access_token}` },
-        });
-        if (error || data?.error) throw new Error(data?.error || error?.message);
-        toast({ title: "M-Pesa prompt sent!", description: data?.message || "Check your phone to complete payment." });
-        setPayDialog(null);
-        setPaymentMethod(null);
-        setMpesaPhone("");
-        
-        // Poll for payment completion
-        const pollForCompletion = async (attempts: number = 0) => {
-          if (attempts > 12) return;
-          await new Promise(r => setTimeout(r, 5000));
-          await loadData();
-        };
-        pollForCompletion();
-      }
-    } catch (err: any) {
-      toast({ title: "Payment failed", description: err.message, variant: "destructive" });
-    } finally {
-      setPaying(false);
-    }
-  };
 
   const submitReview = async () => {
     if (!reviewDialog || !user) return;
