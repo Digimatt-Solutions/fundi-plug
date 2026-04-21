@@ -7,6 +7,13 @@ const corsHeaders = {
 
 const PESAPAL_BASE = "https://cybqa.pesapal.com/pesapalv3"; // sandbox
 
+function respond(payload: Record<string, unknown>) {
+  return new Response(JSON.stringify(payload), {
+    status: 200,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
 async function getAuthToken() {
   const consumerKey = Deno.env.get("PESAPAL_CONSUMER_KEY");
   const consumerSecret = Deno.env.get("PESAPAL_CONSUMER_SECRET");
@@ -122,14 +129,16 @@ Deno.serve(async (req) => {
       throw new Error(orderData?.error?.message || JSON.stringify(orderData));
     }
 
-    return new Response(JSON.stringify({ url: orderData.redirect_url, paymentId: payment.id }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return respond({ ok: true, url: orderData.redirect_url, paymentId: payment.id });
   } catch (err: any) {
     console.error("pesapal-initiate-payment error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return respond({
+      ok: false,
+      error: err.message,
+      diagnostics: {
+        provider: "pesapal",
+        stage: err.message?.includes("auth failed") ? "auth" : "initiate_payment",
+      },
     });
   }
 });

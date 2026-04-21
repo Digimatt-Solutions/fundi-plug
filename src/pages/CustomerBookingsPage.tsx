@@ -110,7 +110,10 @@ export default function CustomerBookingsPage() {
           body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
-        if (error || data?.error) throw new Error(data?.error || error?.message);
+        if (error) throw new Error(error.message);
+        if (!data?.ok || data?.error) {
+          throw new Error(data?.error || "Pesapal payment could not be started.");
+        }
         if (data?.url) window.location.href = data.url;
       } else {
         if (!mpesaPhone) {
@@ -303,7 +306,7 @@ export default function CustomerBookingsPage() {
             {paymentMethod && (
               <Button onClick={() => handlePay(payDialog, paymentMethod)} disabled={paying}>
                 {paymentMethod === "mpesa" ? <Smartphone className="w-4 h-4 mr-2" /> : <CreditCard className="w-4 h-4 mr-2" />}
-                {paying ? "Processing..." : paymentMethod === "mpesa" ? "Send STK Push" : "Pay with Card"}
+                {paying ? "Processing..." : paymentMethod === "mpesa" ? "Send STK Push" : paymentMethod === "pesapal" ? "Continue to Pesapal" : "Pay with Card"}
               </Button>
             )}
           </DialogFooter>
