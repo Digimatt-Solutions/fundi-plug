@@ -38,6 +38,13 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
+    // Pesapal payments are confirmed via IPN — just return current status
+    if (payment.stripe_payment_id?.startsWith("pesapal_")) {
+      return new Response(JSON.stringify({ status: payment.status }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (payment.stripe_payment_id) {
       const session = await stripe.checkout.sessions.retrieve(payment.stripe_payment_id);
       if (session.payment_status === "paid") {

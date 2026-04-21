@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarDays, Star, CreditCard, Smartphone, FileText } from "lucide-react";
+import { CalendarDays, Star, CreditCard, Smartphone, FileText, Globe } from "lucide-react";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
+import pesapalLogo from "@/assets/pesapal-logo.jpg";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ export default function CustomerBookingsPage() {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [paying, setPaying] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | "pesapal" | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState("");
   const [receiptData, setReceiptData] = useState<any>(null);
 
@@ -93,12 +94,19 @@ export default function CustomerBookingsPage() {
     }
   }, [jobs, loading]);
 
-  const handlePay = async (job: any, method: "stripe" | "mpesa") => {
+  const handlePay = async (job: any, method: "stripe" | "mpesa" | "pesapal") => {
     setPaying(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (method === "stripe") {
         const { data, error } = await supabase.functions.invoke("create-payment", {
+          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
+        if (error || data?.error) throw new Error(data?.error || error?.message);
+        if (data?.url) window.location.href = data.url;
+      } else if (method === "pesapal") {
+        const { data, error } = await supabase.functions.invoke("pesapal-initiate-payment", {
           body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
@@ -119,8 +127,6 @@ export default function CustomerBookingsPage() {
         setPayDialog(null);
         setPaymentMethod(null);
         setMpesaPhone("");
-        
-        // Poll for payment completion
         const pollForCompletion = async (attempts: number = 0) => {
           if (attempts > 12) return;
           await new Promise(r => setTimeout(r, 5000));
@@ -240,20 +246,27 @@ export default function CustomerBookingsPage() {
             {!paymentMethod ? (
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">Choose payment method:</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setPaymentMethod("stripe")}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={stripeLogo} alt="Stripe" className="h-8 w-auto object-contain" />
-                    <span className="text-sm font-medium text-foreground">Card (Stripe)</span>
+                    <img src={stripeLogo} alt="Stripe" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-medium text-foreground">Card</span>
                   </button>
                   <button
                     onClick={() => setPaymentMethod("mpesa")}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={mpesaLogo} alt="M-Pesa" className="h-8 w-auto object-contain" />
-                    <span className="text-sm font-medium text-foreground">M-Pesa</span>
+                    <img src={mpesaLogo} alt="M-Pesa" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-medium text-foreground">M-Pesa</span>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("pesapal")}
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
+                  >
+                    <img src={pesapalLogo} alt="Pesapal" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-medium text-foreground">Pesapal</span>
                   </button>
                 </div>
               </div>
@@ -271,10 +284,15 @@ export default function CustomerBookingsPage() {
                 />
                 <p className="text-xs text-muted-foreground">You'll receive an STK push on your phone to complete payment.</p>
               </div>
-            ) : (
+            ) : paymentMethod === "stripe" ? (
               <div className="flex items-center gap-2">
                 <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
                 <span className="text-sm font-medium text-foreground">Pay with Card (Stripe)</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
+                <span className="text-sm font-medium text-foreground">Pay with Pesapal (Card / Mobile / Bank)</span>
               </div>
             )}
 

@@ -28,9 +28,10 @@ interface Props {
   data: ReceiptData | null;
 }
 
-function getPaymentMethod(stripePaymentId?: string | null): "mpesa" | "stripe" | "unknown" {
+function getPaymentMethod(stripePaymentId?: string | null): "mpesa" | "stripe" | "pesapal" | "unknown" {
   if (!stripePaymentId) return "unknown";
   if (stripePaymentId.startsWith("mpesa_")) return "mpesa";
+  if (stripePaymentId.startsWith("pesapal_")) return "pesapal";
   return "stripe";
 }
 
