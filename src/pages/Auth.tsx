@@ -8,7 +8,7 @@ import { Mail, Lock, User, Eye, EyeOff, Phone, ShieldCheck } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/workers-hero.jpg";
-import logo from "@/assets/logo.png";
+import fundiplugLogo from "@/assets/fundiplug-logo.png";
 import { playSubmitSound } from "@/lib/sound";
 
 const Auth = () => {
@@ -152,11 +152,12 @@ const Auth = () => {
         <div className="w-full max-w-md animate-fade-in">
           <div className="border border-border rounded-2xl p-4 sm:p-6 bg-card/50">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden mb-4">
-                <img src={logo} alt="FundiPlug" className="w-full h-full object-cover" />
-              </div>
-              <h1 className="text-2xl font-bold text-foreground">FundiPlug</h1>
-              <p className="text-muted-foreground text-sm mt-1">Skilled Workers Marketplace</p>
+              <img
+                src={fundiplugLogo}
+                alt="FundiPlug"
+                className="mx-auto h-12 sm:h-14 w-auto object-contain mb-3 dark:invert"
+              />
+              <p className="text-muted-foreground text-sm">Skilled Workers Marketplace</p>
             </div>
 
             <div className="flex bg-muted rounded-lg p-1 mb-6">
