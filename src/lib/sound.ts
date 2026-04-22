@@ -5,9 +5,10 @@
 const STORAGE_KEY = "app_sound_enabled";
 
 export function isSoundEnabled(): boolean {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") return false;
   const v = localStorage.getItem(STORAGE_KEY);
-  return v === null ? true : v === "true";
+  // Default OFF — user must opt in via Settings → Preferences
+  return v === null ? false : v === "true";
 }
 
 export function setSoundEnabled(enabled: boolean) {

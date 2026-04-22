@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -60,6 +61,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [disabledModules, setDisabledModules] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -103,7 +105,7 @@ export function AppSidebar() {
                         activeClassName="!text-primary bg-primary/10 border-primary/40"
                       >
                         <item.icon className={`w-4 h-4 shrink-0 ${active ? "text-primary" : ""}`} />
-                        {!collapsed && <span>{item.title}</span>}
+                        {!collapsed && <span>{t(item.title)}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -116,7 +118,7 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         <button onClick={toggleSidebar} className="flex items-center gap-2 px-3 py-2 text-sm text-sidebar-foreground hover:text-primary transition-colors">
           <ChevronLeft className={`w-4 h-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
-          {!collapsed && <span>Collapse</span>}
+          {!collapsed && <span>{t("Collapse")}</span>}
         </button>
       </SidebarFooter>
     </Sidebar>

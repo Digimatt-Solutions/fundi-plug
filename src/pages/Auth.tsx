@@ -12,8 +12,12 @@ import fundiplugLogo from "@/assets/fundiplug-logo.png";
 import { playSubmitSound } from "@/lib/sound";
 import logo from "@/assets/logo.png";
 
+type Mode = "signin" | "signup" | "forgot";
+
 const Auth = () => {
-  const [isSignIn, setIsSignIn] = useState(true);
+  const [mode, setMode] = useState<Mode>("signin");
+  const isSignIn = mode === "signin";
+  const isForgot = mode === "forgot";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -25,13 +29,17 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Phone OTP state
+  // Phone OTP state (signup AND forgot-password)
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+
+  // Forgot-password specific state
+  const [newPassword, setNewPassword] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
@@ -103,8 +111,43 @@ const Auth = () => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!otpVerified) {
+      setError("Verify your phone number first");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    setError("");
+    setResetting(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("reset-password-with-otp", {
+        body: { phone_number: phoneNumber, otp: otpCode, new_password: newPassword },
+      });
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Password updated", description: "You can now sign in with your new password." });
+      // Pre-fill email if returned, switch to sign-in
+      if (data?.email) setEmail(data.email);
+      setPassword("");
+      setNewPassword("");
+      resetOtpState();
+      setMode("signin");
+    } catch (err: any) {
+      setError(err.message || "Failed to reset password");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isForgot) {
+      await handleResetPassword();
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -132,7 +175,8 @@ const Auth = () => {
     }
   };
 
-  const signupDisabled = !isSignIn && !otpVerified;
+  const signupDisabled = !isSignIn && !isForgot && !otpVerified;
+  const resetDisabled = isForgot && (!otpVerified || newPassword.length < 6);
 
   return (
     <div className="flex min-h-screen">
@@ -165,24 +209,39 @@ const Auth = () => {
             </div>
             
 
-            <div className="flex bg-muted rounded-lg p-1 mb-6">
-              <button
-                onClick={() => { setIsSignIn(true); setError(""); resetOtpState(); }}
-                className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
-                  isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => { setIsSignIn(false); setError(""); resetOtpState(); }}
-                className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
-                  !isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Sign Up
-              </button>
-            </div>
+            {!isForgot && (
+              <div className="flex bg-muted rounded-lg p-1 mb-6">
+                <button
+                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); }}
+                  className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
+                    isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => { setMode("signup"); setError(""); resetOtpState(); }}
+                  className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
+                    !isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+
+            {isForgot && (
+              <div className="mb-6 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); setNewPassword(""); }}
+                  className="text-xs text-primary hover:underline"
+                >
+                  ← Back to Sign In
+                </button>
+                <span className="text-sm font-semibold text-foreground ml-auto">Reset Password</span>
+              </div>
+            )}
 
             {error && (
               <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
@@ -191,7 +250,7 @@ const Auth = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {!isSignIn && (
+              {mode === "signup" && (
                 <div className="space-y-2 animate-fade-in">
                   <Label htmlFor="name" className="text-foreground font-medium">Full Name</Label>
                   <div className="relative">
@@ -201,34 +260,51 @@ const Auth = () => {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border-border" required />
+              {!isForgot && (
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border-border" required />
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
-                  {isSignIn && (
-                    <button type="button" className="text-xs text-primary hover:underline">Forgot password?</button>
-                  )}
+              {!isForgot && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
+                    {isSignIn && (
+                      <button
+                        type="button"
+                        onClick={() => { setMode("forgot"); setError(""); resetOtpState(); setNewPassword(""); }}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 pr-10 h-12 bg-muted/50 border-border" required />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 pr-10 h-12 bg-muted/50 border-border" required />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
+              )}
 
-              {/* Phone OTP Section - Sign Up only */}
-              {!isSignIn && (
+              {/* Phone OTP Section - Sign Up AND Forgot Password */}
+              {(mode === "signup" || isForgot) && (
                 <div className="space-y-3 animate-fade-in">
-                  <Label className="text-foreground font-medium">Phone Number</Label>
+                  <Label className="text-foreground font-medium">
+                    {isForgot ? "Registered Phone Number" : "Phone Number"}
+                  </Label>
+                  {isForgot && (
+                    <p className="text-xs text-muted-foreground -mt-1">
+                      Enter the phone number you signed up with. We'll send a 6-digit code to verify it's you.
+                    </p>
+                  )}
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -284,7 +360,30 @@ const Auth = () => {
                 </div>
               )}
 
-              {!isSignIn && (
+              {/* New password field — only in forgot-password flow, after verification */}
+              {isForgot && otpVerified && (
+                <div className="space-y-2 animate-fade-in">
+                  <Label htmlFor="newPassword" className="text-foreground font-medium">New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="newPassword"
+                      type={showPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="pl-10 pr-10 h-12 bg-muted/50 border-border"
+                      minLength={6}
+                      required
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {mode === "signup" && (
                 <div className="space-y-2 animate-fade-in">
                   <Label className="text-foreground font-medium">I am a</Label>
                   <div className="grid grid-cols-2 gap-2">
@@ -303,14 +402,23 @@ const Auth = () => {
 
               <Button
                 type="submit"
-                disabled={loading || signupDisabled}
+                disabled={loading || resetting || signupDisabled || resetDisabled}
                 className="w-full h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
               >
-                {loading ? "Please wait..." : isSignIn ? "Sign In" : "Create Account"}
+                {isForgot
+                  ? (resetting ? "Updating..." : "Update Password")
+                  : loading
+                    ? "Please wait..."
+                    : isSignIn
+                      ? "Sign In"
+                      : "Create Account"}
               </Button>
 
-              {signupDisabled && !isSignIn && (
+              {signupDisabled && (
                 <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
+              )}
+              {isForgot && !otpVerified && (
+                <p className="text-xs text-muted-foreground text-center">Verify your phone number to reset your password</p>
               )}
             </form>
 

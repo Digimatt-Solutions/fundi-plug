@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import * as L from "leaflet";
@@ -50,6 +50,8 @@ export default function CustomerDashboard() {
   const [showMap, setShowMap] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [unpaidJobs, setUnpaidJobs] = useState<any[]>([]);
+  const [showThanks, setShowThanks] = useState(false);
 
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
@@ -204,6 +206,58 @@ export default function CustomerDashboard() {
     load();
   }, [user]);
 
+  // Detect completed-but-unpaid jobs to show a dashboard alert
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    async function loadUnpaid() {
+      const { data: completedJobs } = await supabase
+        .from("jobs")
+        .select("id, title, budget")
+        .eq("customer_id", user!.id)
+        .eq("status", "completed");
+
+      const ids = (completedJobs || []).map(j => j.id);
+      if (ids.length === 0) {
+        if (!cancelled) {
+          // If there used to be unpaid jobs and now none, show "thank you"
+          setUnpaidJobs(prev => {
+            if (prev.length > 0) setShowThanks(true);
+            return [];
+          });
+        }
+        return;
+      }
+
+      const { data: pmts } = await supabase
+        .from("payments")
+        .select("job_id, status")
+        .in("job_id", ids);
+      const paidIds = new Set((pmts || []).filter(p => p.status === "completed").map(p => p.job_id));
+      const unpaid = (completedJobs || []).filter(j => !paidIds.has(j.id));
+      if (cancelled) return;
+      setUnpaidJobs(prev => {
+        if (prev.length > 0 && unpaid.length === 0) setShowThanks(true);
+        return unpaid;
+      });
+    }
+    loadUnpaid();
+    // Refresh whenever payments change
+    const channel = supabase
+      .channel("customer-payments-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, () => loadUnpaid())
+      .on("postgres_changes", { event: "*", schema: "public", table: "jobs", filter: `customer_id=eq.${user.id}` }, () => loadUnpaid())
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(channel); };
+  }, [user]);
+
+  // Auto-hide the thank-you message after 6s
+  useEffect(() => {
+    if (!showThanks) return;
+    const t = setTimeout(() => setShowThanks(false), 6000);
+    return () => clearTimeout(t);
+  }, [showThanks]);
+
   // Filter workers by selected category
   const filteredWorkers = useMemo(() => {
     if (selectedCategory === "all") return nearbyWorkers;
@@ -254,6 +308,37 @@ export default function CustomerDashboard() {
           </Button>
         )}
       </div>
+
+      {unpaidJobs.length > 0 && (
+        <div className="rounded-xl border border-chart-4/40 bg-chart-4/10 p-4 flex items-start gap-3 animate-fade-in">
+          <AlertCircle className="w-5 h-5 text-chart-4 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">
+              Finish payment for {unpaidJobs.length === 1 ? "your completed job" : `${unpaidJobs.length} completed jobs`}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5 break-words">
+              {unpaidJobs.slice(0, 2).map(j => j.title).join(", ")}
+              {unpaidJobs.length > 2 ? ` and ${unpaidJobs.length - 2} more` : ""} — head to My Bookings to complete the payment.
+            </p>
+          </div>
+          <Button size="sm" className="shrink-0" onClick={() => navigate("/dashboard/bookings")}>
+            <CreditCard className="w-4 h-4 mr-1" /> Finish Payment
+          </Button>
+        </div>
+      )}
+
+      {showThanks && unpaidJobs.length === 0 && (
+        <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 flex items-start gap-3 animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">Thank you — payment received!</p>
+            <p className="text-xs text-muted-foreground mt-0.5">All your completed jobs are now paid.</p>
+          </div>
+          <button type="button" onClick={() => setShowThanks(false)} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Dismiss">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       <div className="relative max-w-2xl animate-fade-in">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
