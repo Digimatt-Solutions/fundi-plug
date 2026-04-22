@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CalendarDays, Star, CreditCard, Smartphone, FileText, Globe } from "lucide-react";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
-import pesapalLogo from "@/assets/pesapal-logo.jpg";
+import paystackLogo from "@/assets/paystack-logo.png";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ export default function CustomerBookingsPage() {
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [paying, setPaying] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | "pesapal" | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "mpesa" | "paystack" | null>(null);
   const [mpesaPhone, setMpesaPhone] = useState("");
   const [receiptData, setReceiptData] = useState<any>(null);
 
@@ -94,7 +94,7 @@ export default function CustomerBookingsPage() {
     }
   }, [jobs, loading]);
 
-  const handlePay = async (job: any, method: "stripe" | "mpesa" | "pesapal") => {
+  const handlePay = async (job: any, method: "stripe" | "mpesa" | "paystack") => {
     setPaying(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -105,14 +105,14 @@ export default function CustomerBookingsPage() {
         });
         if (error || data?.error) throw new Error(data?.error || error?.message);
         if (data?.url) window.location.href = data.url;
-      } else if (method === "pesapal") {
-        const { data, error } = await supabase.functions.invoke("pesapal-initiate-payment", {
+      } else if (method === "paystack") {
+        const { data, error } = await supabase.functions.invoke("paystack-initiate-payment", {
           body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
         if (error) throw new Error(error.message);
         if (!data?.ok || data?.error) {
-          throw new Error(data?.error || "Pesapal payment could not be started.");
+          throw new Error(data?.error || "Paystack payment could not be started.");
         }
         if (data?.url) window.location.href = data.url;
       } else {
@@ -265,11 +265,11 @@ export default function CustomerBookingsPage() {
                     <span className="text-xs font-medium text-foreground">M-Pesa</span>
                   </button>
                   <button
-                    onClick={() => setPaymentMethod("pesapal")}
+                    onClick={() => setPaymentMethod("paystack")}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={pesapalLogo} alt="Pesapal" className="h-7 w-auto object-contain" />
-                    <span className="text-xs font-medium text-foreground">Pesapal</span>
+                    <img src={paystackLogo} alt="Paystack" className="h-7 w-auto object-contain" />
+                    <span className="text-xs font-medium text-foreground">Paystack</span>
                   </button>
                 </div>
               </div>
@@ -295,7 +295,7 @@ export default function CustomerBookingsPage() {
             ) : (
               <div className="flex items-center gap-2">
                 <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
-                <span className="text-sm font-medium text-foreground">Pay with Pesapal (Card / Mobile / Bank)</span>
+                <span className="text-sm font-medium text-foreground">Pay with Paystack (Card / Mobile / Bank)</span>
               </div>
             )}
 
@@ -306,7 +306,7 @@ export default function CustomerBookingsPage() {
             {paymentMethod && (
               <Button onClick={() => handlePay(payDialog, paymentMethod)} disabled={paying}>
                 {paymentMethod === "mpesa" ? <Smartphone className="w-4 h-4 mr-2" /> : <CreditCard className="w-4 h-4 mr-2" />}
-                {paying ? "Processing..." : paymentMethod === "mpesa" ? "Send STK Push" : paymentMethod === "pesapal" ? "Continue to Pesapal" : "Pay with Card"}
+                {paying ? "Processing..." : paymentMethod === "mpesa" ? "Send STK Push" : paymentMethod === "paystack" ? "Continue to Paystack" : "Pay with Card"}
               </Button>
             )}
           </DialogFooter>
