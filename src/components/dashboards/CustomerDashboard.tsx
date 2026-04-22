@@ -309,6 +309,37 @@ export default function CustomerDashboard() {
         )}
       </div>
 
+      {unpaidJobs.length > 0 && (
+        <div className="rounded-xl border border-chart-4/40 bg-chart-4/10 p-4 flex items-start gap-3 animate-fade-in">
+          <AlertCircle className="w-5 h-5 text-chart-4 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">
+              Finish payment for {unpaidJobs.length === 1 ? "your completed job" : `${unpaidJobs.length} completed jobs`}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5 break-words">
+              {unpaidJobs.slice(0, 2).map(j => j.title).join(", ")}
+              {unpaidJobs.length > 2 ? ` and ${unpaidJobs.length - 2} more` : ""} — head to My Bookings to complete the payment.
+            </p>
+          </div>
+          <Button size="sm" className="shrink-0" onClick={() => navigate("/dashboard/bookings")}>
+            <CreditCard className="w-4 h-4 mr-1" /> Finish Payment
+          </Button>
+        </div>
+      )}
+
+      {showThanks && unpaidJobs.length === 0 && (
+        <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 flex items-start gap-3 animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">Thank you — payment received!</p>
+            <p className="text-xs text-muted-foreground mt-0.5">All your completed jobs are now paid.</p>
+          </div>
+          <button type="button" onClick={() => setShowThanks(false)} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Dismiss">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <div className="relative max-w-2xl animate-fade-in">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input placeholder={t("What service do you need?")} className="pl-12 h-14 text-base bg-card border-border rounded-xl" />
