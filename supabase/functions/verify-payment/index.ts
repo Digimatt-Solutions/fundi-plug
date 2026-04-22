@@ -38,8 +38,33 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Pesapal payments are confirmed via IPN — just return current status
-    if (payment.stripe_payment_id?.startsWith("pesapal_")) {
+    // Paystack payments are verified by calling Paystack's verify endpoint
+    if (payment.stripe_payment_id?.startsWith("paystack_")) {
+      const paystackKey = Deno.env.get("PAYSTACK_SECRET_KEY");
+      if (paystackKey) {
+        const verifyRes = await fetch(
+          `https://api.paystack.co/transaction/verify/${encodeURIComponent(payment.stripe_payment_id)}`,
+          { headers: { Authorization: `Bearer ${paystackKey}` } }
+        );
+        const verifyData = await verifyRes.json();
+        const txStatus = verifyData?.data?.status;
+        const newStatus = txStatus === "success" ? "completed" : txStatus === "failed" ? "failed" : "pending";
+        if (newStatus !== payment.status) {
+          await supabaseClient.from("payments").update({ status: newStatus }).eq("id", paymentId);
+          if (newStatus === "completed") {
+            await supabaseClient.from("activity_logs").insert({
+              user_id: payment.payer_id,
+              action: "Payment Completed",
+              detail: `Paystack payment of KSH ${Number(payment.amount) + Number(payment.commission || 0)} completed`,
+              entity_type: "payment",
+              entity_id: paymentId,
+            });
+          }
+        }
+        return new Response(JSON.stringify({ status: newStatus }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       return new Response(JSON.stringify({ status: payment.status }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
