@@ -40,7 +40,7 @@ export default function AdminDisbursementsPage() {
 
     // Fetch earnings for each worker
     const { data: payments } = workerIds.length > 0
-      ? await supabase.from("payments").select("payee_id, amount, commission, status").eq("status", "completed").in("payee_id", workerIds)
+      ? await supabase.from("payments").select("payee_id, amount, status").eq("status", "completed").in("payee_id", workerIds)
       : { data: [] };
 
     const financials: Record<string, { earned: number; withdrawn: number; pending: number }> = {};
@@ -48,7 +48,7 @@ export default function AdminDisbursementsPage() {
 
     (payments || []).forEach((p: any) => {
       if (financials[p.payee_id]) {
-        financials[p.payee_id].earned += Number(p.amount) - Number(p.commission || 0);
+        financials[p.payee_id].earned += Number(p.amount);
       }
     });
 
