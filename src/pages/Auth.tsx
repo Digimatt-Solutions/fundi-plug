@@ -12,8 +12,12 @@ import fundiplugLogo from "@/assets/fundiplug-logo.png";
 import { playSubmitSound } from "@/lib/sound";
 import logo from "@/assets/logo.png";
 
+type Mode = "signin" | "signup" | "forgot";
+
 const Auth = () => {
-  const [isSignIn, setIsSignIn] = useState(true);
+  const [mode, setMode] = useState<Mode>("signin");
+  const isSignIn = mode === "signin";
+  const isForgot = mode === "forgot";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -25,13 +29,17 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Phone OTP state
+  // Phone OTP state (signup AND forgot-password)
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+
+  // Forgot-password specific state
+  const [newPassword, setNewPassword] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
