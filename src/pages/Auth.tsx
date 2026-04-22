@@ -111,8 +111,43 @@ const Auth = () => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!otpVerified) {
+      setError("Verify your phone number first");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    setError("");
+    setResetting(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("reset-password-with-otp", {
+        body: { phone_number: phoneNumber, otp: otpCode, new_password: newPassword },
+      });
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Password updated", description: "You can now sign in with your new password." });
+      // Pre-fill email if returned, switch to sign-in
+      if (data?.email) setEmail(data.email);
+      setPassword("");
+      setNewPassword("");
+      resetOtpState();
+      setMode("signin");
+    } catch (err: any) {
+      setError(err.message || "Failed to reset password");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isForgot) {
+      await handleResetPassword();
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -140,7 +175,8 @@ const Auth = () => {
     }
   };
 
-  const signupDisabled = !isSignIn && !otpVerified;
+  const signupDisabled = !isSignIn && !isForgot && !otpVerified;
+  const resetDisabled = isForgot && (!otpVerified || newPassword.length < 6);
 
   return (
     <div className="flex min-h-screen">
