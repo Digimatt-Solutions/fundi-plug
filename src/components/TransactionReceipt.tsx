@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
+import paystackLogo from "@/assets/paystack-logo.png";
 import appLogo from "@/assets/logo.png";
 
 interface ReceiptData {
@@ -28,10 +29,10 @@ interface Props {
   data: ReceiptData | null;
 }
 
-function getPaymentMethod(stripePaymentId?: string | null): "mpesa" | "stripe" | "pesapal" | "unknown" {
+function getPaymentMethod(stripePaymentId?: string | null): "mpesa" | "stripe" | "paystack" | "unknown" {
   if (!stripePaymentId) return "unknown";
   if (stripePaymentId.startsWith("mpesa_")) return "mpesa";
-  if (stripePaymentId.startsWith("pesapal_")) return "pesapal";
+  if (stripePaymentId.startsWith("paystack_")) return "paystack";
   return "stripe";
 }
 
@@ -58,7 +59,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
 
   if (!data) return null;
 
-  const method = data.paymentMethod === "mpesa" ? "mpesa" : data.paymentMethod === "stripe" ? "stripe" : "unknown";
+  const method = data.paymentMethod === "mpesa" ? "mpesa" : data.paymentMethod === "paystack" ? "paystack" : data.paymentMethod === "stripe" ? "stripe" : "unknown";
   const totalAmount = data.type === "payment" ? data.amount + (data.commission || 0) : data.amount;
 
   const handleDownload = async () => {
@@ -66,10 +67,11 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
     if (!el) return;
 
     // Convert images to base64 for print
-    const [appLogoB64, mpesaLogoB64, stripeLogoB64] = await Promise.all([
+    const [appLogoB64, mpesaLogoB64, stripeLogoB64, paystackLogoB64] = await Promise.all([
       imageToBase64(appLogo),
       imageToBase64(mpesaLogo),
       imageToBase64(stripeLogo),
+      imageToBase64(paystackLogo),
     ]);
 
     // Clone and replace image srcs
@@ -78,6 +80,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
       const src = img.getAttribute("src") || "";
       if (src.includes("logo.png") || src.includes("logo")) img.src = appLogoB64;
       else if (src.includes("mpesa")) img.src = mpesaLogoB64;
+      else if (src.includes("paystack")) img.src = paystackLogoB64;
       else if (src.includes("stripe")) img.src = stripeLogoB64;
     });
 
@@ -146,7 +149,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
         `}
         <hr class="divider" />
         <div class="row"><span class="label">Status</span><span class="value"><span class="status-badge ${data.status}">${data.status}</span></span></div>
-        <div class="method-row"><span class="label">Payment Method</span><span class="value">${method !== "unknown" ? `<img src="${method === "mpesa" ? mpesaLogoB64 : stripeLogoB64}" alt="${method}" class="method-logo" />` : ""}${method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : "Stripe"}</span></div>
+        <div class="method-row"><span class="label">Payment Method</span><span class="value">${method !== "unknown" ? `<img src="${method === "mpesa" ? mpesaLogoB64 : method === "paystack" ? paystackLogoB64 : stripeLogoB64}" alt="${method}" class="method-logo" />` : ""}${method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : method === "paystack" ? "Paystack" : "Stripe"}</span></div>
         <div class="footer">
           <p>Thank you for your business</p>
           <p>This is a computer-generated receipt</p>
@@ -280,9 +283,9 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
             <span className="text-muted-foreground">Payment Method</span>
             <div className="flex items-center gap-2">
               {method !== "unknown" && (
-                <img src={method === "mpesa" ? mpesaLogo : stripeLogo} alt={method} className="h-5 object-contain" />
+                <img src={method === "mpesa" ? mpesaLogo : method === "paystack" ? paystackLogo : stripeLogo} alt={method} className="h-5 object-contain" />
               )}
-              <span className="text-foreground capitalize font-medium">{method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : "Stripe"}</span>
+              <span className="text-foreground capitalize font-medium">{method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : method === "paystack" ? "Paystack" : "Stripe"}</span>
             </div>
           </div>
 
