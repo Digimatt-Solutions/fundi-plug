@@ -37,6 +37,16 @@ Deno.serve(async (req) => {
     const { jobId, amount, workerId } = await req.json();
     if (!jobId || !amount || !workerId) throw new Error("Missing required fields");
 
+    // Compute commission split (matches create-payment behavior)
+    const { data: settings } = await supabase
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "commission_rate")
+      .single();
+    const commissionRate = settings ? parseFloat(settings.value) : 15;
+    const commission = Math.round(Number(amount) * commissionRate) / 100;
+    const workerPay = Number(amount) - commission;
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("email, name, phone")
@@ -46,14 +56,15 @@ Deno.serve(async (req) => {
     const origin = req.headers.get("origin") || "https://app.fundiplug.com";
     const reference = `paystack_${jobId.slice(0, 8)}_${Date.now()}`;
 
-    // Create pending payment row
+    // Create pending payment row with commission split
     const { data: payment, error: payErr } = await supabase
       .from("payments")
       .insert({
         job_id: jobId,
         payer_id: user.id,
         payee_id: workerId,
-        amount,
+        amount: workerPay,
+        commission,
         status: "pending",
         stripe_payment_id: reference,
       })
@@ -61,7 +72,7 @@ Deno.serve(async (req) => {
       .single();
     if (payErr) throw payErr;
 
-    // Initialize Paystack transaction (amount in kobo/cents — multiply by 100)
+    // Initialize Paystack transaction (charge full amount; commission is recorded internally)
     const initRes = await fetch(`${PAYSTACK_BASE}/transaction/initialize`, {
       method: "POST",
       headers: {
@@ -77,6 +88,8 @@ Deno.serve(async (req) => {
         metadata: {
           jobId,
           paymentId: payment.id,
+          commission,
+          workerPay,
           customerName: profile?.name || "Customer",
           phone: profile?.phone || "",
         },
