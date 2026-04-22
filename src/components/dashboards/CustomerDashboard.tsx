@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import * as L from "leaflet";
@@ -50,6 +50,8 @@ export default function CustomerDashboard() {
   const [showMap, setShowMap] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [unpaidJobs, setUnpaidJobs] = useState<any[]>([]);
+  const [showThanks, setShowThanks] = useState(false);
 
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
