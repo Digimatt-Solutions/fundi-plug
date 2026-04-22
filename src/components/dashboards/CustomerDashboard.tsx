@@ -206,6 +206,58 @@ export default function CustomerDashboard() {
     load();
   }, [user]);
 
+  // Detect completed-but-unpaid jobs to show a dashboard alert
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    async function loadUnpaid() {
+      const { data: completedJobs } = await supabase
+        .from("jobs")
+        .select("id, title, budget")
+        .eq("customer_id", user!.id)
+        .eq("status", "completed");
+
+      const ids = (completedJobs || []).map(j => j.id);
+      if (ids.length === 0) {
+        if (!cancelled) {
+          // If there used to be unpaid jobs and now none, show "thank you"
+          setUnpaidJobs(prev => {
+            if (prev.length > 0) setShowThanks(true);
+            return [];
+          });
+        }
+        return;
+      }
+
+      const { data: pmts } = await supabase
+        .from("payments")
+        .select("job_id, status")
+        .in("job_id", ids);
+      const paidIds = new Set((pmts || []).filter(p => p.status === "completed").map(p => p.job_id));
+      const unpaid = (completedJobs || []).filter(j => !paidIds.has(j.id));
+      if (cancelled) return;
+      setUnpaidJobs(prev => {
+        if (prev.length > 0 && unpaid.length === 0) setShowThanks(true);
+        return unpaid;
+      });
+    }
+    loadUnpaid();
+    // Refresh whenever payments change
+    const channel = supabase
+      .channel("customer-payments-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, () => loadUnpaid())
+      .on("postgres_changes", { event: "*", schema: "public", table: "jobs", filter: `customer_id=eq.${user.id}` }, () => loadUnpaid())
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(channel); };
+  }, [user]);
+
+  // Auto-hide the thank-you message after 6s
+  useEffect(() => {
+    if (!showThanks) return;
+    const t = setTimeout(() => setShowThanks(false), 6000);
+    return () => clearTimeout(t);
+  }, [showThanks]);
+
   // Filter workers by selected category
   const filteredWorkers = useMemo(() => {
     if (selectedCategory === "all") return nearbyWorkers;
