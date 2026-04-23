@@ -182,7 +182,7 @@ const Auth = () => {
   return (
     <div className="flex min-h-screen">
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <img loading="lazy" decoding="async" src={heroImage} alt="Skilled workers on site" className="absolute inset-0 w-full h-full object-cover" />
+        <img fetchPriority="high" decoding="async" src={heroImage} alt="Skilled workers on site" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
         <div className="relative z-10 flex flex-col justify-end p-12 text-white">
           <h2 className="text-3xl font-bold leading-tight mb-3" style={{ textWrap: "balance" as any }}>
