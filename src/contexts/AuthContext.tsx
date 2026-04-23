@@ -66,7 +66,7 @@ async function setWorkerOnline(userId: string, role: string, online: boolean) {
   if (online && navigator.geolocation) {
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
       );
       updates.latitude = pos.coords.latitude;
       updates.longitude = pos.coords.longitude;
