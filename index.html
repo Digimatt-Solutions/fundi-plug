@@ -13,12 +13,20 @@
     <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
     <style>
-      /* Splash screen — visible before React mounts. Removed once #root has children. */
+      /* Splash screen - visible before React mounts. Removed once #root has children. */
+      /* Only shown on small screens (mobile) and PWA standalone mode, not on large screens. */
       #fp-splash {
         position: fixed; inset: 0; z-index: 9999;
         background: #ffffff;
-        display: flex; align-items: center; justify-content: center;
+        display: none;
+        align-items: center; justify-content: center;
         transition: opacity 350ms ease;
+      }
+      @media (max-width: 768px) {
+        #fp-splash { display: flex; }
+      }
+      @media (display-mode: standalone) {
+        #fp-splash { display: flex; }
       }
       #fp-splash img {
         width: min(70vw, 320px);
