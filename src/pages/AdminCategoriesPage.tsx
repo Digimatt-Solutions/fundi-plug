@@ -102,7 +102,7 @@ export default function AdminCategoriesPage() {
               <div key={cat.id} className="stat-card overflow-hidden p-0 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
                 {img ? (
                   <div className="h-36 bg-muted overflow-hidden">
-                    <img src={img} alt={cat.name} className="w-full h-full object-cover" />
+                    <img loading="lazy" decoding="async" src={img} alt={cat.name} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="h-36 bg-muted flex items-center justify-center">
@@ -140,7 +140,7 @@ export default function AdminCategoriesPage() {
           <div className="space-y-4">
             {imageUrl ? (
               <div className="relative h-32 rounded-lg overflow-hidden bg-muted">
-                <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                <img loading="lazy" decoding="async" src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
                 <button onClick={() => setImageUrl("")} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 text-xs text-destructive hover:bg-background">✕</button>
               </div>
             ) : (

@@ -89,7 +89,8 @@ export default function WorkerDashboard() {
         },
         async () => {
           await supabase.from("worker_profiles").update({ is_online: true }).eq("user_id", user.id);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
     } else {
       await supabase.from("worker_profiles").update({

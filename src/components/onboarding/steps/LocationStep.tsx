@@ -32,7 +32,7 @@ export default function LocationStep({ data, setData }: Props) {
         toast({ title: "Could not get location", description: err.message, variant: "destructive" });
         setBusy(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 

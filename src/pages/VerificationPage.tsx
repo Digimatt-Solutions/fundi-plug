@@ -23,7 +23,7 @@ const ImgPreview = ({ url, label }: { url?: string; label: string }) => (
     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
     {url ? (
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <img src={url} alt={label} className="w-full h-36 object-cover rounded-lg border hover:opacity-90 transition" />
+        <img loading="lazy" decoding="async" src={url} alt={label} className="w-full h-36 object-cover rounded-lg border hover:opacity-90 transition" />
       </a>
     ) : (
       <div className="w-full h-36 rounded-lg border-2 border-dashed border-destructive/30 bg-destructive/5 flex items-center justify-center text-xs text-destructive">
@@ -146,7 +146,7 @@ export default function VerificationPage() {
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm overflow-hidden">
             {w.profile_photo_url || w.profiles?.avatar_url
-              ? <img src={w.profile_photo_url || w.profiles.avatar_url} className="w-full h-full object-cover rounded-full" />
+              ? <img loading="lazy" decoding="async" src={w.profile_photo_url || w.profiles.avatar_url} className="w-full h-full object-cover rounded-full" />
               : (w.profiles?.name || "F").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
           </div>
           <div>
@@ -296,7 +296,7 @@ export default function VerificationPage() {
                     <div className="grid grid-cols-4 gap-2">
                       {viewWorker.portfolio_urls.map((url: string, i: number) => (
                         <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                          <img src={url} alt="" className="w-full h-20 object-cover rounded border hover:opacity-90 transition" />
+                          <img loading="lazy" decoding="async" src={url} alt="" className="w-full h-20 object-cover rounded border hover:opacity-90 transition" />
                         </a>
                       ))}
                     </div>
@@ -343,7 +343,7 @@ export default function VerificationPage() {
                   <div className="space-y-2">
                     {education.map((e) => (
                       <div key={e.id} className="p-3 rounded-lg bg-muted/40 text-sm">
-                        <p className="font-medium text-foreground">{e.level} — {e.institution}</p>
+                        <p className="font-medium text-foreground">{e.level} - {e.institution}</p>
                         <p className="text-xs text-muted-foreground">{e.course || "-"} • {e.status || "-"} • {e.start_date || "?"} → {e.end_date || "Present"}</p>
                         {e.file_url && <a href={e.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View certificate</a>}
                       </div>

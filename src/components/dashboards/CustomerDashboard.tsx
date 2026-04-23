@@ -112,7 +112,8 @@ export default function CustomerDashboard() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setCustomerPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => {}
+        () => {},
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
     }
   }, []);
@@ -318,7 +319,7 @@ export default function CustomerDashboard() {
             </p>
             <p className="text-xs text-muted-foreground mt-0.5 break-words">
               {unpaidJobs.slice(0, 2).map(j => j.title).join(", ")}
-              {unpaidJobs.length > 2 ? ` and ${unpaidJobs.length - 2} more` : ""} — head to My Bookings to complete the payment.
+              {unpaidJobs.length > 2 ? ` and ${unpaidJobs.length - 2} more` : ""} - head to My Bookings to complete the payment.
             </p>
           </div>
           <Button size="sm" className="shrink-0" onClick={() => navigate("/dashboard/bookings")}>
@@ -331,7 +332,7 @@ export default function CustomerDashboard() {
         <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 flex items-start gap-3 animate-fade-in">
           <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">Thank you — payment received!</p>
+            <p className="text-sm font-semibold text-foreground">Thank you - payment received!</p>
             <p className="text-xs text-muted-foreground mt-0.5">All your completed jobs are now paid.</p>
           </div>
           <button type="button" onClick={() => setShowThanks(false)} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Dismiss">
@@ -407,7 +408,7 @@ export default function CustomerDashboard() {
               >
                 {img ? (
                   <div className="w-full h-20 overflow-hidden">
-                    <img src={img} alt={cat.name} className="w-full h-full object-cover" />
+                    <img loading="lazy" decoding="async" src={img} alt={cat.name} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="w-full h-20 flex items-center justify-center bg-muted">
@@ -445,7 +446,7 @@ export default function CustomerDashboard() {
                   <div key={worker.id} className="stat-card space-y-3">
                     <div className="flex items-center gap-3">
                       {worker.avatar_url ? (
-                        <img src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
+                        <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
                       ) : (
                         <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
                           {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}

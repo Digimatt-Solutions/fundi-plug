@@ -270,7 +270,7 @@ export default function CommunityPage() {
       {/* Header */}
       <div className="text-center space-y-1">
         <h1 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-          <img src={logo} alt="FundiPlug" className="w-7 h-7 rounded-lg object-cover" /> Community
+          <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-7 h-7 rounded-lg object-cover" /> Community
         </h1>
         <p className="text-muted-foreground text-sm">Share ideas, fun facts, and connect with the FundiPlug community</p>
       </div>
@@ -291,7 +291,7 @@ export default function CommunityPage() {
                   className="bg-muted/30 border-muted min-h-[80px] resize-none focus:bg-background transition-colors" />
                 {imagePreview && (
                   <div className="relative inline-block">
-                    <img src={imagePreview} alt="Preview" className="max-h-48 rounded-xl object-cover" />
+                    <img loading="lazy" decoding="async" src={imagePreview} alt="Preview" className="max-h-48 rounded-xl object-cover" />
                     <button onClick={() => { setNewImage(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black/80">✕</button>
                   </div>
                 )}
@@ -320,7 +320,7 @@ export default function CommunityPage() {
           {/* Posts */}
           {posts.length === 0 ? (
             <div className="stat-card text-center py-16 space-y-3">
-              <img src={logo} alt="FundiPlug" className="w-12 h-12 mx-auto rounded-xl object-cover opacity-50" />
+              <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-12 h-12 mx-auto rounded-xl object-cover opacity-50" />
               <p className="font-medium text-foreground">No posts yet</p>
               <p className="text-sm text-muted-foreground">Be the first to share something with the community!</p>
             </div>
@@ -367,7 +367,7 @@ export default function CommunityPage() {
 
                 <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{post.content}</p>
                 {post.image_url && (
-                  <img src={post.image_url} alt="Post" className="w-full rounded-xl max-h-96 object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                  <img loading="lazy" decoding="async" src={post.image_url} alt="Post" className="w-full rounded-xl max-h-96 object-cover cursor-pointer hover:opacity-95 transition-opacity"
                     onClick={() => setPreviewImage(post.image_url)} />
                 )}
 
@@ -460,7 +460,7 @@ export default function CommunityPage() {
                     }} />
                     {blogImagePreview ? (
                       <div className="relative">
-                        <img src={blogImagePreview} alt="Preview" className="w-full h-24 rounded-lg object-cover" />
+                        <img loading="lazy" decoding="async" src={blogImagePreview} alt="Preview" className="w-full h-24 rounded-lg object-cover" />
                         <button onClick={() => { setBlogImage(null); setBlogImagePreview(null); }}
                           className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
                       </div>
@@ -490,7 +490,7 @@ export default function CommunityPage() {
                       </button>
                     )}
                     {b.image_url && (
-                      <img src={b.image_url} alt={b.title}
+                      <img loading="lazy" decoding="async" src={b.image_url} alt={b.title}
                         className="w-full h-28 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => setPreviewImage(b.image_url)} />
                     )}
@@ -507,7 +507,7 @@ export default function CommunityPage() {
               </div>
             ) : (
               <div className="stat-card text-center py-8 space-y-2">
-                <img src={logo} alt="FundiPlug" className="w-8 h-8 mx-auto rounded-lg object-cover opacity-40" />
+                <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-8 h-8 mx-auto rounded-lg object-cover opacity-40" />
                 <p className="text-xs text-muted-foreground">No blogs or adverts yet</p>
               </div>
             )}
@@ -519,7 +519,7 @@ export default function CommunityPage() {
       <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
         <DialogContent className="max-w-3xl p-2">
           <DialogHeader><DialogTitle className="sr-only">Image Preview</DialogTitle></DialogHeader>
-          {previewImage && <img src={previewImage} alt="Preview" className="w-full rounded-lg" />}
+          {previewImage && <img loading="lazy" decoding="async" src={previewImage} alt="Preview" className="w-full rounded-lg" />}
         </DialogContent>
       </Dialog>
     </div>

@@ -270,7 +270,7 @@ export default function SkillsStep({ data, setData, userId }: Props) {
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3">
             {portfolio.map((url, i) => (
               <div key={i} className="relative group">
-                <img src={url} alt="work" className="w-full aspect-square object-cover rounded border" />
+                <img loading="lazy" decoding="async" src={url} alt="work" className="w-full aspect-square object-cover rounded border" />
                 <button
                   type="button"
                   onClick={() => removePortfolio(i)}

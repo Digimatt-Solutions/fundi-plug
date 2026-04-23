@@ -83,7 +83,7 @@ export default function AcademicStep({ userId }: Props) {
             <Card key={r.id}>
               <CardContent className="p-3 flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground text-sm">{r.level} — {r.institution}</p>
+                  <p className="font-medium text-foreground text-sm">{r.level} - {r.institution}</p>
                   <p className="text-xs text-muted-foreground truncate">
                     {[r.course, r.status, [r.start_date, r.end_date].filter(Boolean).join(" → ")].filter(Boolean).join(" · ")}
                   </p>

@@ -175,51 +175,68 @@ export default function CustomerBookingsPage() {
         <div className="space-y-4">
           {jobs.map((job, i) => (
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span>{(job as any).service_categories?.icon || "🔧"}</span>
-                    <h3 className="font-semibold text-foreground">{job.title}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
-                      job.status === "completed" ? "bg-green-500/10 text-green-500" :
-                      job.status === "in_progress" ? "bg-primary/10 text-primary" :
-                      "bg-chart-4/10 text-chart-4"
-                    }`}>{job.status.replace("_", " ")}</span>
-                    {job.paymentStatus && (
+              <div className="flex items-start gap-4">
+                {/* Job image thumbnail */}
+                <div className="shrink-0">
+                  {job.image_url ? (
+                    <img
+                      src={job.image_url}
+                      alt={job.title}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center text-2xl">
+                      {(job as any).service_categories?.icon || "🔧"}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 flex items-center justify-between gap-4 flex-wrap">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-foreground truncate">{job.title}</h3>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
-                        job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
-                        job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
-                      }`}>💰 {job.paymentStatus}</span>
+                        job.status === "completed" ? "bg-green-500/10 text-green-500" :
+                        job.status === "in_progress" ? "bg-primary/10 text-primary" :
+                        "bg-chart-4/10 text-chart-4"
+                      }`}>{job.status.replace("_", " ")}</span>
+                      {job.paymentStatus && (
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                          job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
+                          job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
+                        }`}>💰 {job.paymentStatus}</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Fundi: {job.workerName} - KSH {job.budget ? job.budget.toLocaleString() : "Open"} - {new Date(job.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {job.status === "completed" && (!job.paymentStatus || job.paymentStatus === "pending") && (
+                      <Button size="sm" onClick={() => setPayDialog(job)} className="active:scale-[0.97]">
+                        <CreditCard className="w-4 h-4 mr-1" /> Pay Now
+                      </Button>
+                    )}
+                    {job.status === "completed" && job.paymentStatus === "completed" && !job.hasReview && (
+                      <Button size="sm" variant="outline" onClick={() => setReviewDialog(job)} className="active:scale-[0.97]">
+                        <Star className="w-4 h-4 mr-1" /> Review
+                      </Button>
+                    )}
+                    {job.status === "completed" && job.paymentStatus === "completed" && job.paymentRecord && (
+                      <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => setReceiptData({
+                        id: job.paymentRecord.id, type: "payment", amount: Number(job.paymentRecord.amount),
+                        commission: Number(job.paymentRecord.commission || 0), status: job.paymentRecord.status,
+                        date: job.paymentRecord.created_at, paymentMethod: getPaymentMethod(job.paymentRecord.stripe_payment_id),
+                        jobTitle: job.title, payerName: user?.name, payeeName: job.workerName,
+                      })}>
+                        <FileText className="w-3.5 h-3.5" /> Receipt
+                      </Button>
+                    )}
+                    {job.hasReview && (
+                      <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Fundi: {job.workerName} - KSH {job.budget ? job.budget.toLocaleString() : "Open"} - {new Date(job.created_at).toLocaleString()}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  {job.status === "completed" && (!job.paymentStatus || job.paymentStatus === "pending") && (
-                    <Button size="sm" onClick={() => setPayDialog(job)} className="active:scale-[0.97]">
-                      <CreditCard className="w-4 h-4 mr-1" /> Pay Now
-                    </Button>
-                  )}
-                  {job.status === "completed" && job.paymentStatus === "completed" && !job.hasReview && (
-                    <Button size="sm" variant="outline" onClick={() => setReviewDialog(job)} className="active:scale-[0.97]">
-                      <Star className="w-4 h-4 mr-1" /> Review
-                    </Button>
-                  )}
-                  {job.status === "completed" && job.paymentStatus === "completed" && job.paymentRecord && (
-                    <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => setReceiptData({
-                      id: job.paymentRecord.id, type: "payment", amount: Number(job.paymentRecord.amount),
-                      commission: Number(job.paymentRecord.commission || 0), status: job.paymentRecord.status,
-                      date: job.paymentRecord.created_at, paymentMethod: getPaymentMethod(job.paymentRecord.stripe_payment_id),
-                      jobTitle: job.title, payerName: user?.name, payeeName: job.workerName,
-                    })}>
-                      <FileText className="w-3.5 h-3.5" /> Receipt
-                    </Button>
-                  )}
-                  {job.hasReview && (
-                    <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
-                  )}
                 </div>
               </div>
             </div>
@@ -254,21 +271,21 @@ export default function CustomerBookingsPage() {
                     onClick={() => setPaymentMethod("stripe")}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={stripeLogo} alt="Stripe" className="h-7 w-auto object-contain" />
+                    <img loading="lazy" decoding="async" src={stripeLogo} alt="Stripe" className="h-7 w-auto object-contain" />
                     <span className="text-xs font-medium text-foreground">Card</span>
                   </button>
                   <button
                     onClick={() => setPaymentMethod("mpesa")}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={mpesaLogo} alt="M-Pesa" className="h-7 w-auto object-contain" />
+                    <img loading="lazy" decoding="async" src={mpesaLogo} alt="M-Pesa" className="h-7 w-auto object-contain" />
                     <span className="text-xs font-medium text-foreground">M-Pesa</span>
                   </button>
                   <button
                     onClick={() => setPaymentMethod("paystack")}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
-                    <img src={paystackLogo} alt="Paystack" className="h-7 w-auto object-contain" />
+                    <img loading="lazy" decoding="async" src={paystackLogo} alt="Paystack" className="h-7 w-auto object-contain" />
                     <span className="text-xs font-medium text-foreground">Paystack</span>
                   </button>
                 </div>

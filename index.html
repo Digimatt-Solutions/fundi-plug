@@ -6,16 +6,61 @@
     <title>FundiPlug - Skilled Workers Marketplace</title>
     <meta name="description" content="Connect with verified skilled workers on demand" />
     <link rel="icon" href="/favicon.png" type="image/png" />
-    <meta name="theme-color" content="#ea580c" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="FundiPlug" />
     <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
+    <style>
+      /* Splash screen — visible before React mounts. Removed once #root has children. */
+      #fp-splash {
+        position: fixed; inset: 0; z-index: 9999;
+        background: #ffffff;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 350ms ease;
+      }
+      #fp-splash img {
+        width: min(70vw, 320px);
+        height: min(70vw, 320px);
+        object-fit: cover;
+        border-radius: 28px;
+        box-shadow: 0 20px 60px -20px rgba(240, 98, 14, 0.45);
+        animation: fp-pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes fp-pulse {
+        0%, 100% { transform: scale(1); }
+        50%      { transform: scale(1.05); }
+      }
+      #fp-splash.fp-hide { opacity: 0; pointer-events: none; }
+    </style>
   </head>
 
   <body>
+    <div id="fp-splash">
+      <img src="/splash-logo.jpg" alt="FundiPlug" />
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Hide splash once the React root mounts content
+      (function () {
+        var splash = document.getElementById('fp-splash');
+        if (!splash) return;
+        var root = document.getElementById('root');
+        var done = false;
+        function hide() {
+          if (done) return; done = true;
+          splash.classList.add('fp-hide');
+          setTimeout(function () { splash.remove(); }, 400);
+        }
+        var obs = new MutationObserver(function () {
+          if (root && root.childElementCount > 0) { obs.disconnect(); hide(); }
+        });
+        if (root) obs.observe(root, { childList: true });
+        // Safety timeout
+        setTimeout(hide, 4000);
+      })();
+    </script>
   </body>
 </html>
