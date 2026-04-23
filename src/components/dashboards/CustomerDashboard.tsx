@@ -115,7 +115,6 @@ export default function CustomerDashboard() {
         () => {},
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
-      );
     }
   }, []);
 
