@@ -51,23 +51,33 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Hide splash once the React root mounts content
+      // Hide splash once React mounts. In standalone PWA, hold for at least 3s.
       (function () {
         var splash = document.getElementById('fp-splash');
         if (!splash) return;
         var root = document.getElementById('root');
+        var startedAt = Date.now();
+        var isStandalone =
+          window.matchMedia('(display-mode: standalone)').matches ||
+          window.navigator.standalone === true;
+        var minMs = isStandalone ? 3000 : 0;
         var done = false;
         function hide() {
           if (done) return; done = true;
           splash.classList.add('fp-hide');
           setTimeout(function () { splash.remove(); }, 400);
         }
+        function maybeHide() {
+          var elapsed = Date.now() - startedAt;
+          var wait = Math.max(0, minMs - elapsed);
+          setTimeout(hide, wait);
+        }
         var obs = new MutationObserver(function () {
-          if (root && root.childElementCount > 0) { obs.disconnect(); hide(); }
+          if (root && root.childElementCount > 0) { obs.disconnect(); maybeHide(); }
         });
         if (root) obs.observe(root, { childList: true });
         // Safety timeout
-        setTimeout(hide, 4000);
+        setTimeout(hide, Math.max(4000, minMs + 1500));
       })();
     </script>
   </body>
