@@ -2,8 +2,8 @@
   "name": "FundiPlug - Skilled Workers Marketplace",
   "short_name": "FundiPlug",
   "description": "Connect with verified skilled workers on demand",
-  "theme_color": "#ea580c",
-  "background_color": "#ea580c",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait",
   "start_url": "/",
@@ -11,7 +11,8 @@
     {
       "src": "/pwa-icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/pwa-icon-512.png",
