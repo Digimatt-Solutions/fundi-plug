@@ -26,7 +26,7 @@ export default function DocumentsStep({ data, setData, userId }: Props) {
           userId={userId}
           value={data.id_front_url}
           onChange={(url) => setData({ id_front_url: url })}
-          label="National ID — Front *"
+          label="National ID - Front *"
           helper="Clear photo of front side"
           accept="image/*,application/pdf"
           prefix="id-front"
@@ -36,7 +36,7 @@ export default function DocumentsStep({ data, setData, userId }: Props) {
           userId={userId}
           value={data.id_back_url}
           onChange={(url) => setData({ id_back_url: url })}
-          label="National ID — Back *"
+          label="National ID - Back *"
           helper="Clear photo of back side"
           accept="image/*,application/pdf"
           prefix="id-back"
@@ -60,7 +60,7 @@ export default function DocumentsStep({ data, setData, userId }: Props) {
             value={data.kra_pin || ""}
             onChange={(e) => setData({ kra_pin: (e.target.value || "").toUpperCase() })}
           />
-          <p className="text-xs text-muted-foreground">Kenya Revenue Authority PIN — recommended for paid jobs.</p>
+          <p className="text-xs text-muted-foreground">Kenya Revenue Authority PIN - recommended for paid jobs.</p>
         </div>
       </div>
     </div>

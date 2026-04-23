@@ -235,7 +235,7 @@ export default function FindWorkersPage() {
       <div key={w.id} className="stat-card space-y-3 cursor-pointer hover:border-primary/40 transition-colors animate-fade-in" style={{ animationDelay: `${i * 40}ms` }} onClick={() => openWorkerProfile(w)}>
         <div className="flex items-center gap-3">
           {w.avatar_url ? (
-            <img src={w.avatar_url} alt={w.name} className="w-12 h-12 rounded-full object-cover" />
+            <img loading="lazy" decoding="async" src={w.avatar_url} alt={w.name} className="w-12 h-12 rounded-full object-cover" />
           ) : (
             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
               {w.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -349,7 +349,7 @@ export default function FindWorkersPage() {
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-3">
                     {selectedWorker.avatar_url ? (
-                      <img src={selectedWorker.avatar_url} alt={selectedWorker.name} className="w-14 h-14 rounded-full object-cover" />
+                      <img loading="lazy" decoding="async" src={selectedWorker.avatar_url} alt={selectedWorker.name} className="w-14 h-14 rounded-full object-cover" />
                     ) : (
                       <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-lg">
                         {selectedWorker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -386,7 +386,7 @@ export default function FindWorkersPage() {
                   {/* Digimatt verified badge (replaces certs list for clients) */}
                   <div className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/5 border border-primary/20">
                     <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-                    <p className="text-sm text-foreground"><span className="font-medium">{t("Certified by Digimatt")}</span> — {t("This fundi has been vetted and approved.")}</p>
+                    <p className="text-sm text-foreground"><span className="font-medium">{t("Certified by Digimatt")}</span> - {t("This fundi has been vetted and approved.")}</p>
                   </div>
 
                   {/* Live map preview */}

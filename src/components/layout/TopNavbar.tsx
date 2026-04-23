@@ -112,7 +112,7 @@ export function TopNavbar() {
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 ml-2 pl-3 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
               {avatarUrl ? (
-                <img src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
+                <img loading="lazy" decoding="async" src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
                   {initials}

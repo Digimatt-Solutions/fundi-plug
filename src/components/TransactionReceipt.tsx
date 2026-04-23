@@ -122,7 +122,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
       </style></head><body>
       <div class="receipt">
         <div class="header">
-          <img src="${appLogoB64}" alt="FundiPlug" class="app-logo" />
+          <img loading="lazy" decoding="async" src="${appLogoB64}" alt="FundiPlug" class="app-logo" />
           <h2>${data.type === "payment" ? "Payment Receipt" : "Withdrawal Receipt"}</h2>
           <p>${new Date(data.date).toLocaleString()}</p>
         </div>
@@ -149,7 +149,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
         `}
         <hr class="divider" />
         <div class="row"><span class="label">Status</span><span class="value"><span class="status-badge ${data.status}">${data.status}</span></span></div>
-        <div class="method-row"><span class="label">Payment Method</span><span class="value">${method !== "unknown" ? `<img src="${method === "mpesa" ? mpesaLogoB64 : method === "paystack" ? paystackLogoB64 : stripeLogoB64}" alt="${method}" class="method-logo" />` : ""}${method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : method === "paystack" ? "Paystack" : "Stripe"}</span></div>
+        <div class="method-row"><span class="label">Payment Method</span><span class="value">${method !== "unknown" ? `<img loading="lazy" decoding="async" src="${method === "mpesa" ? mpesaLogoB64 : method === "paystack" ? paystackLogoB64 : stripeLogoB64}" alt="${method}" class="method-logo" />` : ""}${method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : method === "paystack" ? "Paystack" : "Stripe"}</span></div>
         <div class="footer">
           <p>Thank you for your business</p>
           <p>This is a computer-generated receipt</p>
@@ -176,7 +176,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
         <div ref={receiptRef} className="bg-background px-6 pb-6 pt-4 space-y-3">
           {/* Header with App Logo */}
           <div className="text-center border-b-2 border-dashed border-border pb-4">
-            <img src={appLogo} alt="FundiPlug" className="h-10 mx-auto mb-2 object-contain" />
+            <img loading="lazy" decoding="async" src={appLogo} alt="FundiPlug" className="h-10 mx-auto mb-2 object-contain" />
             <h2 className="text-lg font-bold text-foreground">
               {data.type === "payment" ? "Payment Receipt" : "Withdrawal Receipt"}
             </h2>
@@ -283,7 +283,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
             <span className="text-muted-foreground">Payment Method</span>
             <div className="flex items-center gap-2">
               {method !== "unknown" && (
-                <img src={method === "mpesa" ? mpesaLogo : method === "paystack" ? paystackLogo : stripeLogo} alt={method} className="h-5 object-contain" />
+                <img loading="lazy" decoding="async" src={method === "mpesa" ? mpesaLogo : method === "paystack" ? paystackLogo : stripeLogo} alt={method} className="h-5 object-contain" />
               )}
               <span className="text-foreground capitalize font-medium">{method === "unknown" ? "N/A" : method === "mpesa" ? "M-Pesa" : method === "paystack" ? "Paystack" : "Stripe"}</span>
             </div>

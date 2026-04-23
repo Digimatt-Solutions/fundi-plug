@@ -66,7 +66,7 @@ export default function FileUploader({
       <div className="rounded-lg border border-dashed border-border p-3 bg-muted/30 flex items-center gap-3">
         {value ? (
           isImage ? (
-            <img src={value} alt="preview" className="w-16 h-16 object-cover rounded-md border" />
+            <img loading="lazy" decoding="async" src={value} alt="preview" className="w-16 h-16 object-cover rounded-md border" />
           ) : (
             <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center">
               <FileText className="w-6 h-6 text-muted-foreground" />

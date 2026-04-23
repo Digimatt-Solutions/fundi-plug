@@ -48,7 +48,7 @@ export default function StepShell({
           <div>
             <h1 className="text-2xl font-bold text-foreground">{title || "Fundi Onboarding"}</h1>
             <p className="text-sm text-muted-foreground">
-              {subtitle || `Step ${currentStep + 1} of ${steps.length} — ${active?.label}`}
+              {subtitle || `Step ${currentStep + 1} of ${steps.length} - ${active?.label}`}
             </p>
           </div>
           {onSaveExit && (

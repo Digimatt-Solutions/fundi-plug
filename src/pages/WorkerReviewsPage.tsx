@@ -103,7 +103,7 @@ export default function WorkerReviewsPage() {
             <div key={r.id} className="stat-card animate-fade-in p-4 sm:p-6" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex items-start gap-3">
                 {r.reviewerAvatar ? (
-                  <img src={r.reviewerAvatar} alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                  <img loading="lazy" decoding="async" src={r.reviewerAvatar} alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-semibold shrink-0">
                     {r.reviewerName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}

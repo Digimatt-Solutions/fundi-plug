@@ -250,7 +250,7 @@ export default function WorkerProfilePage() {
       <div className="stat-card animate-fade-in flex items-center gap-6">
         <div className="relative">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
+            <img loading="lazy" decoding="async" src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">{initials}</div>
           )}

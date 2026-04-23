@@ -184,10 +184,10 @@ export default function FundiOnboardingPage() {
     validateSkills,
     validateLocation,
     validateDocuments,
-    () => null, // academic — multi-row, validated separately if needed
+    () => null, // academic - multi-row, validated separately if needed
     validatePayment,
-    () => null, // work history — optional
-    () => null, // review — read-only summary
+    () => null, // work history - optional
+    () => null, // review - read-only summary
     validateAgreements,
   ];
 
@@ -317,7 +317,7 @@ export default function FundiOnboardingPage() {
         saving={saving}
         nextLabel={isFinalStep ? "Submit for Verification" : "Next"}
         title="Fundi Verification"
-        subtitle={`Step ${currentStep + 1} of ${STEPS.length} — ${STEPS[currentStep].label}`}
+        subtitle={`Step ${currentStep + 1} of ${STEPS.length} - ${STEPS[currentStep].label}`}
       >
         {currentStep === 0 && <PersonalStep data={data} setData={patch} userId={user!.id} />}
         {currentStep === 1 && <SkillsStep data={data} setData={patch} userId={user!.id} />}

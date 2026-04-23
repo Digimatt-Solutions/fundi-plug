@@ -33,7 +33,7 @@ const Img = ({ url, label }: { url?: string; label: string }) =>
     <div className="space-y-1">
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <img src={url} alt={label} className="w-full h-32 object-cover rounded-lg border hover:opacity-90 transition" />
+        <img loading="lazy" decoding="async" src={url} alt={label} className="w-full h-32 object-cover rounded-lg border hover:opacity-90 transition" />
       </a>
     </div>
   ) : (
@@ -119,7 +119,7 @@ export default function ReviewStep({ data, userId }: Props) {
             <div className="grid grid-cols-3 gap-2">
               {data.portfolio_urls.map((url: string, i: number) => (
                 <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                  <img src={url} alt="" className="w-full h-20 object-cover rounded border hover:opacity-90 transition" />
+                  <img loading="lazy" decoding="async" src={url} alt="" className="w-full h-20 object-cover rounded border hover:opacity-90 transition" />
                 </a>
               ))}
             </div>
@@ -157,7 +157,7 @@ export default function ReviewStep({ data, userId }: Props) {
         ) : (
           education.map((e) => (
             <div key={e.id} className="p-2.5 rounded-lg bg-muted/40 text-sm">
-              <p className="font-medium text-foreground">{e.level} — {e.institution}</p>
+              <p className="font-medium text-foreground">{e.level} - {e.institution}</p>
               <p className="text-xs text-muted-foreground">{e.course || "-"} • {e.status || "-"} • {e.start_date || "?"} → {e.end_date || "Present"}</p>
               {e.file_url && <a href={e.file_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View certificate</a>}
             </div>

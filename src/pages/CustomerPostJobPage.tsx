@@ -221,7 +221,7 @@ export default function CustomerPostJobPage() {
       <Label className="flex items-center gap-2"><ImagePlus className="w-4 h-4" /> Work Image</Label>
       {preview && (
         <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted">
-          <img src={preview} alt="Job" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={preview} alt="Job" className="w-full h-full object-cover" />
           <button type="button" onClick={() => onSelect(null)} className="absolute top-1 right-1 bg-background/80 rounded-full p-1 text-destructive hover:bg-background">
             <X className="w-4 h-4" />
           </button>
@@ -253,7 +253,7 @@ export default function CustomerPostJobPage() {
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="flex gap-3">
                     {job.image_url && (
-                      <img src={job.image_url} alt={job.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                      <img loading="lazy" decoding="async" src={job.image_url} alt={job.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                     )}
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">

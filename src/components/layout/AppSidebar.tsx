@@ -16,7 +16,7 @@ import logo from "@/assets/logo.png";
 
 // Tiny component to use logo as a nav icon (matches lucide icon API shape)
 const CommunityIcon = ({ className }: { className?: string }) => (
-  <img src={logo} alt="" className={`rounded ${className || "w-4 h-4"}`} />
+  <img loading="lazy" decoding="async" src={logo} alt="" className={`rounded ${className || "w-4 h-4"}`} />
 );
 
 const adminNav = [
@@ -81,7 +81,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <div className="h-16 flex items-center gap-3 px-4 border-b border-sidebar-border">
         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
-          <img src={logo} alt="FundiPlug" className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-full h-full object-cover" />
         </div>
         {!collapsed && <span className="font-bold text-primary text-lg">FundiPlug</span>}
       </div>

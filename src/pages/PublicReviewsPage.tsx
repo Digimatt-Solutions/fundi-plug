@@ -64,7 +64,7 @@ export default function PublicReviewsPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="max-w-3xl mx-auto flex items-center gap-3 p-4">
-          <img src={logo} alt="FundiPlug" className="w-8 h-8 rounded" />
+          <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-8 h-8 rounded" />
           <span className="font-bold text-primary">FundiPlug</span>
         </div>
       </header>
@@ -72,7 +72,7 @@ export default function PublicReviewsPage() {
       <main className="max-w-3xl mx-auto p-4 sm:p-6 space-y-5">
         <section className="stat-card flex items-center gap-4">
           {worker?.avatar_url ? (
-            <img src={worker.avatar_url} alt={worker.name} className="w-16 h-16 rounded-full object-cover" />
+            <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-16 h-16 rounded-full object-cover" />
           ) : (
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
               {(worker?.name || "F").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -98,7 +98,7 @@ export default function PublicReviewsPage() {
               <article key={r.id} className="stat-card">
                 <div className="flex items-start gap-3">
                   {r.reviewerAvatar ? (
-                    <img src={r.reviewerAvatar} alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                    <img loading="lazy" decoding="async" src={r.reviewerAvatar} alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-semibold shrink-0">
                       {r.reviewerName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
