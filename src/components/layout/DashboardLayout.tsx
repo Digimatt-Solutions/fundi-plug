@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { TopNavbar } from "./TopNavbar";
+import VoiceAssistant from "@/components/voice/VoiceAssistant";
 
 export default function DashboardLayout() {
   const { isAuthenticated, loading } = useAuth();
@@ -26,6 +27,7 @@ export default function DashboardLayout() {
           <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto">
             <Outlet />
           </main>
+          <VoiceAssistant />
         </div>
       </div>
     </SidebarProvider>

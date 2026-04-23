@@ -11,6 +11,7 @@ import heroImage from "@/assets/workers-hero.jpg";
 import fundiplugLogo from "@/assets/fundiplug-logo.png";
 import { playSubmitSound } from "@/lib/sound";
 import logo from "@/assets/logo.png";
+import AuthVoiceButton from "@/components/voice/AuthVoiceButton";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -207,7 +208,8 @@ const Auth = () => {
               />
               <p className="text-muted-foreground text-sm">Skilled Workers Marketplace</p>
             </div>
-            
+
+            <AuthVoiceButton />
 
             {!isForgot && (
               <div className="flex bg-muted rounded-lg p-1 mb-6">
