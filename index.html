@@ -21,10 +21,12 @@
         transition: opacity 350ms ease;
       }
       #fp-splash img {
-        width: 160px; height: 160px;
-        border-radius: 32px;
-        box-shadow: 0 10px 40px -10px rgba(240, 98, 14, 0.35);
-        animation: fp-pulse 1.6s ease-in-out infinite;
+        width: min(70vw, 320px);
+        height: min(70vw, 320px);
+        object-fit: cover;
+        border-radius: 28px;
+        box-shadow: 0 20px 60px -20px rgba(240, 98, 14, 0.45);
+        animation: fp-pulse 1.8s ease-in-out infinite;
       }
       @keyframes fp-pulse {
         0%, 100% { transform: scale(1); }
@@ -36,7 +38,7 @@
 
   <body>
     <div id="fp-splash">
-      <img src="/splash-logo.png" alt="FundiPlug" />
+      <img src="/splash-logo.jpg" alt="FundiPlug" />
     </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
