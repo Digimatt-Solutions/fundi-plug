@@ -12,10 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useSearchParams } from "react-router-dom";
 import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState<any[]>([]);

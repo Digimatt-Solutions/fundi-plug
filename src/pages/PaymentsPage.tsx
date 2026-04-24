@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PaymentsPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [payments, setPayments] = useState<any[]>([]);
   const [search, setSearch] = useState("");

@@ -11,10 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Camera, Mail, Phone, MapPin, ShieldCheck, User as UserIcon, KeyRound, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AccountProfilePage() {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);

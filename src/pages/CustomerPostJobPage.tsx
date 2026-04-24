@@ -11,10 +11,12 @@ import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CustomerPostJobPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [myJobs, setMyJobs] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);

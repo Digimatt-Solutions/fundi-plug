@@ -15,6 +15,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.png";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Post {
   id: string;
@@ -52,6 +53,7 @@ interface Blog {
 export default function CommunityPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [posts, setPosts] = useState<Post[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
