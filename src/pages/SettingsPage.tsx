@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { isSoundEnabled, setSoundEnabled, playNotificationSound } from "@/lib/sound";
+import TrafficAnalytics from "@/components/admin/TrafficAnalytics";
 
 export default function SettingsPage() {
   const { user, refreshProfile } = useAuth();
@@ -174,15 +175,19 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-4">
-        {/* Profile */}
-        <div className="stat-card animate-fade-in">
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-primary" /> Profile</h3>
-          <div className="space-y-4">
-            <div className="space-y-2"><Label>Display Name</Label><Input value={profileName} onChange={e => setProfileName(e.target.value)} className="bg-muted/50 max-w-sm" /></div>
-            <div className="space-y-2"><Label>Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} className="bg-muted/50 max-w-sm" placeholder="+254 712 345 678" /></div>
-            <Button size="sm" onClick={saveProfile} disabled={saving}>{saving ? "Saving..." : "Save Profile"}</Button>
+        {/* Admin: Traffic Analytics replaces Profile section at the top */}
+        {user?.role === "admin" ? (
+          <TrafficAnalytics />
+        ) : (
+          <div className="stat-card animate-fade-in">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-primary" /> Profile</h3>
+            <div className="space-y-4">
+              <div className="space-y-2"><Label>Display Name</Label><Input value={profileName} onChange={e => setProfileName(e.target.value)} className="bg-muted/50 max-w-sm" /></div>
+              <div className="space-y-2"><Label>Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} className="bg-muted/50 max-w-sm" placeholder="+254 712 345 678" /></div>
+              <Button size="sm" onClick={saveProfile} disabled={saving}>{saving ? "Saving..." : "Save Profile"}</Button>
+            </div>
           </div>
-        </div>
+        )}
 
         {user?.role === "admin" && (
           <>
