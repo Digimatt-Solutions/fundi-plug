@@ -61,16 +61,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (otpRecord.attempts >= 5) {
-      return new Response(JSON.stringify({ error: "Too many attempts. Request a new code." }), {
-        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    await supabase.from("phone_otps").update({ attempts: otpRecord.attempts + 1 }).eq("id", otpRecord.id);
-
+    // Validate the OTP hash matches (whether or not it was already marked verified by verify-otp)
     const inputHash = await hashOtp(otp);
     if (inputHash !== otpRecord.otp_hash) {
+      if (otpRecord.attempts >= 5) {
+        return new Response(JSON.stringify({ error: "Too many attempts. Request a new code." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      await supabase.from("phone_otps").update({ attempts: otpRecord.attempts + 1 }).eq("id", otpRecord.id);
       return new Response(JSON.stringify({ error: "Invalid code" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
