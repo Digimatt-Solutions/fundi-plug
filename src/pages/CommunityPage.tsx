@@ -247,9 +247,9 @@ export default function CommunityPage() {
 
   const getRoleBadge = (role: string) => {
     switch (role) {
-      case "admin": return <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/15 text-primary">Admin</span>;
-      case "worker": return <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/15 text-green-600">Fundi</span>;
-      default: return <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/15 text-blue-600">Client</span>;
+      case "admin": return <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/15 text-primary">{t("Admin")}</span>;
+      case "worker": return <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/15 text-green-600">{t("Fundi")}</span>;
+      default: return <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/15 text-blue-600">{t("Client")}</span>;
     }
   };
 
@@ -289,7 +289,7 @@ export default function CommunityPage() {
               </Avatar>
               <div className="flex-1 space-y-3">
                 <Textarea value={newContent} onChange={e => setNewContent(e.target.value)}
-                  placeholder="What's on your mind? Share a tip, fun fact, or update..."
+                  placeholder={t("What's on your mind? Share a tip, fun fact, or update...")}
                   className="bg-muted/30 border-muted min-h-[80px] resize-none focus:bg-background transition-colors" />
                 {imagePreview && (
                   <div className="relative inline-block">
@@ -323,8 +323,8 @@ export default function CommunityPage() {
           {posts.length === 0 ? (
             <div className="stat-card text-center py-16 space-y-3">
               <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-12 h-12 mx-auto rounded-xl object-cover opacity-50" />
-              <p className="font-medium text-foreground">No posts yet</p>
-              <p className="text-sm text-muted-foreground">Be the first to share something with the community!</p>
+              <p className="font-medium text-foreground">{t("No posts yet")}</p>
+              <p className="text-sm text-muted-foreground">{t("Be the first to share something with the community!")}</p>
             </div>
           ) : (
             posts.map((post, i) => (
@@ -420,7 +420,7 @@ export default function CommunityPage() {
                       <Input value={commentTexts[post.id] || ""}
                         onChange={e => setCommentTexts(prev => ({ ...prev, [post.id]: e.target.value }))}
                         onKeyDown={e => e.key === "Enter" && addComment(post.id)}
-                        placeholder="Write a comment..." className="h-8 text-xs bg-muted/30 rounded-full" />
+                        placeholder={t("Write a comment...")} className="h-8 text-xs bg-muted/30 rounded-full" />
                       <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => addComment(post.id)} disabled={!commentTexts[post.id]?.trim()}>
                         <Send className="w-3.5 h-3.5" />
                       </Button>
@@ -449,12 +449,12 @@ export default function CommunityPage() {
                 {showBlogForm && (
                   <div className="space-y-2.5">
                     <div className="flex gap-1.5">
-                      <Button size="sm" variant={blogType === "blog" ? "default" : "outline"} className="text-xs h-7 flex-1" onClick={() => setBlogType("blog")}>Blog</Button>
-                      <Button size="sm" variant={blogType === "advert" ? "default" : "outline"} className="text-xs h-7 flex-1" onClick={() => setBlogType("advert")}>Advert</Button>
+                      <Button size="sm" variant={blogType === "blog" ? "default" : "outline"} className="text-xs h-7 flex-1" onClick={() => setBlogType("blog")}>{t("Blog")}</Button>
+                      <Button size="sm" variant={blogType === "advert" ? "default" : "outline"} className="text-xs h-7 flex-1" onClick={() => setBlogType("advert")}>{t("Advert")}</Button>
                     </div>
-                    <Input value={blogTitle} onChange={e => setBlogTitle(e.target.value)} placeholder="Title" className="h-8 text-xs" />
+                    <Input value={blogTitle} onChange={e => setBlogTitle(e.target.value)} placeholder={t("Title")} className="h-8 text-xs" />
                     {blogType === "blog" && (
-                      <Textarea value={blogContent} onChange={e => setBlogContent(e.target.value)} placeholder="Write content..." className="text-xs min-h-[60px] resize-none" />
+                      <Textarea value={blogContent} onChange={e => setBlogContent(e.target.value)} placeholder={t("Write content...")} className="text-xs min-h-[60px] resize-none" />
                     )}
                     <input type="file" ref={blogFileRef} accept="image/*" className="hidden" onChange={e => {
                       const f = e.target.files?.[0];
@@ -482,7 +482,7 @@ export default function CommunityPage() {
             {/* Blog/Advert Feed */}
             {blogs.length > 0 ? (
               <div className="space-y-3">
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">Blogs & Adverts</h3>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">{t("Blogs & Adverts")}</h3>
                 {blogs.map(b => (
                   <div key={b.id} className="stat-card space-y-2 group relative">
                     {user?.role === "admin" && (
@@ -510,7 +510,7 @@ export default function CommunityPage() {
             ) : (
               <div className="stat-card text-center py-8 space-y-2">
                 <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-8 h-8 mx-auto rounded-lg object-cover opacity-40" />
-                <p className="text-xs text-muted-foreground">No blogs or adverts yet</p>
+                <p className="text-xs text-muted-foreground">{t("No blogs or adverts yet")}</p>
               </div>
             )}
           </div>
@@ -520,7 +520,7 @@ export default function CommunityPage() {
       {/* Image Preview Dialog */}
       <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
         <DialogContent className="max-w-3xl p-2">
-          <DialogHeader><DialogTitle className="sr-only">Image Preview</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="sr-only">{t("Image Preview")}</DialogTitle></DialogHeader>
           {previewImage && <img loading="lazy" decoding="async" src={previewImage} alt="Preview" className="w-full rounded-lg" />}
         </DialogContent>
       </Dialog>

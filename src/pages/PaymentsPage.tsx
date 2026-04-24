@@ -96,14 +96,14 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Payments</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("Payments")}</h1>
         <p className="text-muted-foreground text-sm">{isAdmin ? "All platform transactions" : "Your payment history"}</p>
       </div>
 
       {/* Payment visualization */}
       {chartData.some(d => d.amount > 0) && (
         <div className="stat-card animate-fade-in">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Monthly Payments</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-4">{t("Monthly Payments")}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 20%)" />
@@ -118,7 +118,7 @@ export default function PaymentsPage() {
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Search payments..." className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <Input placeholder={t("Search payments...")} className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
       {filtered.length > 0 ? (
         <div className="stat-card overflow-hidden p-0 animate-fade-in">
@@ -126,15 +126,15 @@ export default function PaymentsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left p-4 text-muted-foreground font-medium">Job</th>
-                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">Payer</th>}
-                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">Payee</th>}
-                  <th className="text-left p-4 text-muted-foreground font-medium">Amount</th>
-                  {(isAdmin || isWorker) && <th className="text-left p-4 text-muted-foreground font-medium">Commission</th>}
-                  <th className="text-left p-4 text-muted-foreground font-medium">Status</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Date</th>
-                  <th className="text-left p-4 text-muted-foreground font-medium">Receipt</th>
-                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">Actions</th>}
+                  <th className="text-left p-4 text-muted-foreground font-medium">{t("Job")}</th>
+                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">{t("Payer")}</th>}
+                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">{t("Payee")}</th>}
+                  <th className="text-left p-4 text-muted-foreground font-medium">{t("Amount")}</th>
+                  {(isAdmin || isWorker) && <th className="text-left p-4 text-muted-foreground font-medium">{t("Commission")}</th>}
+                  <th className="text-left p-4 text-muted-foreground font-medium">{t("Status")}</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">{t("Date")}</th>
+                  <th className="text-left p-4 text-muted-foreground font-medium">{t("Receipt")}</th>
+                  {isAdmin && <th className="text-left p-4 text-muted-foreground font-medium">{t("Actions")}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -183,8 +183,8 @@ export default function PaymentsPage() {
       ) : (
         <div className="stat-card flex flex-col items-center py-16 text-center">
           <CreditCard className="w-10 h-10 text-muted-foreground mb-3" />
-          <p className="text-foreground font-medium">No payments yet</p>
-          <p className="text-sm text-muted-foreground">Transaction records will appear here</p>
+          <p className="text-foreground font-medium">{t("No payments yet")}</p>
+          <p className="text-sm text-muted-foreground">{t("Transaction records will appear here")}</p>
         </div>
       )}
       <TransactionReceipt open={!!receiptData} onClose={() => setReceiptData(null)} data={receiptData} />
