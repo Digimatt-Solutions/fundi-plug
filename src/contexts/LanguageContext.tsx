@@ -27,6 +27,9 @@ const translations: Record<string, Record<Language, string>> = {
   "Post a Job": { en: "Post a Job", sw: "Tuma Kazi" },
   "Find Fundis": { en: "Find Fundis", sw: "Tafuta Fundi" },
   "My Bookings": { en: "My Bookings", sw: "Hifadhi Zangu" },
+  "Hire Directly": { en: "Hire Directly", sw: "Ajiri Moja kwa Moja" },
+  "Describe it, fundis apply": { en: "Describe it, fundis apply", sw: "Ieleze, mafundi waombe" },
+  "Pick a fundi yourself": { en: "Pick a fundi yourself", sw: "Chagua fundi mwenyewe" },
 
   // Customer Dashboard
   "Find Skilled Fundis": { en: "Find Skilled Fundis", sw: "Tafuta Mafundi Wenye Ujuzi" },

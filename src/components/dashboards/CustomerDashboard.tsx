@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import * as L from "leaflet";
@@ -50,6 +50,7 @@ export default function CustomerDashboard() {
   const [showMap, setShowMap] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const [unpaidJobs, setUnpaidJobs] = useState<any[]>([]);
   const [showThanks, setShowThanks] = useState(false);
 
@@ -259,11 +260,24 @@ export default function CustomerDashboard() {
     return () => clearTimeout(t);
   }, [showThanks]);
 
-  // Filter workers by selected category
+  // Filter workers by selected category and search query
   const filteredWorkers = useMemo(() => {
-    if (selectedCategory === "all") return nearbyWorkers;
-    return nearbyWorkers.filter(w => (w.skillIds || []).includes(selectedCategory));
-  }, [nearbyWorkers, selectedCategory]);
+    let list = nearbyWorkers;
+    if (selectedCategory !== "all") {
+      list = list.filter(w => (w.skillIds || []).includes(selectedCategory));
+    }
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter(w =>
+        (w.name || "").toLowerCase().includes(q) ||
+        (w.skill || "").toLowerCase().includes(q) ||
+        (w.bio || "").toLowerCase().includes(q) ||
+        (w.service_area || "").toLowerCase().includes(q) ||
+        (w.county || "").toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [nearbyWorkers, selectedCategory, searchQuery]);
 
   // Pagination
   const totalPages = Math.ceil(filteredWorkers.length / FUNDIS_PER_PAGE);
@@ -272,8 +286,8 @@ export default function CustomerDashboard() {
     return filteredWorkers.slice(start, start + FUNDIS_PER_PAGE);
   }, [filteredWorkers, currentPage]);
 
-  // Reset page when category changes
-  useEffect(() => { setCurrentPage(1); }, [selectedCategory]);
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [selectedCategory, searchQuery]);
 
   const formatDistance = (km: number) => {
     if (km < 1) return `${Math.round(km * 1000)} m away`;
@@ -343,22 +357,45 @@ export default function CustomerDashboard() {
 
       <div className="relative max-w-2xl animate-fade-in">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <Input placeholder={t("What service do you need?")} className="pl-12 h-14 text-base bg-card border-border rounded-xl" />
+        <Input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t("What service do you need?")}
+          className="pl-12 pr-12 h-14 text-base bg-card border-border rounded-xl"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => setSearchQuery("")}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 max-w-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
-        <Button variant="outline" className="h-14 justify-start gap-3 bg-primary/5 border-primary/20 hover:bg-primary/10 text-foreground">
-          <Zap className="w-5 h-5 text-primary" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
+        <Button
+          variant="outline"
+          onClick={() => navigate("/dashboard/post-job")}
+          className="h-14 justify-start gap-3 bg-primary/5 border-primary/20 hover:bg-primary/10 text-foreground"
+        >
+          <FileText className="w-5 h-5 text-primary" />
           <div className="text-left">
-            <p className="text-sm font-medium">{t("Instant Service")}</p>
-            <p className="text-xs text-muted-foreground">{t("Request now")}</p>
+            <p className="text-sm font-medium">{t("Post a Job")}</p>
+            <p className="text-xs text-muted-foreground">{t("Describe it, fundis apply")}</p>
           </div>
         </Button>
-        <Button variant="outline" className="h-14 justify-start gap-3 bg-card border-border hover:bg-muted text-foreground">
-          <CalendarDays className="w-5 h-5 text-chart-3" />
+        <Button
+          variant="outline"
+          onClick={() => navigate("/dashboard/find-workers")}
+          className="h-14 justify-start gap-3 bg-card border-border hover:bg-muted text-foreground"
+        >
+          <UserCheck className="w-5 h-5 text-chart-3" />
           <div className="text-left">
-            <p className="text-sm font-medium">{t("Schedule")}</p>
-            <p className="text-xs text-muted-foreground">{t("Book ahead")}</p>
+            <p className="text-sm font-medium">{t("Hire Directly")}</p>
+            <p className="text-xs text-muted-foreground">{t("Pick a fundi yourself")}</p>
           </div>
         </Button>
       </div>
