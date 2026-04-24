@@ -12,10 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useSearchParams } from "react-router-dom";
 import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState<any[]>([]);
@@ -167,8 +169,8 @@ export default function CustomerBookingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">My Bookings</h1>
-        <p className="text-muted-foreground text-sm">Track your active and completed bookings</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("My Bookings")}</h1>
+        <p className="text-muted-foreground text-sm">{t("Track your active and completed bookings")}</p>
       </div>
 
       {jobs.length > 0 ? (
@@ -245,34 +247,34 @@ export default function CustomerBookingsPage() {
       ) : (
         <div className="stat-card flex flex-col items-center py-16 text-center">
           <CalendarDays className="w-10 h-10 text-muted-foreground mb-3" />
-          <p className="text-foreground font-medium">No bookings yet</p>
-          <p className="text-sm text-muted-foreground">When you hire a fundi, your bookings will appear here</p>
+          <p className="text-foreground font-medium">{t("No bookings yet")}</p>
+          <p className="text-sm text-muted-foreground">{t("When you hire a fundi, your bookings will appear here")}</p>
         </div>
       )}
 
       {/* Payment Dialog */}
       <Dialog open={!!payDialog} onOpenChange={(open) => { if (!open) { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); } }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Payment Required</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("Payment Required")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               The service for <strong className="text-foreground">{payDialog?.title}</strong> has been completed by <strong className="text-foreground">{payDialog?.workerName}</strong>.
             </p>
             <div className="p-4 rounded-lg bg-muted/50 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Amount Due</span>
+              <span className="text-sm text-muted-foreground">{t("Amount Due")}</span>
               <span className="text-2xl font-bold text-foreground">KSH {payDialog?.budget || 50}</span>
             </div>
 
             {!paymentMethod ? (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground">Choose payment method:</p>
+                <p className="text-sm font-medium text-foreground">{t("Choose payment method:")}</p>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setPaymentMethod("stripe")}
                     className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
                     <img loading="lazy" decoding="async" src={stripeLogo} alt="Stripe" className="h-7 w-auto object-contain" />
-                    <span className="text-xs font-medium text-foreground">Card</span>
+                    <span className="text-xs font-medium text-foreground">{t("Card")}</span>
                   </button>
                   <button
                     onClick={() => setPaymentMethod("mpesa")}
@@ -286,7 +288,7 @@ export default function CustomerBookingsPage() {
                     className="flex flex-col items-center gap-2 p-3 rounded-xl border-2 border-border hover:border-primary transition-colors bg-card"
                   >
                     <img loading="lazy" decoding="async" src={paystackLogo} alt="Paystack" className="h-7 w-auto object-contain" />
-                    <span className="text-xs font-medium text-foreground">Paystack</span>
+                    <span className="text-xs font-medium text-foreground">{t("Paystack")}</span>
                   </button>
                 </div>
               </div>
@@ -297,29 +299,29 @@ export default function CustomerBookingsPage() {
                   <span className="text-sm font-medium text-foreground">M-Pesa STK Push</span>
                 </div>
                 <Input
-                  placeholder="Phone number e.g. 0712345678"
+                  placeholder={t("Phone number e.g. 0712345678")}
                   value={mpesaPhone}
                   onChange={(e) => setMpesaPhone(e.target.value)}
                   className="bg-muted/50"
                 />
-                <p className="text-xs text-muted-foreground">You'll receive an STK push on your phone to complete payment.</p>
+                <p className="text-xs text-muted-foreground">{t("You'll receive an STK push on your phone to complete payment.")}</p>
               </div>
             ) : paymentMethod === "stripe" ? (
               <div className="flex items-center gap-2">
                 <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
-                <span className="text-sm font-medium text-foreground">Pay with Card (Stripe)</span>
+                <span className="text-sm font-medium text-foreground">{t("Pay with Card (Stripe)")}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <button onClick={() => setPaymentMethod(null)} className="text-xs text-muted-foreground hover:text-foreground">← Back</button>
-                <span className="text-sm font-medium text-foreground">Pay with Paystack (Card / Mobile / Bank)</span>
+                <span className="text-sm font-medium text-foreground">{t("Pay with Paystack (Card / Mobile / Bank)")}</span>
               </div>
             )}
 
             <p className="text-xs text-muted-foreground">A platform commission will be deducted. The fundi receives the net amount.</p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); }}>Later</Button>
+            <Button variant="outline" onClick={() => { setPayDialog(null); setPaymentMethod(null); setMpesaPhone(""); }}>{t("Later")}</Button>
             {paymentMethod && (
               <Button onClick={() => handlePay(payDialog, paymentMethod)} disabled={paying}>
                 {paymentMethod === "mpesa" ? <Smartphone className="w-4 h-4 mr-2" /> : <CreditCard className="w-4 h-4 mr-2" />}
@@ -333,7 +335,7 @@ export default function CustomerBookingsPage() {
       {/* Review Dialog */}
       <Dialog open={!!reviewDialog} onOpenChange={(open) => !open && setReviewDialog(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Rate Fundi</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("Rate Fundi")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-1 justify-center">
               {[1, 2, 3, 4, 5].map((s) => (
@@ -342,10 +344,10 @@ export default function CustomerBookingsPage() {
                 </button>
               ))}
             </div>
-            <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Leave a comment..." className="bg-muted/50" />
+            <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("Leave a comment...")} className="bg-muted/50" />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewDialog(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setReviewDialog(null)}>{t("Cancel")}</Button>
             <Button onClick={submitReview} disabled={submitting}>{submitting ? "Submitting..." : "Submit Review"}</Button>
           </DialogFooter>
         </DialogContent>

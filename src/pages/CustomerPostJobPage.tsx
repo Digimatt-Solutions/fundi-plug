@@ -11,10 +11,12 @@ import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CustomerPostJobPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [myJobs, setMyJobs] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -236,7 +238,7 @@ export default function CustomerPostJobPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Jobs</h1>
-          <p className="text-muted-foreground text-sm">Post jobs and manage fundi applications</p>
+          <p className="text-muted-foreground text-sm">{t("Post jobs and manage fundi applications")}</p>
         </div>
         <Button onClick={() => setShowCreate(true)} className="active:scale-[0.97]"><Plus className="w-4 h-4 mr-2" /> Post a Job</Button>
       </div>
@@ -306,33 +308,33 @@ export default function CustomerPostJobPage() {
       {/* Create Job Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Post a New Job</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("Post a New Job")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>Job Title *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Fix kitchen faucet" className="bg-muted/50" /></div>
-            <div className="space-y-2"><Label>Description</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe the work needed..." className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Job Title *")}</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("e.g. Fix kitchen faucet")} className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Description")}</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("Describe the work needed...")} className="bg-muted/50" /></div>
             <ImageUploadField preview={jobImagePreview} onSelect={(f) => handleImageSelect(f, setJobImage, setJobImagePreview)} />
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Budget (KSH)</Label><Input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="5000" className="bg-muted/50" /></div>
+              <div className="space-y-2"><Label>{t("Budget (KSH)")}</Label><Input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder={t("5000")} className="bg-muted/50" /></div>
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>{t("Category")}</Label>
                 <Select value={categoryId} onValueChange={setCategoryId}>
-                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder={t("Select")} /></SelectTrigger>
                   <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="space-y-2"><Label>Address / Location</Label><Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Main St" className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Address / Location")}</Label><Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={t("123 Main St")} className="bg-muted/50" /></div>
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><CalendarDays className="w-4 h-4" /> Timeline / Deadline</Label>
               <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="bg-muted/50" />
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={isInstant} onChange={(e) => setIsInstant(e.target.checked)} className="rounded border-border" />
-              <span className="text-sm text-foreground">Instant service (urgent request)</span>
+              <span className="text-sm text-foreground">{t("Instant service (urgent request)")}</span>
             </label>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowCreate(false)}>{t("Cancel")}</Button>
             <Button onClick={createJob} disabled={creating || !title.trim()}>{creating ? "Posting..." : "Post Job"}</Button>
           </DialogFooter>
         </DialogContent>
@@ -341,25 +343,25 @@ export default function CustomerPostJobPage() {
       {/* Edit Job Dialog */}
       <Dialog open={!!editJob} onOpenChange={(open) => !open && setEditJob(null)}>
         <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Edit Job Post</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("Edit Job Post")}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"><Label>Job Title *</Label><Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="bg-muted/50" /></div>
-            <div className="space-y-2"><Label>Description</Label><Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Job Title *")}</Label><Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Description")}</Label><Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="bg-muted/50" /></div>
             <ImageUploadField preview={editImagePreview} onSelect={(f) => handleImageSelect(f, setEditImage, setEditImagePreview)} />
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Budget (KSH)</Label><Input type="number" value={editBudget} onChange={(e) => setEditBudget(e.target.value)} className="bg-muted/50" /></div>
+              <div className="space-y-2"><Label>{t("Budget (KSH)")}</Label><Input type="number" value={editBudget} onChange={(e) => setEditBudget(e.target.value)} className="bg-muted/50" /></div>
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label>{t("Category")}</Label>
                 <Select value={editCategoryId} onValueChange={setEditCategoryId}>
-                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger className="bg-muted/50"><SelectValue placeholder={t("Select")} /></SelectTrigger>
                   <SelectContent>{categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.icon} {c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="space-y-2"><Label>Address / Location</Label><Input value={editAddress} onChange={(e) => setEditAddress(e.target.value)} className="bg-muted/50" /></div>
+            <div className="space-y-2"><Label>{t("Address / Location")}</Label><Input value={editAddress} onChange={(e) => setEditAddress(e.target.value)} className="bg-muted/50" /></div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditJob(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setEditJob(null)}>{t("Cancel")}</Button>
             <Button onClick={saveEditJob} disabled={saving || !editTitle.trim()}>{saving ? "Saving..." : "Save Changes"}</Button>
           </DialogFooter>
         </DialogContent>
@@ -368,7 +370,7 @@ export default function CustomerPostJobPage() {
       {/* Applications Dialog */}
       <Dialog open={!!viewAppsJobId} onOpenChange={(open) => !open && setViewAppsJobId(null)}>
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader><DialogTitle>Job Applications</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("Job Applications")}</DialogTitle></DialogHeader>
           {loadingApps ? (
             <div className="flex items-center justify-center py-8">
               <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
@@ -398,7 +400,7 @@ export default function CustomerPostJobPage() {
                 </div>
               ))}
             </div>
-          ) : <p className="text-sm text-muted-foreground text-center py-8">No applications yet</p>}
+          ) : <p className="text-sm text-muted-foreground text-center py-8">{t("No applications yet")}</p>}
         </DialogContent>
       </Dialog>
 
@@ -406,13 +408,13 @@ export default function CustomerPostJobPage() {
       <AlertDialog open={!!deleteJobConfirm} onOpenChange={(open) => !open && setDeleteJobConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+            <AlertDialogTitle>{t("Delete this job?")}</AlertDialogTitle>
             <AlertDialogDescription>
               "{deleteJobConfirm?.title}" and all its applications will be permanently removed. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>{t("Cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteJob} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {deleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>

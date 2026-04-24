@@ -11,10 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Camera, Mail, Phone, MapPin, ShieldCheck, User as UserIcon, KeyRound, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AccountProfilePage() {
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
@@ -158,7 +160,7 @@ export default function AccountProfilePage() {
                 onClick={onPickAvatar}
                 disabled={uploading}
                 className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-2 shadow hover:opacity-90 transition disabled:opacity-50"
-                aria-label="Change photo"
+                aria-label={t("Change photo")}
               >
                 {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
               </button>
@@ -194,17 +196,17 @@ export default function AccountProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="name">Full name</Label>
-              <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Jane Doe" />
+              <Label htmlFor="name">{t("Full name")}</Label>
+              <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("Jane Doe")} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="phone" className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> Phone</Label>
-              <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+254 712 345 678" />
+              <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t("+254 712 345 678")} />
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="email" className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> Email</Label>
               <Input id="email" value={form.email} disabled className="bg-muted/50" />
-              <p className="text-xs text-muted-foreground">Email cannot be changed from this page.</p>
+              <p className="text-xs text-muted-foreground">{t("Email cannot be changed from this page.")}</p>
             </div>
           </div>
           <Separator />
@@ -226,12 +228,12 @@ export default function AccountProfilePage() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="newPassword">New password</Label>
-              <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="At least 6 characters" />
+              <Label htmlFor="newPassword">{t("New password")}</Label>
+              <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={t("At least 6 characters")} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
-              <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" />
+              <Label htmlFor="confirmPassword">{t("Confirm password")}</Label>
+              <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder={t("Re-enter password")} />
             </div>
           </div>
           <div className="flex justify-end">
