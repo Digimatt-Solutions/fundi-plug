@@ -10,6 +10,44 @@ export const isSpeechRecognitionSupported = () =>
 export const isSpeechSynthesisSupported = () =>
   typeof window !== "undefined" && "speechSynthesis" in window;
 
+// Pick the best available voice, preferring African English (en-ZA, en-NG, en-KE),
+// then other English locales. Cached after first lookup.
+let _selectedVoice: SpeechSynthesisVoice | null = null;
+let _voicesLoaded = false;
+
+function pickVoice(): SpeechSynthesisVoice | null {
+  if (!isSpeechSynthesisSupported()) return null;
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return null;
+
+  const prefer = ["en-ZA", "en-NG", "en-KE", "en-GH", "en-ZW"];
+  for (const lang of prefer) {
+    const v = voices.find((x) => x.lang?.toLowerCase() === lang.toLowerCase());
+    if (v) return v;
+  }
+  // Try "African" in name
+  const named = voices.find((v) => /africa|south\s*african|nigeri|kenya|ghan/i.test(v.name));
+  if (named) return named;
+  // Fall back to en-GB then en-US then any English
+  return (
+    voices.find((v) => v.lang === "en-GB") ||
+    voices.find((v) => v.lang === "en-US") ||
+    voices.find((v) => v.lang?.startsWith("en")) ||
+    voices[0] ||
+    null
+  );
+}
+
+function ensureVoice(): SpeechSynthesisVoice | null {
+  if (_selectedVoice) return _selectedVoice;
+  _selectedVoice = pickVoice();
+  if (!_voicesLoaded && isSpeechSynthesisSupported()) {
+    _voicesLoaded = true;
+    window.speechSynthesis.onvoiceschanged = () => { _selectedVoice = pickVoice(); };
+  }
+  return _selectedVoice;
+}
+
 export function speak(text: string, opts?: { rate?: number; pitch?: number; onEnd?: () => void }) {
   if (!isSpeechSynthesisSupported()) {
     opts?.onEnd?.();
@@ -18,6 +56,8 @@ export function speak(text: string, opts?: { rate?: number; pitch?: number; onEn
   try {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
+    const v = ensureVoice();
+    if (v) { u.voice = v; u.lang = v.lang; }
     u.rate = opts?.rate ?? 1;
     u.pitch = opts?.pitch ?? 1;
     u.onend = () => opts?.onEnd?.();
