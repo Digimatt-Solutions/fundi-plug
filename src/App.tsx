@@ -32,6 +32,7 @@ import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
 import CommunityPage from "@/pages/CommunityPage";
 import NotFound from "@/pages/NotFound";
+import VisitTracker from "@/components/VisitTracker";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <VisitTracker />
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
