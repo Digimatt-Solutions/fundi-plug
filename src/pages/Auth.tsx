@@ -155,6 +155,19 @@ const Auth = () => {
     try {
       if (isSignIn) {
         await login(email, password);
+        // Cache password for fingerprint sign-in on this device (only for this user's enrolled creds)
+        try {
+          const { data: { user: u } } = await supabase.auth.getUser();
+          if (u) {
+            const { data: creds } = await supabase
+              .from("webauthn_credentials")
+              .select("credential_id")
+              .eq("user_id", u.id);
+            (creds || []).forEach((c: any) => {
+              localStorage.setItem(`fp_secret_${c.credential_id}`, JSON.stringify({ email, password }));
+            });
+          }
+        } catch { /* non-fatal */ }
         playSubmitSound();
       } else {
         await signup(email, password, name, role);
