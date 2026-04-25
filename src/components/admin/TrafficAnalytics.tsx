@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { Activity, Download, Globe, Monitor, Smartphone, Tablet, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Activity, Download, Globe, Monitor, Smartphone, Tablet, Users, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -24,6 +25,28 @@ type Visit = {
 
 const COLORS = ["hsl(22, 93%, 49%)", "hsl(200, 80%, 55%)", "hsl(140, 60%, 50%)", "hsl(280, 60%, 60%)", "hsl(40, 90%, 55%)", "hsl(0, 70%, 60%)"];
 
+type RangeKey = "7d" | "30d" | "90d" | "month" | "all";
+
+const RANGE_OPTIONS: { value: RangeKey; label: string }[] = [
+  { value: "7d", label: "Last 7 days" },
+  { value: "30d", label: "Last 30 days" },
+  { value: "90d", label: "Last 90 days" },
+  { value: "month", label: "This month" },
+  { value: "all", label: "All time" },
+];
+
+function rangeToSinceMs(range: RangeKey): number | null {
+  const now = Date.now();
+  if (range === "7d") return now - 7 * 86400000;
+  if (range === "30d") return now - 30 * 86400000;
+  if (range === "90d") return now - 90 * 86400000;
+  if (range === "month") {
+    const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }
+  return null; // all
+}
+
 function tally(arr: (string | null)[]) {
   const map: Record<string, number> = {};
   arr.forEach((v) => {
@@ -40,23 +63,31 @@ function deviceIcon(name: string) {
 }
 
 export default function TrafficAnalytics() {
-  const [visits, setVisits] = useState<Visit[]>([]);
+  const [allVisits, setAllVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [range, setRange] = useState<RangeKey>("30d");
 
   useEffect(() => {
     (async () => {
-      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      // Pull a generous window once; client-side filter for instant range switching.
       const { data } = await supabase
         .from("site_visits")
         .select("id, path, device, browser, os, country, city, referrer, created_at")
-        .gte("created_at", since)
         .order("created_at", { ascending: false })
-        .limit(5000);
-      setVisits((data as Visit[]) || []);
+        .limit(20000);
+      setAllVisits((data as Visit[]) || []);
       setLoading(false);
     })();
   }, []);
+
+  const visits = useMemo(() => {
+    const since = rangeToSinceMs(range);
+    if (since == null) return allVisits;
+    return allVisits.filter((v) => new Date(v.created_at).getTime() >= since);
+  }, [allVisits, range]);
+
+  const rangeLabel = RANGE_OPTIONS.find((o) => o.value === range)?.label || "";
 
   const totalVisits = visits.length;
   const uniqueCountries = new Set(visits.map((v) => v.country).filter(Boolean)).size;
@@ -65,18 +96,46 @@ export default function TrafficAnalytics() {
   const countries = tally(visits.map((v) => v.country)).slice(0, 8);
   const oses = tally(visits.map((v) => v.os));
 
-  // Last 14 days line
-  const days: { date: string; visits: number }[] = [];
-  for (let i = 13; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    days.push({ date: key.slice(5), visits: 0 });
-  }
-  visits.forEach((v) => {
-    const k = v.created_at.slice(5, 10);
-    const d = days.find((x) => x.date === k);
-    if (d) d.visits += 1;
-  });
+  // Time series: pick bucket size by range
+  const series = useMemo(() => {
+    if (range === "all") {
+      // monthly buckets across full history
+      const buckets: { date: string; visits: number }[] = [];
+      const map: Record<string, number> = {};
+      visits.forEach((v) => {
+        const k = v.created_at.slice(0, 7); // YYYY-MM
+        map[k] = (map[k] || 0) + 1;
+      });
+      Object.keys(map).sort().forEach((k) => buckets.push({ date: k, visits: map[k] }));
+      return buckets;
+    }
+    if (range === "90d") {
+      // weekly buckets (~13 weeks)
+      const map: Record<string, number> = {};
+      visits.forEach((v) => {
+        const d = new Date(v.created_at);
+        const day = d.getUTCDay();
+        d.setUTCDate(d.getUTCDate() - day);
+        const k = d.toISOString().slice(0, 10);
+        map[k] = (map[k] || 0) + 1;
+      });
+      return Object.keys(map).sort().map((k) => ({ date: k.slice(5), visits: map[k] }));
+    }
+    // daily buckets for 7d/30d/month
+    const days: { date: string; visits: number }[] = [];
+    const since = rangeToSinceMs(range) ?? Date.now() - 30 * 86400000;
+    const start = new Date(since); start.setHours(0, 0, 0, 0);
+    const end = new Date();
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      days.push({ date: d.toISOString().slice(5, 10), visits: 0 });
+    }
+    visits.forEach((v) => {
+      const k = v.created_at.slice(5, 10);
+      const d = days.find((x) => x.date === k);
+      if (d) d.visits += 1;
+    });
+    return days;
+  }, [visits, range]);
 
   const exportPDF = async () => {
     setExporting(true);
@@ -99,16 +158,16 @@ export default function TrafficAnalytics() {
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(20);
-      doc.text("FundiPlug — Traffic Report", 80, 38);
+      doc.text("FundiPlug - Traffic Report", 80, 38);
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.text(`Generated ${new Date().toLocaleString()}  •  Last 30 days`, 80, 56);
+      doc.text(`Generated ${new Date().toLocaleString()}  -  ${rangeLabel}`, 80, 56);
 
       // Summary
       doc.setTextColor(33, 33, 33);
       let y = 100;
       doc.setFont("helvetica", "bold"); doc.setFontSize(12);
-      doc.text("Summary", 24, y); y += 14;
+      doc.text(`Summary (${rangeLabel})`, 24, y); y += 14;
       doc.setFont("helvetica", "normal"); doc.setFontSize(10);
       doc.text(`Total visits: ${totalVisits}`, 24, y); y += 14;
       doc.text(`Unique countries: ${uniqueCountries}`, 24, y); y += 14;
@@ -125,10 +184,10 @@ export default function TrafficAnalytics() {
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(8); doc.setTextColor(120);
-        doc.text(`FundiPlug Analytics  •  Page ${i} of ${pageCount}`, 24, doc.internal.pageSize.getHeight() - 16);
+        doc.text(`FundiPlug Analytics  -  ${rangeLabel}  -  Page ${i} of ${pageCount}`, 24, doc.internal.pageSize.getHeight() - 16);
       }
 
-      doc.save(`fundiplug-traffic-${new Date().toISOString().slice(0, 10)}.pdf`);
+      doc.save(`fundiplug-traffic-${range}-${new Date().toISOString().slice(0, 10)}.pdf`);
     } finally {
       setExporting(false);
     }
@@ -149,13 +208,26 @@ export default function TrafficAnalytics() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <Activity className="w-5 h-5 text-primary" /> Traffic — Last 30 Days
+            <Activity className="w-5 h-5 text-primary" /> Traffic - {rangeLabel}
           </h3>
           <p className="text-xs text-muted-foreground">Visitors, devices, browsers and countries</p>
         </div>
-        <Button size="sm" onClick={exportPDF} disabled={exporting} className="gap-1.5">
-          <Download className="w-4 h-4" /> {exporting ? "Generating..." : "Download PDF"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select value={range} onValueChange={(v) => setRange(v as RangeKey)}>
+            <SelectTrigger className="h-9 w-[150px] gap-1">
+              <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {RANGE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button size="sm" onClick={exportPDF} disabled={exporting} className="gap-1.5">
+            <Download className="w-4 h-4" /> {exporting ? "Generating..." : "Download PDF"}
+          </Button>
+        </div>
       </div>
 
       {/* KPI tiles */}
@@ -172,12 +244,12 @@ export default function TrafficAnalytics() {
           <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Top Device</span>
             {(() => { const Icon = deviceIcon(devices[0]?.name || ""); return <Icon className="w-4 h-4 text-chart-3" />; })()}
           </div>
-          <p className="text-base font-semibold text-foreground mt-1 truncate">{devices[0]?.name || "—"}</p>
+          <p className="text-base font-semibold text-foreground mt-1 truncate">{devices[0]?.name || "-"}</p>
           <p className="text-xs text-muted-foreground">{devices[0]?.value || 0} visits</p>
         </div>
         <div className="rounded-xl border border-border bg-muted/30 p-4">
           <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Top Browser</span><Monitor className="w-4 h-4 text-chart-4" /></div>
-          <p className="text-base font-semibold text-foreground mt-1 truncate">{browsers[0]?.name || "—"}</p>
+          <p className="text-base font-semibold text-foreground mt-1 truncate">{browsers[0]?.name || "-"}</p>
           <p className="text-xs text-muted-foreground">{browsers[0]?.value || 0} visits</p>
         </div>
       </div>
@@ -187,7 +259,7 @@ export default function TrafficAnalytics() {
         <div className="rounded-xl border border-border p-3">
           <p className="text-xs font-medium text-muted-foreground mb-2">Visits over time</p>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={days}>
+            <LineChart data={series}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 20%)" />
               <XAxis dataKey="date" stroke="hsl(220, 10%, 46%)" fontSize={10} />
               <YAxis stroke="hsl(220, 10%, 46%)" fontSize={10} allowDecimals={false} />
