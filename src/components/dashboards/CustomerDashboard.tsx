@@ -380,7 +380,7 @@ export default function CustomerDashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
+      <div className="grid grid-cols-2 gap-3 max-w-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
         <Button
           variant="outline"
           onClick={() => navigate("/dashboard/post-job")}
