@@ -71,6 +71,43 @@ export default function CustomerDashboard() {
   const [hireCategoryId, setHireCategoryId] = useState("");
   const [hiring, setHiring] = useState(false);
 
+  // Worker profile dialog
+  const [selectedWorker, setSelectedWorker] = useState<any>(null);
+  const [workerReviews, setWorkerReviews] = useState<any[]>([]);
+  const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("jobs")
+        .select("worker_id, status")
+        .eq("customer_id", user.id)
+        .in("status", ["accepted", "in_progress", "completed"])
+        .not("worker_id", "is", null);
+      const ids = new Set<string>();
+      (data || []).forEach((j: any) => j.worker_id && ids.add(j.worker_id));
+      setUnlockedWorkerIds(ids);
+    })();
+  }, [user]);
+
+  const openWorkerProfile = async (worker: any) => {
+    setSelectedWorker(worker);
+    const reviewsRes = await supabase
+      .from("reviews")
+      .select("*, jobs:job_id(title)")
+      .eq("reviewee_id", worker.user_id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    const reviewerIds = [...new Set((reviewsRes.data || []).map((r: any) => r.reviewer_id))];
+    const { data: profiles } = reviewerIds.length > 0
+      ? await supabase.from("profiles").select("id, name").in("id", reviewerIds)
+      : { data: [] };
+    const nameMap: Record<string, string> = {};
+    (profiles || []).forEach((p: any) => { nameMap[p.id] = p.name; });
+    setWorkerReviews((reviewsRes.data || []).map((r: any) => ({ ...r, reviewerName: nameMap[r.reviewer_id] || t("Client") })));
+  };
+
   const openHireDialog = (worker: any) => {
     setHireDialog(worker);
     setHireTitle(`${t("Hire")}: ${worker.name}`);
