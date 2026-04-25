@@ -96,7 +96,7 @@ export async function verifyFingerprint(allowCredentialIds?: string[]): Promise<
     const bin = atob(padded);
     const buf = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-    return { type: "public-key" as const, id: buf.buffer };
+    return { type: "public-key" as const, id: buf.buffer as ArrayBuffer };
   });
 
   const publicKey: PublicKeyCredentialRequestOptions = {
