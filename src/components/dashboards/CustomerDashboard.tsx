@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { friendlyError } from "@/lib/friendlyError";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",
@@ -98,7 +99,7 @@ export default function CustomerDashboard() {
       is_instant: true,
     }).select().single();
     if (error) {
-      toast({ title: "Failed to hire", description: error.message, variant: "destructive" });
+      toast({ title: "Failed to hire", description: friendlyError(error), variant: "destructive" });
       setHiring(false);
       return;
     }

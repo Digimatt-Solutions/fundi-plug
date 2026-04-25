@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Trash2, Edit2, Upload, Image } from "lucide-react";
 import {
+import { friendlyError } from "@/lib/friendlyError";
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 
@@ -52,7 +53,7 @@ export default function AdminCategoriesPage() {
     const ext = file.name.split(".").pop();
     const path = `${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("category-images").upload(path, file);
-    if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); setUploading(false); return; }
+    if (error) { toast({ title: "Upload failed", description: friendlyError(error), variant: "destructive" }); setUploading(false); return; }
     const { data: { publicUrl } } = supabase.storage.from("category-images").getPublicUrl(path);
     setImageUrl(publicUrl);
     setUploading(false);

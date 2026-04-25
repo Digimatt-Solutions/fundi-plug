@@ -11,6 +11,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { isSoundEnabled, setSoundEnabled, playNotificationSound } from "@/lib/sound";
 import TrafficAnalytics from "@/components/admin/TrafficAnalytics";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function SettingsPage() {
   const { user, refreshProfile } = useAuth();
@@ -139,7 +140,7 @@ export default function SettingsPage() {
       URL.revokeObjectURL(url);
       toast({ title: "Backup downloaded", description: "All data has been exported successfully." });
     } catch (err: any) {
-      toast({ title: "Backup failed", description: err.message, variant: "destructive" });
+      toast({ title: "Backup failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setBackingUp(false);
     }
@@ -156,7 +157,7 @@ export default function SettingsPage() {
       setFlushOpen(false);
       setFlushPassword("");
     } catch (err: any) {
-      toast({ title: "Flush failed", description: err.message, variant: "destructive" });
+      toast({ title: "Flush failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setFlushing(false);
     }

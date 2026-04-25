@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useSearchParams } from "react-router-dom";
 import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
@@ -140,7 +141,7 @@ export default function CustomerBookingsPage() {
         pollForCompletion();
       }
     } catch (err: any) {
-      toast({ title: "Payment failed", description: err.message, variant: "destructive" });
+      toast({ title: "Payment failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setPaying(false);
     }

@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Camera, Mail, Phone, MapPin, ShieldCheck, User as UserIcon, KeyRound, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import FingerprintEnroll from "@/components/FingerprintEnroll";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function AccountProfilePage() {
   const { user, refreshProfile } = useAuth();
@@ -81,7 +82,7 @@ export default function AccountProfilePage() {
       await refreshProfile();
       toast({ title: "Profile photo updated" });
     } catch (err: any) {
-      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+      toast({ title: "Upload failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setUploading(false);
     }

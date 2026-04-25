@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
+import { friendlyError } from "@/lib/friendlyError";
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 
@@ -112,7 +113,7 @@ export default function AdminDisbursementsPage() {
       setAdminNotes("");
       load();
     } catch (err: any) {
-      toast({ title: "Action failed", description: err.message, variant: "destructive" });
+      toast({ title: "Action failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setProcessing(false);
     }

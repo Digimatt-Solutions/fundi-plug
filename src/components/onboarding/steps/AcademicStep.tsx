@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import FileUploader from "../FileUploader";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface Props {
   data: any;
@@ -51,7 +52,7 @@ export default function AcademicStep({ userId }: Props) {
     };
     const { data: row, error } = await supabase.from("worker_education").insert(payload).select().single();
     if (error) {
-      toast({ title: "Failed", description: error.message, variant: "destructive" });
+      toast({ title: "Failed", description: friendlyError(error), variant: "destructive" });
     } else {
       setRows([row, ...rows]);
       setDraft({ level: "", institution: "", course: "", status: "Completed", start_date: "", end_date: "", file_url: "" });
@@ -62,7 +63,7 @@ export default function AcademicStep({ userId }: Props) {
   const removeRow = async (id: string) => {
     const { error } = await supabase.from("worker_education").delete().eq("id", id);
     if (error) {
-      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      toast({ title: "Delete failed", description: friendlyError(error), variant: "destructive" });
       return;
     }
     setRows(rows.filter((r) => r.id !== id));

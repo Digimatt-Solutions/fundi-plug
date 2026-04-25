@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function CustomerComplaintsPage() {
   const { user } = useAuth();
@@ -48,7 +49,7 @@ export default function CustomerComplaintsPage() {
       message: message.trim(),
     } as any);
     if (error) {
-      toast({ title: "Failed to submit", description: error.message, variant: "destructive" });
+      toast({ title: "Failed to submit", description: friendlyError(error), variant: "destructive" });
     } else {
       toast({ title: "Complaint submitted", description: "Admin will review and respond." });
       setMessage("");

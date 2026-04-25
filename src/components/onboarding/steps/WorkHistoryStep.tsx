@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface Props {
   data: any;
@@ -50,7 +51,7 @@ export default function WorkHistoryStep({ userId }: Props) {
       .select()
       .single();
     if (error) {
-      toast({ title: "Failed", description: error.message, variant: "destructive" });
+      toast({ title: "Failed", description: friendlyError(error), variant: "destructive" });
     } else {
       setRows([row, ...rows]);
       setDraft({ role: "", company: "", description: "", start_date: "", end_date: "", reference_name: "", reference_phone: "" });
@@ -61,7 +62,7 @@ export default function WorkHistoryStep({ userId }: Props) {
   const removeRow = async (id: string) => {
     const { error } = await supabase.from("worker_work_history").delete().eq("id", id);
     if (error) {
-      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      toast({ title: "Delete failed", description: friendlyError(error), variant: "destructive" });
       return;
     }
     setRows(rows.filter((r) => r.id !== id));

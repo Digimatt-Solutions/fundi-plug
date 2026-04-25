@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
+import { friendlyError } from "@/lib/friendlyError";
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
 
@@ -96,7 +97,7 @@ export default function WorkerEarningsPage() {
       setDialogOpen(false);
       load();
     } catch (err: any) {
-      toast({ title: "Request failed", description: err.message, variant: "destructive" });
+      toast({ title: "Request failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setWithdrawing(false);
     }
