@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileText, Trash2, CheckCircle, Clock, XCircle, Camera, AlertTriangle } from "lucide-react";
+import FingerprintEnroll from "@/components/FingerprintEnroll";
 
 const REQUIRED_DOCS = [
   { key: "national_id", label: "National ID", description: "Upload a copy of your National ID (front)" },
