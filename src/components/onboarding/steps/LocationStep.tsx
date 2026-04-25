@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { MapPin, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface Props {
   data: any;
@@ -29,7 +30,7 @@ export default function LocationStep({ data, setData }: Props) {
         setBusy(false);
       },
       (err) => {
-        toast({ title: "Could not get location", description: err.message, variant: "destructive" });
+        toast({ title: "Could not get location", description: friendlyError(err), variant: "destructive" });
         setBusy(false);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }

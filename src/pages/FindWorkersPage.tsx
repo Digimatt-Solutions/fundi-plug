@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { maskEmail, maskPhone } from "@/lib/mask";
 import { MapPreview } from "@/components/MapPreview";
+import { friendlyError } from "@/lib/friendlyError";
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -156,7 +157,7 @@ export default function FindWorkersPage() {
       is_instant: true,
     }).select().single();
     if (error) {
-      toast({ title: t("Failed to hire"), description: error.message, variant: "destructive" });
+      toast({ title: t("Failed to hire"), description: friendlyError(error), variant: "destructive" });
       setHiring(false);
       return;
     }

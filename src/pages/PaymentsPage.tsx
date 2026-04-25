@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function PaymentsPage() {
   const { user } = useAuth();
@@ -71,7 +72,7 @@ export default function PaymentsPage() {
       toast({ title: "Payment reset", description: "Client can now retry payment." });
       load();
     } catch (err: any) {
-      toast({ title: "Reset failed", description: err.message, variant: "destructive" });
+      toast({ title: "Reset failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setResetting(null);
     }

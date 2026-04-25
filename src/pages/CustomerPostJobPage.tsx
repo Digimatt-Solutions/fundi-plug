@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function CustomerPostJobPage() {
   const { user } = useAuth();
@@ -83,7 +84,7 @@ export default function CustomerPostJobPage() {
     const ext = file.name.split(".").pop();
     const path = `${user!.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("job-images").upload(path, file);
-    if (error) { toast({ title: "Image upload failed", description: error.message, variant: "destructive" }); return null; }
+    if (error) { toast({ title: "Image upload failed", description: friendlyError(error), variant: "destructive" }); return null; }
     const { data } = supabase.storage.from("job-images").getPublicUrl(path);
     return data.publicUrl;
   };
@@ -102,7 +103,7 @@ export default function CustomerPostJobPage() {
       image_url: imageUrl,
     });
     if (error) {
-      toast({ title: "Error creating job", description: error.message, variant: "destructive" });
+      toast({ title: "Error creating job", description: friendlyError(error), variant: "destructive" });
     } else {
       toast({ title: "Job posted!" });
       await supabase.from("activity_logs").insert({
@@ -143,7 +144,7 @@ export default function CustomerPostJobPage() {
       image_url: imageUrl,
     }).eq("id", editJob.id);
     if (error) {
-      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      toast({ title: "Update failed", description: friendlyError(error), variant: "destructive" });
     } else {
       toast({ title: "Job updated!" });
       setEditJob(null);
@@ -172,7 +173,7 @@ export default function CustomerPostJobPage() {
     await supabase.from("bookings").delete().eq("job_id", deleteJobConfirm.id);
     const { error } = await supabase.from("jobs").delete().eq("id", deleteJobConfirm.id);
     if (error) {
-      toast({ title: "Delete failed", description: error.message, variant: "destructive" });
+      toast({ title: "Delete failed", description: friendlyError(error), variant: "destructive" });
     } else {
       toast({ title: "Job deleted" });
       await supabase.from("activity_logs").insert({

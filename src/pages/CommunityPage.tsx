@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.png";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { friendlyError } from "@/lib/friendlyError";
 
 interface Post {
   id: string;
@@ -173,7 +174,7 @@ export default function CommunityPage() {
       author_id: user.id, content: newContent.trim(), image_url: imageUrl,
       post_type: isAnnouncement && user.role === "admin" ? "announcement" : "post",
     } as any);
-    if (error) { toast({ title: "Failed to post", description: error.message, variant: "destructive" }); }
+    if (error) { toast({ title: "Failed to post", description: friendlyError(error), variant: "destructive" }); }
     else { setNewContent(""); setNewImage(null); setImagePreview(null); setIsAnnouncement(false); }
     setPosting(false);
   };

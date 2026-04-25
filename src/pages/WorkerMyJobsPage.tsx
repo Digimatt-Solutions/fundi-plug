@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { maskEmail, maskPhone } from "@/lib/mask";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function WorkerMyJobsPage() {
   const { user } = useAuth();
@@ -95,7 +96,7 @@ export default function WorkerMyJobsPage() {
       cover_note: coverNote || null, proposed_rate: proposedRate ? Number(proposedRate) : null,
     });
     if (error) {
-      toast({ title: "Application failed", description: error.message, variant: "destructive" });
+      toast({ title: "Application failed", description: friendlyError(error), variant: "destructive" });
     } else {
       toast({ title: "Application sent!" });
       await supabase.from("activity_logs").insert({
