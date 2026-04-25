@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
-import { friendlyError } from "@/lib/friendlyError";
   isSpeechRecognitionSupported,
   listenOnce,
   speak,
   stopSpeaking,
 } from "@/lib/voice";
+import { friendlyError } from "@/lib/friendlyError";
 
 type NavItem = { title: string; url: string; key: string };
 
