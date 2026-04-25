@@ -267,6 +267,8 @@ export default function WorkerProfilePage() {
         </div>
       </div>
 
+      <FingerprintEnroll showFundiPreview />
+
       <Tabs defaultValue="demographics" className="space-y-4">
         <TabsList className="flex flex-wrap h-auto gap-1">
           <TabsTrigger value="demographics">Personal Details</TabsTrigger>
