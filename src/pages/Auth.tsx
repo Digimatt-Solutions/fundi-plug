@@ -13,6 +13,7 @@ import { playSubmitSound } from "@/lib/sound";
 import logo from "@/assets/logo.png";
 import AuthVoiceButton from "@/components/voice/AuthVoiceButton";
 import AuthFingerprintButton from "@/components/voice/AuthFingerprintButton";
+import { friendlyError } from "@/lib/friendlyError";
 
 type Mode = "signin" | "signup" | "forgot";
 
