@@ -89,7 +89,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
               <button
                 key={cat.id}
                 onClick={() => onSelect(cat.id)}
-                className={`stat-card overflow-hidden p-0 flex flex-col items-center cursor-pointer transition-colors active:scale-[0.97] shrink-0 snap-start basis-[calc((100%-2.25rem)/4)] sm:basis-[180px] ${isSelected ? "border-primary ring-2 ring-primary/30" : "hover:border-primary/40"}`}
+                className={`stat-card overflow-hidden p-0 flex flex-col items-center cursor-pointer transition-colors active:scale-[0.97] shrink-0 snap-start basis-[calc((100%-1.5rem)/3)] sm:basis-[180px] ${isSelected ? "border-primary ring-2 ring-primary/30" : "hover:border-primary/40"}`}
               >
                 {img ? (
                   <div className="w-full h-20 overflow-hidden">
