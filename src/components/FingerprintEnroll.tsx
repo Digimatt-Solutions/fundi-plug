@@ -195,7 +195,7 @@ export default function FingerprintEnroll({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-green-600" /> Verified - this is what clients see
+              <ShieldCheck className="w-5 h-5 text-primary" /> Verified - this is what clients see
             </DialogTitle>
           </DialogHeader>
           {preview && (
