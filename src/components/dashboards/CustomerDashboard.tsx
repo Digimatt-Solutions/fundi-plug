@@ -206,7 +206,7 @@ export default function CustomerDashboard() {
 
       const { data: onlineWorkers } = await supabase
         .from("worker_profiles")
-        .select("*, profiles!worker_profiles_user_id_fkey(name, avatar_url)")
+        .select("*, profiles!worker_profiles_user_id_fkey(name, avatar_url, email, phone)")
         .eq("verification_status", "approved");
 
       const workerIds = (onlineWorkers || []).map(w => w.user_id);
@@ -232,6 +232,8 @@ export default function CustomerDashboard() {
         ...w,
         name: (w as any).profiles?.name || "Fundi",
         avatar_url: (w as any).profiles?.avatar_url || null,
+        email: (w as any).profiles?.email || "",
+        phone: (w as any).profiles?.phone || "",
         skill: (w.skills || []).map((s: string) => skillMap[s] || "").filter(Boolean).join(", ") || t("General"),
         skillIds: w.skills || [],
         rating: ratingMap[w.user_id] ? Math.round(ratingMap[w.user_id].sum / ratingMap[w.user_id].count * 10) / 10 : 0,
