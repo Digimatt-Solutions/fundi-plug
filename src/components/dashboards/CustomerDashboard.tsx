@@ -25,6 +25,9 @@ const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Welder": "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=300&fit=crop",
   "Mechanic": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=400&h=300&fit=crop",
   "Cleaner": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop",
+  "Tiler": "https://images.unsplash.com/photo-1523413363574-c30aa1c2a516?w=600&h=400&fit=crop",
+  "Roofer": "https://images.unsplash.com/photo-1632759145355-8b8f4c4d8f6f?w=600&h=400&fit=crop",
+  "HVAC Technician": "https://images.unsplash.com/photo-1617104678098-de229db51175?w=600&h=400&fit=crop",
 };
 
 const FUNDIS_PER_PAGE = 12;
