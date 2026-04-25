@@ -51,6 +51,54 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // App update detection - polls index.html and notifies users when a new build is deployed
+  useEffect(() => {
+    let initialHash: string | null = null;
+    let notified = false;
+
+    const fetchHash = async (): Promise<string | null> => {
+      try {
+        const res = await fetch("/index.html", { cache: "no-store" });
+        const text = await res.text();
+        // Hash a slice that contains the bundled script tag (changes per build)
+        const match = text.match(/src="\/assets\/[^"]+\.js"/g)?.join("|") || text.slice(0, 500);
+        let hash = 0;
+        for (let i = 0; i < match.length; i++) hash = (hash * 31 + match.charCodeAt(i)) | 0;
+        return String(hash);
+      } catch {
+        return null;
+      }
+    };
+
+    const check = async () => {
+      const h = await fetchHash();
+      if (!h) return;
+      if (initialHash === null) { initialHash = h; return; }
+      if (h !== initialHash && !notified) {
+        notified = true;
+        const notif: Notification = {
+          id: "app-update-" + Date.now(),
+          title: "App update available",
+          body: "A new version is ready. Please refresh the page to get the latest features.",
+          time: new Date().toLocaleTimeString(),
+          read: false,
+        };
+        setNotifications((prev) => [notif, ...prev].slice(0, 50));
+        playNotificationSound();
+        showBrowserNotification(notif.title, notif.body);
+        toast.info(notif.title, {
+          description: notif.body,
+          duration: 15000,
+          action: { label: "Refresh", onClick: () => window.location.reload() },
+        });
+      }
+    };
+
+    check();
+    const interval = setInterval(check, 60_000); // every minute
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (!user) return;
 
