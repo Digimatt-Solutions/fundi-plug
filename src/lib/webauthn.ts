@@ -14,14 +14,15 @@ function bufToB64url(buf: ArrayBuffer): string {
   return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function randomBytes(len = 32): Uint8Array {
+function randomBytes(len = 32): ArrayBuffer {
   const a = new Uint8Array(len);
   crypto.getRandomValues(a);
-  return a;
+  return a.buffer.slice(0) as ArrayBuffer;
 }
 
-function strToBuf(s: string): Uint8Array {
-  return new TextEncoder().encode(s);
+function strToBuf(s: string): ArrayBuffer {
+  const u = new TextEncoder().encode(s);
+  return u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength) as ArrayBuffer;
 }
 
 /**
