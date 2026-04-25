@@ -831,6 +831,47 @@ export type Database = {
         }
         Relationships: []
       }
+      webauthn_credentials: {
+        Row: {
+          created_at: string
+          credential_id: string
+          device_label: string | null
+          email: string | null
+          id: string
+          last_used_at: string | null
+          public_key: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id: string
+          device_label?: string | null
+          email?: string | null
+          id?: string
+          last_used_at?: string | null
+          public_key?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string
+          device_label?: string | null
+          email?: string | null
+          id?: string
+          last_used_at?: string | null
+          public_key?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webauthn_credentials_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       withdrawals: {
         Row: {
           admin_notes: string | null

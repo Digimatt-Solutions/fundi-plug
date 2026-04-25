@@ -12,6 +12,7 @@ import fundiplugLogo from "@/assets/fundiplug-logo.png";
 import { playSubmitSound } from "@/lib/sound";
 import logo from "@/assets/logo.png";
 import AuthVoiceButton from "@/components/voice/AuthVoiceButton";
+import AuthFingerprintButton from "@/components/voice/AuthFingerprintButton";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -154,6 +155,19 @@ const Auth = () => {
     try {
       if (isSignIn) {
         await login(email, password);
+        // Cache password for fingerprint sign-in on this device (only for this user's enrolled creds)
+        try {
+          const { data: { user: u } } = await supabase.auth.getUser();
+          if (u) {
+            const { data: creds } = await supabase
+              .from("webauthn_credentials")
+              .select("credential_id")
+              .eq("user_id", u.id);
+            (creds || []).forEach((c: any) => {
+              localStorage.setItem(`fp_secret_${c.credential_id}`, JSON.stringify({ email, password }));
+            });
+          }
+        } catch { /* non-fatal */ }
         playSubmitSound();
       } else {
         await signup(email, password, name, role);
@@ -209,7 +223,10 @@ const Auth = () => {
               <p className="text-muted-foreground text-sm">Skilled Workers Marketplace</p>
             </div>
 
-            <AuthVoiceButton />
+            <div className="flex items-stretch gap-2 mb-4">
+              <div className="flex-1"><AuthVoiceButton /></div>
+              <AuthFingerprintButton />
+            </div>
 
             {!isForgot && (
               <div className="flex bg-muted rounded-lg p-1 mb-6">
