@@ -16,6 +16,7 @@ import { toast as sonnerToast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { friendlyError } from "@/lib/friendlyError";
+import CategoriesScroller from "./CategoriesScroller";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",
@@ -435,41 +436,13 @@ export default function CustomerDashboard() {
         </div>
       )}
 
-      <div className="animate-fade-in" style={{ animationDelay: "200ms" }}>
-        <h2 className="text-lg font-semibold text-foreground mb-3">{t("Service Categories")}</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {categories.map((cat) => {
-            const img = cat.image_url || DEFAULT_CATEGORY_IMAGES[cat.name] || "";
-            const isSelected = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(isSelected ? "all" : cat.id)}
-                className={`stat-card overflow-hidden p-0 flex flex-col items-center cursor-pointer transition-colors active:scale-[0.97] ${isSelected ? "border-primary ring-2 ring-primary/30" : "hover:border-primary/40"}`}
-              >
-                {img ? (
-                  <div className="w-full h-20 overflow-hidden">
-                    <img loading="lazy" decoding="async" src={img} alt={cat.name} className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="w-full h-20 flex items-center justify-center bg-muted">
-                    <span className="text-3xl">{cat.icon}</span>
-                  </div>
-                )}
-                <div className="p-2 text-center">
-                  <span className="text-xs font-medium text-foreground">{cat.name}</span>
-                  <span className="text-[10px] text-muted-foreground block">{cat.count} {t("available")}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        {selectedCategory !== "all" && (
-          <Button variant="ghost" size="sm" className="mt-2 text-xs" onClick={() => setSelectedCategory("all")}>
-            ✕ {t("All Categories")}
-          </Button>
-        )}
-      </div>
+      <CategoriesScroller
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelect={(id) => setSelectedCategory(selectedCategory === id ? "all" : id)}
+        onClear={() => setSelectedCategory("all")}
+        t={t}
+      />
 
       <div className="animate-fade-in" style={{ animationDelay: "300ms" }}>
         <div className="flex items-center justify-between mb-3">
