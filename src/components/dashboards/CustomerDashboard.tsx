@@ -496,7 +496,11 @@ export default function CustomerDashboard() {
               {paginatedWorkers.map((worker) => {
                 const dist = getWorkerDistance(worker);
                 return (
-                  <div key={worker.id} className="stat-card space-y-3">
+                  <div
+                    key={worker.id}
+                    className="stat-card space-y-3 cursor-pointer hover:border-primary/40 transition-colors"
+                    onClick={() => openWorkerProfile(worker)}
+                  >
                     <div className="flex items-center gap-3">
                       {worker.avatar_url ? (
                         <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
@@ -523,7 +527,7 @@ export default function CustomerDashboard() {
                         <Navigation className="w-3 h-3" /> {formatDistance(dist)}
                       </div>
                     )}
-                    <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={() => openHireDialog(worker)}>{t("Hire Now")}</Button>
+                    <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={(e) => { e.stopPropagation(); openHireDialog(worker); }}>{t("Hire Now")}</Button>
                   </div>
                 );
               })}
