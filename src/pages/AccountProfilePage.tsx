@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Camera, Mail, Phone, MapPin, ShieldCheck, User as UserIcon, KeyRound, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import FingerprintEnroll from "@/components/FingerprintEnroll";
 
 export default function AccountProfilePage() {
   const { user, refreshProfile } = useAuth();
@@ -243,6 +244,8 @@ export default function AccountProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <FingerprintEnroll />
     </div>
   );
 }
