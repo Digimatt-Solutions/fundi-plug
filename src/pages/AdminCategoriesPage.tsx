@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Trash2, Edit2, Upload, Image } from "lucide-react";
 import {
-import { friendlyError } from "@/lib/friendlyError";
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { friendlyError } from "@/lib/friendlyError";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",

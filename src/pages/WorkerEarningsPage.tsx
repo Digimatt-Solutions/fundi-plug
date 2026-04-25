@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
-import { friendlyError } from "@/lib/friendlyError";
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
+import { friendlyError } from "@/lib/friendlyError";
 
 export default function WorkerEarningsPage() {
   const { user } = useAuth();
