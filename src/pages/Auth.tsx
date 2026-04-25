@@ -12,6 +12,7 @@ import fundiplugLogo from "@/assets/fundiplug-logo.png";
 import { playSubmitSound } from "@/lib/sound";
 import logo from "@/assets/logo.png";
 import AuthVoiceButton from "@/components/voice/AuthVoiceButton";
+import AuthFingerprintButton from "@/components/voice/AuthFingerprintButton";
 
 type Mode = "signin" | "signup" | "forgot";
 
