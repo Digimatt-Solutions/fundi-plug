@@ -84,7 +84,7 @@ const Auth = () => {
       setResendTimer(60);
       toast({ title: "Code sent", description: "Check your phone for the verification code." });
     } catch (err: any) {
-      setError(err.message || "Failed to send code");
+      setError(friendlyError(err, "Couldn't send the code. Please try again."));
     } finally {
       setOtpLoading(false);
     }
@@ -108,7 +108,7 @@ const Auth = () => {
         toast({ title: "Phone verified", description: "You can now create your account." });
       }
     } catch (err: any) {
-      setError(err.message || "Verification failed");
+      setError(friendlyError(err, "We couldn't verify that code. Please try again."));
     } finally {
       setOtpLoading(false);
     }
@@ -139,7 +139,7 @@ const Auth = () => {
       resetOtpState();
       setMode("signin");
     } catch (err: any) {
-      setError(err.message || "Failed to reset password");
+      setError(friendlyError(err, "We couldn't reset your password. Please try again."));
     } finally {
       setResetting(false);
     }
@@ -184,9 +184,9 @@ const Auth = () => {
         });
       }
     } catch (err: any) {
-      const msg = err.message || "Something went wrong";
+      const msg = friendlyError(err);
       setError(msg);
-      toast({ title: "Error", description: msg, variant: "destructive" });
+      toast({ title: "Sign in problem", description: msg, variant: "destructive" });
       setLoading(false);
     }
   };
