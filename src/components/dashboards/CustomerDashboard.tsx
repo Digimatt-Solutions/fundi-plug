@@ -578,6 +578,127 @@ export default function CustomerDashboard() {
         ))}
       </div>
 
+      {/* Worker Profile Dialog */}
+      <Dialog open={!!selectedWorker && !hireDialog} onOpenChange={(open) => !open && setSelectedWorker(null)}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          {selectedWorker && (() => {
+            const dist = getWorkerDistance(selectedWorker);
+            const unlocked = unlockedWorkerIds.has(selectedWorker.user_id);
+            const phoneShown = unlocked ? selectedWorker.phone : maskPhone(selectedWorker.phone);
+            const emailShown = unlocked ? (selectedWorker as any).email : maskEmail((selectedWorker as any).email);
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-3">
+                    {selectedWorker.avatar_url ? (
+                      <img loading="lazy" decoding="async" src={selectedWorker.avatar_url} alt={selectedWorker.name} className="w-14 h-14 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-lg">
+                        {selectedWorker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="flex items-center gap-1.5">
+                        {selectedWorker.name}
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-normal ${selectedWorker.is_online ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                          {selectedWorker.is_online ? t("Online") : t("Offline")}
+                        </span>
+                      </p>
+                      <p className="text-sm text-muted-foreground font-normal">{selectedWorker.skill || t("General")}</p>
+                    </div>
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 rounded-lg bg-muted/50">
+                      <p className="text-lg font-bold text-foreground">{selectedWorker.rating > 0 ? selectedWorker.rating : "-"}</p>
+                      <p className="text-xs text-muted-foreground">{t("Rating")}</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-muted/50">
+                      <p className="text-lg font-bold text-foreground">{selectedWorker.years_experience || 0}</p>
+                      <p className="text-xs text-muted-foreground">{t("Years Exp.")}</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-muted/50">
+                      <p className="text-lg font-bold text-foreground">{selectedWorker.hourly_rate ? `KSH ${selectedWorker.hourly_rate}` : "-"}</p>
+                      <p className="text-xs text-muted-foreground">{t("Per Hour")}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-primary/5 border border-primary/20">
+                    <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+                    <p className="text-sm text-foreground"><span className="font-medium">{t("Certified by Digimatt")}</span> - {t("This fundi has been vetted and approved.")}</p>
+                  </div>
+                  {customerPos && selectedWorker.latitude && selectedWorker.longitude && (
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground mb-1.5 flex items-center gap-1.5">
+                        <Navigation className="w-3.5 h-3.5 text-primary" /> {t("Live Location")}
+                      </h4>
+                      <MapPreview
+                        customer={customerPos}
+                        worker={{ lat: selectedWorker.latitude, lng: selectedWorker.longitude }}
+                        distanceLabel={dist != null ? formatDistance(dist) : undefined}
+                      />
+                    </div>
+                  )}
+                  <div className="space-y-2 text-sm">
+                    {selectedWorker.phone && (
+                      <div className="flex items-center gap-2 text-foreground">
+                        {unlocked ? <Phone className="w-3.5 h-3.5 text-muted-foreground" /> : <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+                        {phoneShown}
+                      </div>
+                    )}
+                    {(selectedWorker as any).email && (
+                      <div className="flex items-center gap-2 text-foreground">
+                        {unlocked ? <Mail className="w-3.5 h-3.5 text-muted-foreground" /> : <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+                        {emailShown}
+                      </div>
+                    )}
+                    {!unlocked && (
+                      <p className="text-xs text-muted-foreground italic">{t("Contact details are revealed once your hire request is accepted.")}</p>
+                    )}
+                    {(selectedWorker.county || selectedWorker.constituency || selectedWorker.ward) && (
+                      <div className="flex items-start gap-2 text-foreground">
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground mt-0.5" />
+                        <span>{[selectedWorker.ward, selectedWorker.constituency, selectedWorker.county].filter(Boolean).join(", ")}</span>
+                      </div>
+                    )}
+                  </div>
+                  {selectedWorker.bio && (
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground mb-1">{t("About")}</h4>
+                      <p className="text-sm text-muted-foreground">{selectedWorker.bio}</p>
+                    </div>
+                  )}
+                  {workerReviews.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground mb-2">{t("Customer Reviews")}</h4>
+                      <div className="space-y-2">
+                        {workerReviews.map((r) => (
+                          <div key={r.id} className="p-2 rounded bg-muted/50">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="flex gap-0.5">
+                                {[1, 2, 3, 4, 5].map((s) => (
+                                  <Star key={s} className={`w-3 h-3 ${s <= r.rating ? "text-chart-4 fill-current" : "text-muted-foreground"}`} />
+                                ))}
+                              </div>
+                              <span className="text-xs text-muted-foreground">{r.reviewerName}</span>
+                            </div>
+                            {r.comment && <p className="text-xs text-muted-foreground">{r.comment}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <Button className="w-full" onClick={() => openHireDialog(selectedWorker)}>
+                    <Briefcase className="w-4 h-4 mr-2" /> {t("Hire This Fundi")}
+                  </Button>
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
       {/* Hire Details Dialog */}
       <Dialog open={!!hireDialog} onOpenChange={(open) => { if (!open) setHireDialog(null); }}>
         <DialogContent className="sm:max-w-lg">
