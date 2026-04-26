@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import logo from "@/assets/logo.png";
+import cover from "@/assets/fundiplug-cover.jpg";
 
 export default function PublicReviewsPage() {
   const { workerId } = useParams();
@@ -127,6 +128,17 @@ export default function PublicReviewsPage() {
             <p className="text-foreground font-medium">No reviews yet</p>
           </div>
         )}
+
+        {/* Marketing banner */}
+        <a href="/" aria-label="Visit FundiPlug" className="block group">
+          <img
+            src={cover}
+            alt="Connect with skilled fundis you can rely on - FundiPlug"
+            loading="lazy"
+            decoding="async"
+            className="w-full rounded-xl border border-border shadow-sm transition-transform group-hover:scale-[1.01]"
+          />
+        </a>
 
         <footer className="text-center py-6 text-xs text-muted-foreground">
           Powered by <a href="/" className="text-primary hover:underline">FundiPlug</a> - © Digimatt Solutions 2026

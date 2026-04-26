@@ -23,6 +23,7 @@ import WorkerMyJobsPage from "@/pages/WorkerMyJobsPage";
 import WorkerEarningsPage from "@/pages/WorkerEarningsPage";
 import WorkerReviewsPage from "@/pages/WorkerReviewsPage";
 import PublicReviewsPage from "@/pages/PublicReviewsPage";
+import VerifyFundiPage from "@/pages/VerifyFundiPage";
 import CustomerPostJobPage from "@/pages/CustomerPostJobPage";
 import CustomerBookingsPage from "@/pages/CustomerBookingsPage";
 import FindWorkersPage from "@/pages/FindWorkersPage";
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/reviews/:workerId" element={<PublicReviewsPage />} />
+              <Route path="/verify-fundi/:workerId" element={<VerifyFundiPage />} />
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<Dashboard />} />
                 {/* Admin */}

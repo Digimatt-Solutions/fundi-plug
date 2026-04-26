@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleLeft, ToggleRight, RefreshCw, Volume2, VolumeX } from "lucide-react";
+import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { isSoundEnabled, setSoundEnabled, playNotificationSound } from "@/lib/sound";
 import TrafficAnalytics from "@/components/admin/TrafficAnalytics";
 import { friendlyError } from "@/lib/friendlyError";
+import FingerprintEnroll from "@/components/FingerprintEnroll";
+import FundiQRCard from "@/components/FundiQRCard";
 
 export default function SettingsPage() {
   const { user, refreshProfile } = useAuth();
@@ -31,6 +33,7 @@ export default function SettingsPage() {
   const [moduleSettings, setModuleSettings] = useState<any[]>([]);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [refreshing, setRefreshing] = useState(false);
+  const [profileViews, setProfileViews] = useState({ total: 0, week: 0, month: 0 });
 
   const handleSoundToggle = (v: boolean) => {
     setSoundOn(v);
@@ -92,6 +95,16 @@ export default function SettingsPage() {
         // Load module settings
         const { data: modules } = await supabase.from("module_settings").select("*").order("role").order("label");
         setModuleSettings(modules || []);
+      }
+      if (user?.role === "worker") {
+        const { data: views } = await supabase
+          .from("profile_views")
+          .select("created_at")
+          .eq("worker_id", user.id);
+        const now = Date.now();
+        const week = (views || []).filter((v: any) => now - new Date(v.created_at).getTime() < 7 * 86400e3).length;
+        const month = (views || []).filter((v: any) => now - new Date(v.created_at).getTime() < 30 * 86400e3).length;
+        setProfileViews({ total: views?.length || 0, week, month });
       }
       setLoading(false);
     }
@@ -187,6 +200,47 @@ export default function SettingsPage() {
               <div className="space-y-2"><Label>Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} className="bg-muted/50 max-w-sm" placeholder="+254 712 345 678" /></div>
               <Button size="sm" onClick={saveProfile} disabled={saving}>{saving ? "Saving..." : "Save Profile"}</Button>
             </div>
+          </div>
+        )}
+
+        {/* Fundi-only sections: profile views, fingerprint, QR code */}
+        {user?.role === "worker" && (
+          <>
+            <div className="stat-card animate-fade-in" style={{ animationDelay: "60ms" }}>
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Eye className="w-5 h-5 text-primary" /> Profile views
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">How many clients have checked out your profile.</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg bg-muted/50 p-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{profileViews.total}</p>
+                  <p className="text-xs text-muted-foreground mt-1">All time</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{profileViews.month}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
+                </div>
+                <div className="rounded-lg bg-primary/10 p-4 text-center">
+                  <p className="text-2xl font-bold text-primary">{profileViews.week}</p>
+                  <p className="text-xs text-muted-foreground mt-1">This week</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="animate-fade-in" style={{ animationDelay: "120ms" }}>
+              <FingerprintEnroll showFundiPreview />
+            </div>
+
+            <div className="animate-fade-in" style={{ animationDelay: "180ms" }}>
+              <FundiQRCard workerUserId={user.id} workerName={user.name} />
+            </div>
+          </>
+        )}
+
+        {/* Client-only: fingerprint sign-in */}
+        {user?.role === "customer" && (
+          <div className="animate-fade-in" style={{ animationDelay: "120ms" }}>
+            <FingerprintEnroll />
           </div>
         )}
 

@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { maskEmail, maskPhone } from "@/lib/mask";
 import { MapPreview } from "@/components/MapPreview";
 import { friendlyError } from "@/lib/friendlyError";
+import QRScanner from "@/components/QRScanner";
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -174,6 +175,13 @@ export default function FindWorkersPage() {
 
   const openWorkerProfile = async (worker: any) => {
     setSelectedWorker(worker);
+    // Track this profile view (fire-and-forget; ignore failures)
+    if (user && worker.user_id !== user.id) {
+      supabase.from("profile_views").insert({
+        worker_id: worker.user_id,
+        viewer_id: user.id,
+      }).then(() => {});
+    }
     const reviewsRes = await supabase
       .from("reviews")
       .select("*, jobs:job_id(title)")
@@ -285,9 +293,12 @@ export default function FindWorkersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("Find Fundis")}</h1>
-        <p className="text-muted-foreground text-sm">{t("Browse verified skilled professionals")}</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t("Find Fundis")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Browse verified skilled professionals")}</p>
+        </div>
+        <QRScanner buttonLabel="Scan fundi QR" />
       </div>
 
       {/* Horizontal category tabs (sticky on top, like dashboard) */}

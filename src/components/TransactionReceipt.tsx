@@ -6,6 +6,7 @@ import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
 import appLogo from "@/assets/logo.png";
+import coverBanner from "@/assets/fundiplug-cover.jpg";
 
 interface ReceiptData {
   id: string;
@@ -67,11 +68,12 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
     if (!el) return;
 
     // Convert images to base64 for print
-    const [appLogoB64, mpesaLogoB64, stripeLogoB64, paystackLogoB64] = await Promise.all([
+    const [appLogoB64, mpesaLogoB64, stripeLogoB64, paystackLogoB64, coverB64] = await Promise.all([
       imageToBase64(appLogo),
       imageToBase64(mpesaLogo),
       imageToBase64(stripeLogo),
       imageToBase64(paystackLogo),
+      imageToBase64(coverBanner),
     ]);
 
     // Clone and replace image srcs
@@ -118,6 +120,8 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
         .footer { text-align: center; margin-top: 18px; padding-top: 16px; border-top: 2px dashed #ddd; }
         .footer p { font-size: 11px; color: #999; line-height: 1.6; }
         .footer .company { font-weight: 600; color: #666; font-size: 11px; margin-top: 6px; }
+        .marketing { margin-top: 18px; }
+        .marketing img { width: 100%; border-radius: 8px; display: block; }
         @media print { body { padding: 0; } .receipt { border: none; box-shadow: none; } }
       </style></head><body>
       <div class="receipt">
@@ -154,6 +158,9 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
           <p>Thank you for your business</p>
           <p>This is a computer-generated receipt</p>
           <p class="company">Digimatt Solutions Limited</p>
+        </div>
+        <div class="marketing">
+          <img src="${coverB64}" alt="FundiPlug - Connect with skilled fundis you can rely on" />
         </div>
       </div>
       <script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };</script>
