@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import FileUploader from "../FileUploader";
+import CameraCapture from "@/components/CameraCapture";
 
 interface Props {
   data: any;
@@ -16,23 +16,26 @@ export default function PersonalStep({ data, setData, userId }: Props) {
 
   return (
     <div className="space-y-5">
-      {/* Profile photo + selfie */}
+      {/* Profile photo + selfie - LIVE camera capture only (anti-fraud) */}
       <div className="grid sm:grid-cols-2 gap-4">
-        <FileUploader
+        <CameraCapture
           bucket="avatars"
           userId={userId}
           value={data.profile_photo_url}
           onChange={(url) => setData({ profile_photo_url: url })}
           label="Profile Photo *"
-          helper="Clear face photo, JPG/PNG"
+          helper="Take a clear, live face photo - no gallery"
+          facing="user"
+          prefix="profile"
         />
-        <FileUploader
+        <CameraCapture
           bucket="verification-docs"
           userId={userId}
           value={data.selfie_with_id_url}
           onChange={(url) => setData({ selfie_with_id_url: url })}
           label="Selfie holding your ID *"
-          helper="Hold your National ID next to your face"
+          helper="Live photo - hold your National ID next to your face"
+          facing="user"
           prefix="selfie-id"
         />
       </div>
