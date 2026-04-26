@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleLeft, ToggleRight, RefreshCw, Volume2, VolumeX } from "lucide-react";
+import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { isSoundEnabled, setSoundEnabled, playNotificationSound } from "@/lib/sound";
 import TrafficAnalytics from "@/components/admin/TrafficAnalytics";
 import { friendlyError } from "@/lib/friendlyError";
+import FingerprintEnroll from "@/components/FingerprintEnroll";
+import FundiQRCard from "@/components/FundiQRCard";
 
 export default function SettingsPage() {
   const { user, refreshProfile } = useAuth();
@@ -31,6 +33,7 @@ export default function SettingsPage() {
   const [moduleSettings, setModuleSettings] = useState<any[]>([]);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [refreshing, setRefreshing] = useState(false);
+  const [profileViews, setProfileViews] = useState({ total: 0, week: 0, month: 0 });
 
   const handleSoundToggle = (v: boolean) => {
     setSoundOn(v);
@@ -92,6 +95,16 @@ export default function SettingsPage() {
         // Load module settings
         const { data: modules } = await supabase.from("module_settings").select("*").order("role").order("label");
         setModuleSettings(modules || []);
+      }
+      if (user?.role === "worker") {
+        const { data: views } = await supabase
+          .from("profile_views")
+          .select("created_at")
+          .eq("worker_id", user.id);
+        const now = Date.now();
+        const week = (views || []).filter((v: any) => now - new Date(v.created_at).getTime() < 7 * 86400e3).length;
+        const month = (views || []).filter((v: any) => now - new Date(v.created_at).getTime() < 30 * 86400e3).length;
+        setProfileViews({ total: views?.length || 0, week, month });
       }
       setLoading(false);
     }
