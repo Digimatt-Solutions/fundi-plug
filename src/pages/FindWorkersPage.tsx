@@ -293,9 +293,12 @@ export default function FindWorkersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("Find Fundis")}</h1>
-        <p className="text-muted-foreground text-sm">{t("Browse verified skilled professionals")}</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t("Find Fundis")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Browse verified skilled professionals")}</p>
+        </div>
+        <QRScanner buttonLabel="Scan fundi QR" />
       </div>
 
       {/* Horizontal category tabs (sticky on top, like dashboard) */}
