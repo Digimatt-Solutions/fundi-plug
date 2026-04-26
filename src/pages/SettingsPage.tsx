@@ -203,6 +203,47 @@ export default function SettingsPage() {
           </div>
         )}
 
+        {/* Fundi-only sections: profile views, fingerprint, QR code */}
+        {user?.role === "worker" && (
+          <>
+            <div className="stat-card animate-fade-in" style={{ animationDelay: "60ms" }}>
+              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Eye className="w-5 h-5 text-primary" /> Profile views
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">How many clients have checked out your profile.</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg bg-muted/50 p-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{profileViews.total}</p>
+                  <p className="text-xs text-muted-foreground mt-1">All time</p>
+                </div>
+                <div className="rounded-lg bg-muted/50 p-4 text-center">
+                  <p className="text-2xl font-bold text-foreground">{profileViews.month}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
+                </div>
+                <div className="rounded-lg bg-primary/10 p-4 text-center">
+                  <p className="text-2xl font-bold text-primary">{profileViews.week}</p>
+                  <p className="text-xs text-muted-foreground mt-1">This week</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="animate-fade-in" style={{ animationDelay: "120ms" }}>
+              <FingerprintEnroll showFundiPreview />
+            </div>
+
+            <div className="animate-fade-in" style={{ animationDelay: "180ms" }}>
+              <FundiQRCard workerUserId={user.id} workerName={user.name} />
+            </div>
+          </>
+        )}
+
+        {/* Client-only: fingerprint sign-in */}
+        {user?.role === "customer" && (
+          <div className="animate-fade-in" style={{ animationDelay: "120ms" }}>
+            <FingerprintEnroll />
+          </div>
+        )}
+
         {user?.role === "admin" && (
           <>
             {/* Platform Config */}
