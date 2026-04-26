@@ -93,6 +93,10 @@ export default function CustomerDashboard() {
 
   const openWorkerProfile = async (worker: any) => {
     setSelectedWorker(worker);
+    // Track profile view (fire-and-forget)
+    if (user && worker.user_id && worker.user_id !== user.id) {
+      supabase.from("profile_views").insert({ worker_id: worker.user_id, viewer_id: user.id }).then(() => {});
+    }
     const reviewsRes = await supabase
       .from("reviews")
       .select("*, jobs:job_id(title)")
