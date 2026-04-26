@@ -14,6 +14,7 @@ import { useSearchParams } from "react-router-dom";
 import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
+import QRScanner from "@/components/QRScanner";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
@@ -169,9 +170,12 @@ export default function CustomerBookingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("My Bookings")}</h1>
-        <p className="text-muted-foreground text-sm">{t("Track your active and completed bookings")}</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{t("My Bookings")}</h1>
+          <p className="text-muted-foreground text-sm">{t("Track your active and completed bookings")}</p>
+        </div>
+        <QRScanner buttonLabel="Scan fundi on arrival" />
       </div>
 
       {jobs.length > 0 ? (
