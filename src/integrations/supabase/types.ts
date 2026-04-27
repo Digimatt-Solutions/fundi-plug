@@ -518,6 +518,7 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          delivered_at: string | null
           id: string
           job_id: string | null
           read_at: string | null
@@ -527,6 +528,7 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          delivered_at?: string | null
           id?: string
           job_id?: string | null
           read_at?: string | null
@@ -536,6 +538,7 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          delivered_at?: string | null
           id?: string
           job_id?: string | null
           read_at?: string | null

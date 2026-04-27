@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Send, Minus } from "lucide-react";
+import { X, Send, Minus, Check, CheckCheck, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,11 @@ interface Message {
   recipient_id: string;
   content: string;
   created_at: string;
+  delivered_at: string | null;
   read_at: string | null;
 }
+
+const SELECT_COLS = "id, sender_id, recipient_id, content, created_at, delivered_at, read_at";
 
 export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
   const { user } = useAuth();
@@ -34,6 +37,19 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
   const [minimized, setMinimized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Mark a batch of incoming messages as delivered/read
+  const markIncoming = async (ids: string[], asRead: boolean) => {
+    if (!ids.length || !user) return;
+    const now = new Date().toISOString();
+    const patch: any = { delivered_at: now };
+    if (asRead) patch.read_at = now;
+    await supabase
+      .from("messages")
+      .update(patch)
+      .in("id", ids)
+      .eq("recipient_id", user.id);
+  };
+
   // Initial fetch + subscribe
   useEffect(() => {
     if (!user) return;
@@ -42,21 +58,21 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
     (async () => {
       const { data } = await supabase
         .from("messages")
-        .select("id, sender_id, recipient_id, content, created_at, read_at")
+        .select(SELECT_COLS)
         .or(
           `and(sender_id.eq.${user.id},recipient_id.eq.${peer.id}),and(sender_id.eq.${peer.id},recipient_id.eq.${user.id})`
         )
         .order("created_at", { ascending: true })
         .limit(200);
-      if (!cancelled) setMessages((data as Message[]) || []);
+      if (cancelled) return;
+      const list = (data as Message[]) || [];
+      setMessages(list);
 
-      // mark unread incoming as read
-      await supabase
-        .from("messages")
-        .update({ read_at: new Date().toISOString() })
-        .eq("recipient_id", user.id)
-        .eq("sender_id", peer.id)
-        .is("read_at", null);
+      // Mark all incoming as delivered + read (chat is open)
+      const incomingIds = list
+        .filter((m) => m.recipient_id === user.id && (!m.read_at || !m.delivered_at))
+        .map((m) => m.id);
+      markIncoming(incomingIds, true);
     })();
 
     const channel = supabase
@@ -72,11 +88,21 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
           if (!involvesPair) return;
           setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
           if (m.recipient_id === user.id) {
-            supabase
-              .from("messages")
-              .update({ read_at: new Date().toISOString() })
-              .eq("id", m.id);
+            // Open chat -> mark delivered AND read
+            markIncoming([m.id], !minimized);
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages" },
+        (payload) => {
+          const m = payload.new as Message;
+          const involvesPair =
+            (m.sender_id === user.id && m.recipient_id === peer.id) ||
+            (m.sender_id === peer.id && m.recipient_id === user.id);
+          if (!involvesPair) return;
+          setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, ...m } : x)));
         }
       )
       .subscribe();
@@ -85,7 +111,18 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
       cancelled = true;
       supabase.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, peer.id]);
+
+  // When chat is un-minimized, mark visible incoming as read
+  useEffect(() => {
+    if (minimized || !user) return;
+    const ids = messages
+      .filter((m) => m.recipient_id === user.id && !m.read_at)
+      .map((m) => m.id);
+    if (ids.length) markIncoming(ids, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minimized, messages.length]);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -96,12 +133,14 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
     const content = input.trim();
     if (!content || !user || sending) return;
     setSending(true);
+    const tmpId = `tmp-${Date.now()}`;
     const optimistic: Message = {
-      id: `tmp-${Date.now()}`,
+      id: tmpId,
       sender_id: user.id,
       recipient_id: peer.id,
       content,
       created_at: new Date().toISOString(),
+      delivered_at: null,
       read_at: null,
     };
     setMessages((prev) => [...prev, optimistic]);
@@ -114,7 +153,7 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
         content,
         job_id: peer.jobId || null,
       })
-      .select("id, sender_id, recipient_id, content, created_at, read_at")
+      .select(SELECT_COLS)
       .single();
     if (error) {
       setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
@@ -174,6 +213,10 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
             ) : (
               messages.map((m) => {
                 const mine = m.sender_id === user?.id;
+                const pending = mine && m.id.startsWith("tmp-");
+                const sent = mine && !pending;
+                const delivered = mine && !!m.delivered_at;
+                const seen = mine && !!m.read_at;
                 return (
                   <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                     <div
@@ -184,10 +227,26 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
                       }`}
                     >
                       <p className="whitespace-pre-wrap">{m.content}</p>
-                      <p className={`text-[10px] mt-0.5 ${mine ? "opacity-70" : "text-muted-foreground"}`}>
-                        {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        {mine && m.read_at ? " · seen" : ""}
-                      </p>
+                      <div className={`flex items-center justify-end gap-1 mt-0.5 text-[10px] ${mine ? "opacity-90" : "text-muted-foreground"}`}>
+                        <span>{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        {mine && (
+                          <span
+                            className="inline-flex items-center"
+                            aria-label={pending ? "Sending" : seen ? "Seen" : delivered ? "Delivered" : "Sent"}
+                            title={pending ? "Sending" : seen ? "Seen" : delivered ? "Delivered" : "Sent"}
+                          >
+                            {pending ? (
+                              <Clock className="w-3 h-3" />
+                            ) : seen ? (
+                              <CheckCheck className="w-3.5 h-3.5 text-sky-300" />
+                            ) : delivered ? (
+                              <CheckCheck className="w-3.5 h-3.5" />
+                            ) : sent ? (
+                              <Check className="w-3.5 h-3.5" />
+                            ) : null}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
