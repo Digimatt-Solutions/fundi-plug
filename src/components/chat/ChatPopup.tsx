@@ -23,8 +23,11 @@ interface Message {
   recipient_id: string;
   content: string;
   created_at: string;
+  delivered_at: string | null;
   read_at: string | null;
 }
+
+const SELECT_COLS = "id, sender_id, recipient_id, content, created_at, delivered_at, read_at";
 
 export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
   const { user } = useAuth();
@@ -34,6 +37,19 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
   const [minimized, setMinimized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Mark a batch of incoming messages as delivered/read
+  const markIncoming = async (ids: string[], asRead: boolean) => {
+    if (!ids.length || !user) return;
+    const now = new Date().toISOString();
+    const patch: any = { delivered_at: now };
+    if (asRead) patch.read_at = now;
+    await supabase
+      .from("messages")
+      .update(patch)
+      .in("id", ids)
+      .eq("recipient_id", user.id);
+  };
+
   // Initial fetch + subscribe
   useEffect(() => {
     if (!user) return;
@@ -42,21 +58,21 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
     (async () => {
       const { data } = await supabase
         .from("messages")
-        .select("id, sender_id, recipient_id, content, created_at, read_at")
+        .select(SELECT_COLS)
         .or(
           `and(sender_id.eq.${user.id},recipient_id.eq.${peer.id}),and(sender_id.eq.${peer.id},recipient_id.eq.${user.id})`
         )
         .order("created_at", { ascending: true })
         .limit(200);
-      if (!cancelled) setMessages((data as Message[]) || []);
+      if (cancelled) return;
+      const list = (data as Message[]) || [];
+      setMessages(list);
 
-      // mark unread incoming as read
-      await supabase
-        .from("messages")
-        .update({ read_at: new Date().toISOString() })
-        .eq("recipient_id", user.id)
-        .eq("sender_id", peer.id)
-        .is("read_at", null);
+      // Mark all incoming as delivered + read (chat is open)
+      const incomingIds = list
+        .filter((m) => m.recipient_id === user.id && (!m.read_at || !m.delivered_at))
+        .map((m) => m.id);
+      markIncoming(incomingIds, true);
     })();
 
     const channel = supabase
@@ -72,11 +88,21 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
           if (!involvesPair) return;
           setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
           if (m.recipient_id === user.id) {
-            supabase
-              .from("messages")
-              .update({ read_at: new Date().toISOString() })
-              .eq("id", m.id);
+            // Open chat -> mark delivered AND read
+            markIncoming([m.id], !minimized);
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages" },
+        (payload) => {
+          const m = payload.new as Message;
+          const involvesPair =
+            (m.sender_id === user.id && m.recipient_id === peer.id) ||
+            (m.sender_id === peer.id && m.recipient_id === user.id);
+          if (!involvesPair) return;
+          setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, ...m } : x)));
         }
       )
       .subscribe();
@@ -85,7 +111,18 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
       cancelled = true;
       supabase.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, peer.id]);
+
+  // When chat is un-minimized, mark visible incoming as read
+  useEffect(() => {
+    if (minimized || !user) return;
+    const ids = messages
+      .filter((m) => m.recipient_id === user.id && !m.read_at)
+      .map((m) => m.id);
+    if (ids.length) markIncoming(ids, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [minimized, messages.length]);
 
   // Auto scroll to bottom
   useEffect(() => {
