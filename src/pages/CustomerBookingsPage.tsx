@@ -15,6 +15,7 @@ import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionRe
 import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
+import ChatButton from "@/components/chat/ChatButton";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
@@ -220,6 +221,12 @@ export default function CustomerBookingsPage() {
                     </p>
                   </div>
                   <div className="flex gap-2 flex-wrap">
+                    {job.worker_id && (
+                      <ChatButton
+                        peer={{ id: job.worker_id, name: job.workerName, jobId: job.id }}
+                        label="Chat fundi"
+                      />
+                    )}
                     {job.status === "completed" && (!job.paymentStatus || job.paymentStatus === "pending") && (
                       <Button size="sm" onClick={() => setPayDialog(job)} className="active:scale-[0.97]">
                         <CreditCard className="w-4 h-4 mr-1" /> Pay Now
