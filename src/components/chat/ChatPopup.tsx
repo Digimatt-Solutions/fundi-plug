@@ -166,7 +166,7 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
 
   const initials = peer.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
 
-  return (
+  return createPortal(
     <div
       className="fixed z-[100] bottom-3 right-3 sm:bottom-4 sm:right-4 w-[calc(100vw-1.5rem)] sm:w-[360px] rounded-2xl shadow-2xl border border-border bg-card overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 fade-in"
       style={{ height: minimized ? 56 : "min(70vh, 520px)" }}
@@ -273,6 +273,7 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
           </form>
         </>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
