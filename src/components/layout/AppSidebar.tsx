@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList, MapPin, Star, Briefcase, Search,
   BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, UserCog, ArrowDownCircle,
+  MessageCircle,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -37,6 +38,7 @@ const adminNav = [
 const workerNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase, key: "my-jobs" },
+  { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Profile", url: "/dashboard/profile", icon: UserCog, key: "profile" },
   { title: "Earnings", url: "/dashboard/earnings", icon: CreditCard, key: "earnings" },
   { title: "Reviews", url: "/dashboard/reviews", icon: Star, key: "reviews" },
@@ -50,6 +52,7 @@ const customerNav = [
   { title: "Post a Job", url: "/dashboard/post-job", icon: Briefcase, key: "post-job" },
   { title: "Find Fundis", url: "/dashboard/find-workers", icon: Search, key: "find-workers" },
   { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays, key: "bookings" },
+  { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
   { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Profile", url: "/dashboard/account", icon: UserCog, key: "account" },
