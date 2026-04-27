@@ -66,6 +66,7 @@ export function AppSidebar() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [disabledModules, setDisabledModules] = useState<Set<string>>(new Set());
+  const [unreadChats, setUnreadChats] = useState(0);
 
   useEffect(() => {
     if (!user || user.role === "admin") return;
@@ -75,6 +76,24 @@ export function AppSidebar() {
       (data || []).forEach((m: any) => { if (!m.enabled) disabled.add(m.module_key); });
       setDisabledModules(disabled);
     });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadUnread = async () => {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("recipient_id", user.id)
+        .is("read_at", null);
+      setUnreadChats(count || 0);
+    };
+    loadUnread();
+    const ch = supabase
+      .channel(`sidebar-unread-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => loadUnread())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [user]);
 
   const allNav = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
