@@ -127,7 +127,12 @@ export function AppSidebar() {
                         activeClassName="!text-primary bg-primary/10 border-primary/40"
                       >
                         <item.icon className={`w-4 h-4 shrink-0 ${active ? "text-primary" : ""}`} />
-                        {!collapsed && <span>{t(item.title)}</span>}
+                        {!collapsed && <span className="flex-1">{t(item.title)}</span>}
+                        {item.key === "chat" && unreadChats > 0 && (
+                          <span className="ml-auto bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                            {unreadChats > 99 ? "99+" : unreadChats}
+                          </span>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
