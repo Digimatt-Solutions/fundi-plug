@@ -213,6 +213,10 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
             ) : (
               messages.map((m) => {
                 const mine = m.sender_id === user?.id;
+                const pending = mine && m.id.startsWith("tmp-");
+                const sent = mine && !pending;
+                const delivered = mine && !!m.delivered_at;
+                const seen = mine && !!m.read_at;
                 return (
                   <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                     <div
@@ -223,10 +227,26 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
                       }`}
                     >
                       <p className="whitespace-pre-wrap">{m.content}</p>
-                      <p className={`text-[10px] mt-0.5 ${mine ? "opacity-70" : "text-muted-foreground"}`}>
-                        {new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        {mine && m.read_at ? " · seen" : ""}
-                      </p>
+                      <div className={`flex items-center justify-end gap-1 mt-0.5 text-[10px] ${mine ? "opacity-90" : "text-muted-foreground"}`}>
+                        <span>{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        {mine && (
+                          <span
+                            className="inline-flex items-center"
+                            aria-label={pending ? "Sending" : seen ? "Seen" : delivered ? "Delivered" : "Sent"}
+                            title={pending ? "Sending" : seen ? "Seen" : delivered ? "Delivered" : "Sent"}
+                          >
+                            {pending ? (
+                              <Clock className="w-3 h-3" />
+                            ) : seen ? (
+                              <CheckCheck className="w-3.5 h-3.5 text-sky-300" />
+                            ) : delivered ? (
+                              <CheckCheck className="w-3.5 h-3.5" />
+                            ) : sent ? (
+                              <Check className="w-3.5 h-3.5" />
+                            ) : null}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
