@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, CalendarDays, ClipboardList, MapPin, Star, Briefcase, Search,
   BarChart3, Activity, Settings, ChevronLeft, Shield, CreditCard, UserCog, ArrowDownCircle,
+  MessageCircle,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -37,6 +38,7 @@ const adminNav = [
 const workerNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase, key: "my-jobs" },
+  { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Profile", url: "/dashboard/profile", icon: UserCog, key: "profile" },
   { title: "Earnings", url: "/dashboard/earnings", icon: CreditCard, key: "earnings" },
   { title: "Reviews", url: "/dashboard/reviews", icon: Star, key: "reviews" },
@@ -50,6 +52,7 @@ const customerNav = [
   { title: "Post a Job", url: "/dashboard/post-job", icon: Briefcase, key: "post-job" },
   { title: "Find Fundis", url: "/dashboard/find-workers", icon: Search, key: "find-workers" },
   { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays, key: "bookings" },
+  { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
   { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Profile", url: "/dashboard/account", icon: UserCog, key: "account" },
@@ -63,6 +66,7 @@ export function AppSidebar() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [disabledModules, setDisabledModules] = useState<Set<string>>(new Set());
+  const [unreadChats, setUnreadChats] = useState(0);
 
   useEffect(() => {
     if (!user || user.role === "admin") return;
@@ -72,6 +76,24 @@ export function AppSidebar() {
       (data || []).forEach((m: any) => { if (!m.enabled) disabled.add(m.module_key); });
       setDisabledModules(disabled);
     });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const loadUnread = async () => {
+      const { count } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("recipient_id", user.id)
+        .is("read_at", null);
+      setUnreadChats(count || 0);
+    };
+    loadUnread();
+    const ch = supabase
+      .channel(`sidebar-unread-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => loadUnread())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [user]);
 
   const allNav = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
@@ -105,7 +127,12 @@ export function AppSidebar() {
                         activeClassName="!text-primary bg-primary/10 border-primary/40"
                       >
                         <item.icon className={`w-4 h-4 shrink-0 ${active ? "text-primary" : ""}`} />
-                        {!collapsed && <span>{t(item.title)}</span>}
+                        {!collapsed && <span className="flex-1">{t(item.title)}</span>}
+                        {item.key === "chat" && unreadChats > 0 && (
+                          <span className="ml-auto bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                            {unreadChats > 99 ? "99+" : unreadChats}
+                          </span>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

@@ -32,6 +32,7 @@ import AdminJobsPage from "@/pages/AdminJobsPage";
 import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
 import CommunityPage from "@/pages/CommunityPage";
+import ChatPage from "@/pages/ChatPage";
 import NotFound from "@/pages/NotFound";
 import VisitTracker from "@/components/VisitTracker";
 
@@ -76,6 +77,7 @@ const App = () => (
                 {/* Shared */}
                 <Route path="account" element={<AccountProfilePage />} />
                 <Route path="community" element={<CommunityPage />} />
+                <Route path="chat" element={<ChatPage />} />
                 <Route path="payments" element={<PaymentsPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
