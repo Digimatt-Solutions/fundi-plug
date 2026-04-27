@@ -133,12 +133,14 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
     const content = input.trim();
     if (!content || !user || sending) return;
     setSending(true);
+    const tmpId = `tmp-${Date.now()}`;
     const optimistic: Message = {
-      id: `tmp-${Date.now()}`,
+      id: tmpId,
       sender_id: user.id,
       recipient_id: peer.id,
       content,
       created_at: new Date().toISOString(),
+      delivered_at: null,
       read_at: null,
     };
     setMessages((prev) => [...prev, optimistic]);
@@ -151,7 +153,7 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
         content,
         job_id: peer.jobId || null,
       })
-      .select("id, sender_id, recipient_id, content, created_at, read_at")
+      .select(SELECT_COLS)
       .single();
     if (error) {
       setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
