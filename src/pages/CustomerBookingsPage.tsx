@@ -15,6 +15,7 @@ import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionRe
 import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
+import ChatButton from "@/components/chat/ChatButton";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
