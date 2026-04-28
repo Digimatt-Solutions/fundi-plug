@@ -703,13 +703,13 @@ export default function CustomerDashboard() {
                     <Button className="w-full" onClick={() => openHireDialog(selectedWorker)}>
                       <Briefcase className="w-4 h-4 mr-2" /> {t("Hire This Fundi")}
                     </Button>
-                    <ChatButton
-                      fullWidth
-                      size="default"
+                    <Button
                       variant="outline"
-                      label={t("Chat")}
-                      peer={{ id: selectedWorker.user_id, name: selectedWorker.name, avatar_url: selectedWorker.avatar_url }}
-                    />
+                      className="w-full"
+                      onClick={() => setActiveChatPeer({ id: selectedWorker.user_id, name: selectedWorker.name, avatar_url: selectedWorker.avatar_url })}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" /> {t("Chat")}
+                    </Button>
                   </div>
                 </div>
               </>
