@@ -474,9 +474,24 @@ export default function FindWorkersPage() {
                       </div>
                     </div>
                   )}
-                  <Button className="w-full" onClick={() => openHireDialog(selectedWorker)}>
-                    <Briefcase className="w-4 h-4 mr-2" /> {t("Hire This Fundi")}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      className="w-full sm:flex-1"
+                      onClick={() => {
+                        setActiveChatPeer({
+                          id: selectedWorker.user_id,
+                          name: selectedWorker.name,
+                          avatar_url: selectedWorker.avatar_url,
+                        });
+                      }}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" /> {t("Chat")}
+                    </Button>
+                    <Button className="w-full sm:flex-1" onClick={() => openHireDialog(selectedWorker)}>
+                      <Briefcase className="w-4 h-4 mr-2" /> {t("Hire This Fundi")}
+                    </Button>
+                  </div>
                 </div>
               </>
             );
