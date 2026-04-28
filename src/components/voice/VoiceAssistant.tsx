@@ -170,8 +170,8 @@ export const VoiceAssistant = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [enabled, setEnabled] = useState(true); // default ON per request
-  const [minimized, setMinimized] = useState(false);
+  const [enabled, setEnabled] = useState(true);
+  const [minimized, setMinimized] = useState(true); // closed by default; user clicks icon to open
   const [listening, setListening] = useState(false);
   const greetedRef = useRef(false);
 
