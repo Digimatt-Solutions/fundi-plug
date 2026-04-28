@@ -526,6 +526,10 @@ export default function FindWorkersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {activeChatPeer && (
+        <ChatPopup peer={activeChatPeer} onClose={() => setActiveChatPeer(null)} />
+      )}
     </div>
   );
 }
