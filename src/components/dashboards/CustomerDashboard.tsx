@@ -20,6 +20,8 @@ import CategoriesScroller from "./CategoriesScroller";
 import { maskEmail, maskPhone } from "@/lib/mask";
 import { MapPreview } from "@/components/MapPreview";
 import ChatButton from "@/components/chat/ChatButton";
+import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
+import { MessageCircle } from "lucide-react";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",
