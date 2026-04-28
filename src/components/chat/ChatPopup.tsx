@@ -168,7 +168,7 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
 
   return createPortal(
     <div
-      className="fixed z-[100] bottom-3 right-3 sm:bottom-4 sm:right-4 w-[calc(100vw-1.5rem)] sm:w-[360px] rounded-2xl shadow-2xl border border-border bg-card overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 fade-in"
+      className="fixed z-[100] bottom-3 right-3 sm:bottom-4 sm:right-4 w-[calc(100vw-1.5rem)] sm:w-[340px] md:w-[360px] rounded-2xl shadow-2xl border border-border bg-card overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 fade-in"
       style={{ height: minimized ? 56 : "min(70vh, 520px)" }}
     >
       {/* Header */}
