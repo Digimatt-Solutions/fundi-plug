@@ -168,7 +168,7 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
 
   return createPortal(
     <div
-      className="fixed z-[100] bottom-3 right-3 sm:bottom-4 sm:right-4 w-[calc(100vw-1.5rem)] sm:w-[360px] rounded-2xl shadow-2xl border border-border bg-card overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 fade-in"
+      className="fixed z-[100] bottom-3 right-3 sm:bottom-4 sm:right-4 w-[calc(100vw-1.5rem)] sm:w-[340px] md:w-[360px] rounded-2xl shadow-2xl border border-border bg-card overflow-hidden flex flex-col animate-in slide-in-from-bottom-4 fade-in"
       style={{ height: minimized ? 56 : "min(70vh, 520px)" }}
     >
       {/* Header */}
@@ -184,8 +184,8 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{peer.name}</p>
-          <p className="text-[11px] opacity-80">Direct chat</p>
+          <p className="text-[13px] sm:text-sm font-semibold truncate">{peer.name}</p>
+          <p className="text-[10px] sm:text-[11px] opacity-80">Direct chat</p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); setMinimized((m) => !m); }}
@@ -221,7 +221,7 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
                 return (
                   <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                     <div
-                      className={`max-w-[78%] px-3 py-2 rounded-2xl text-sm break-words ${
+                      className={`max-w-[78%] px-3 py-2 rounded-2xl text-[12.5px] sm:text-sm break-words leading-snug ${
                         mine
                           ? "bg-primary text-primary-foreground rounded-br-sm"
                           : "bg-background border border-border text-foreground rounded-bl-sm"

@@ -15,6 +15,8 @@ import { maskEmail, maskPhone } from "@/lib/mask";
 import { MapPreview } from "@/components/MapPreview";
 import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
+import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
+import { MessageCircle } from "lucide-react";
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -41,6 +43,7 @@ export default function FindWorkersPage() {
   const [customerPos, setCustomerPos] = useState<{ lat: number; lng: number } | null>(null);
   // Set of worker user_ids that this customer has an active/successful hire with
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
+  const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
 
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
@@ -471,9 +474,24 @@ export default function FindWorkersPage() {
                       </div>
                     </div>
                   )}
-                  <Button className="w-full" onClick={() => openHireDialog(selectedWorker)}>
-                    <Briefcase className="w-4 h-4 mr-2" /> {t("Hire This Fundi")}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      className="w-full sm:flex-1"
+                      onClick={() => {
+                        setActiveChatPeer({
+                          id: selectedWorker.user_id,
+                          name: selectedWorker.name,
+                          avatar_url: selectedWorker.avatar_url,
+                        });
+                      }}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" /> {t("Chat")}
+                    </Button>
+                    <Button className="w-full sm:flex-1" onClick={() => openHireDialog(selectedWorker)}>
+                      <Briefcase className="w-4 h-4 mr-2" /> {t("Hire This Fundi")}
+                    </Button>
+                  </div>
                 </div>
               </>
             );
@@ -508,6 +526,10 @@ export default function FindWorkersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {activeChatPeer && (
+        <ChatPopup peer={activeChatPeer} onClose={() => setActiveChatPeer(null)} />
+      )}
     </div>
   );
 }
