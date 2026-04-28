@@ -76,6 +76,7 @@ export default function CustomerDashboard() {
 
   // Worker profile dialog
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
+  const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
   const [workerReviews, setWorkerReviews] = useState<any[]>([]);
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
 
