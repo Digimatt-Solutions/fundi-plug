@@ -184,8 +184,8 @@ export default function ChatPopup({ peer, onClose }: ChatPopupProps) {
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{peer.name}</p>
-          <p className="text-[11px] opacity-80">Direct chat</p>
+          <p className="text-[13px] sm:text-sm font-semibold truncate">{peer.name}</p>
+          <p className="text-[10px] sm:text-[11px] opacity-80">Direct chat</p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); setMinimized((m) => !m); }}
