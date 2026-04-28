@@ -43,6 +43,7 @@ export default function FindWorkersPage() {
   const [customerPos, setCustomerPos] = useState<{ lat: number; lng: number } | null>(null);
   // Set of worker user_ids that this customer has an active/successful hire with
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
+  const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
 
   // Hire dialog state
   const [hireDialog, setHireDialog] = useState<any>(null);
