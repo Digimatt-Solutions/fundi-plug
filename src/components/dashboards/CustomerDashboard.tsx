@@ -745,6 +745,10 @@ export default function CustomerDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {activeChatPeer && (
+        <ChatPopup peer={activeChatPeer} onClose={() => setActiveChatPeer(null)} />
+      )}
     </div>
   );
 }
