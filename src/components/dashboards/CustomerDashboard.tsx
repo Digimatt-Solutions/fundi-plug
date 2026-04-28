@@ -20,6 +20,8 @@ import CategoriesScroller from "./CategoriesScroller";
 import { maskEmail, maskPhone } from "@/lib/mask";
 import { MapPreview } from "@/components/MapPreview";
 import ChatButton from "@/components/chat/ChatButton";
+import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
+import { MessageCircle } from "lucide-react";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",
@@ -74,6 +76,7 @@ export default function CustomerDashboard() {
 
   // Worker profile dialog
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
+  const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
   const [workerReviews, setWorkerReviews] = useState<any[]>([]);
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
 
@@ -700,13 +703,13 @@ export default function CustomerDashboard() {
                     <Button className="w-full" onClick={() => openHireDialog(selectedWorker)}>
                       <Briefcase className="w-4 h-4 mr-2" /> {t("Hire This Fundi")}
                     </Button>
-                    <ChatButton
-                      fullWidth
-                      size="default"
+                    <Button
                       variant="outline"
-                      label={t("Chat")}
-                      peer={{ id: selectedWorker.user_id, name: selectedWorker.name, avatar_url: selectedWorker.avatar_url }}
-                    />
+                      className="w-full"
+                      onClick={() => setActiveChatPeer({ id: selectedWorker.user_id, name: selectedWorker.name, avatar_url: selectedWorker.avatar_url })}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" /> {t("Chat")}
+                    </Button>
                   </div>
                 </div>
               </>
@@ -742,6 +745,10 @@ export default function CustomerDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {activeChatPeer && (
+        <ChatPopup peer={activeChatPeer} onClose={() => setActiveChatPeer(null)} />
+      )}
     </div>
   );
 }
