@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog } from "lucide-react";
+import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
