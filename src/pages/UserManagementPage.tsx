@@ -25,6 +25,7 @@ export default function UserManagementPage() {
   const [roleDialog, setRoleDialog] = useState<any>(null);
   const [newRole, setNewRole] = useState("");
   const [deleteDialog, setDeleteDialog] = useState<any>(null);
+  const [promoteDialog, setPromoteDialog] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   async function loadUsers() {
