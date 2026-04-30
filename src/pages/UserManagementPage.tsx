@@ -188,6 +188,11 @@ export default function UserManagementPage() {
                           <DropdownMenuItem onClick={() => { setRoleDialog(u); setNewRole(u.role); }}>
                             <UserCog className="w-4 h-4 mr-2" /> Change Role
                           </DropdownMenuItem>
+                          {u.role !== "admin" && (
+                            <DropdownMenuItem onClick={() => setPromoteDialog(u)}>
+                              <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => handleToggleActive(u)}>
                             <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
                           </DropdownMenuItem>
