@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog } from "lucide-react";
+import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ export default function UserManagementPage() {
   const [roleDialog, setRoleDialog] = useState<any>(null);
   const [newRole, setNewRole] = useState("");
   const [deleteDialog, setDeleteDialog] = useState<any>(null);
+  const [promoteDialog, setPromoteDialog] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   async function loadUsers() {
@@ -96,6 +97,19 @@ export default function UserManagementPage() {
     if (!deleteDialog) return;
     const ok = await callAdminApi({ action: "delete_user", userId: deleteDialog.id });
     if (ok) { toast({ title: "User deleted permanently" }); setDeleteDialog(null); loadUsers(); }
+  };
+
+  const handlePromote = async () => {
+    if (!promoteDialog) return;
+    const ok = await callAdminApi({ action: "promote_to_admin", userId: promoteDialog.id });
+    if (ok) {
+      toast({
+        title: "Promoted to Admin",
+        description: `${promoteDialog.name} must verify their email before signing in as admin.`,
+      });
+      setPromoteDialog(null);
+      loadUsers();
+    }
   };
 
   if (loading) {
@@ -174,6 +188,11 @@ export default function UserManagementPage() {
                           <DropdownMenuItem onClick={() => { setRoleDialog(u); setNewRole(u.role); }}>
                             <UserCog className="w-4 h-4 mr-2" /> Change Role
                           </DropdownMenuItem>
+                          {u.role !== "admin" && (
+                            <DropdownMenuItem onClick={() => setPromoteDialog(u)}>
+                              <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => handleToggleActive(u)}>
                             <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
                           </DropdownMenuItem>
@@ -223,6 +242,27 @@ export default function UserManagementPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialog(null)}>Cancel</Button>
             <Button variant="destructive" onClick={handleDelete} disabled={actionLoading}>{actionLoading ? "Deleting..." : "Delete"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Promote to Admin Dialog */}
+      <Dialog open={!!promoteDialog} onOpenChange={(o) => !o && setPromoteDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Promote {promoteDialog?.name} to Admin?</DialogTitle></DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              This will grant <strong>{promoteDialog?.name}</strong> full administrator access.
+            </p>
+            <div className="p-3 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs leading-relaxed">
+              For security, the user will be signed out of all sessions and required to <strong>re-verify their email address</strong> before they can sign in as admin. A verification link will be emailed to <strong>{promoteDialog?.email}</strong>.
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPromoteDialog(null)}>Cancel</Button>
+            <Button onClick={handlePromote} disabled={actionLoading}>
+              {actionLoading ? "Promoting..." : "Promote & Send Verification"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

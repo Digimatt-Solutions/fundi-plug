@@ -28,6 +28,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [promotionMessage, setPromotionMessage] = useState("");
   const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -152,6 +153,7 @@ const Auth = () => {
       return;
     }
     setError("");
+    setPromotionMessage("");
     setLoading(true);
     try {
       if (isSignIn) {
@@ -184,6 +186,20 @@ const Auth = () => {
         });
       }
     } catch (err: any) {
+      const rawMsg = (err?.message || "").toLowerCase();
+      // Detect promoted-admin pending email verification
+      if (isSignIn && (rawMsg.includes("email not confirmed") || rawMsg.includes("email_not_confirmed"))) {
+        try {
+          const { data: pending } = await supabase.rpc("is_pending_admin_promotion", { _email: email });
+          if (pending === true) {
+            setPromotionMessage(
+              "Congratulations - you have been promoted to Admin. Please check your inbox and click the verification link to confirm your email before signing in."
+            );
+            setLoading(false);
+            return;
+          }
+        } catch { /* non-fatal */ }
+      }
       const msg = friendlyError(err);
       setError(msg);
       toast({ title: "Sign in problem", description: msg, variant: "destructive" });
@@ -263,7 +279,14 @@ const Auth = () => {
               </div>
             )}
 
-            {error && (
+            {promotionMessage && (
+              <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-400 text-sm flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>{promotionMessage}</span>
+              </div>
+            )}
+
+            {error && !promotionMessage && (
               <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                 {error}
               </div>
