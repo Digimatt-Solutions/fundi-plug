@@ -1242,6 +1242,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_pending_admin_promotion: { Args: { _email: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "customer" | "worker"

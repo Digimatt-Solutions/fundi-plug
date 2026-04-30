@@ -38,6 +38,46 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    if (action === "promote_to_admin") {
+      // 1. Set role to admin
+      const { data: existingRole } = await adminClient.from("user_roles").select("user_id").eq("user_id", userId).maybeSingle();
+      if (existingRole) {
+        await adminClient.from("user_roles").update({ role: "admin" }).eq("user_id", userId);
+      } else {
+        await adminClient.from("user_roles").insert({ user_id: userId, role: "admin" });
+      }
+
+      // 2. Force email re-verification: revoke email confirmation and sign user out of all sessions
+      const { data: userData } = await adminClient.auth.admin.getUserById(userId);
+      const targetEmail = userData?.user?.email;
+      if (!targetEmail) throw new Error("Target user email not found");
+
+      // Mark email as unconfirmed and tag metadata so the login UI can detect promotion
+      await adminClient.auth.admin.updateUserById(userId, {
+        email_confirm: false,
+        user_metadata: {
+          ...(userData?.user?.user_metadata || {}),
+          pending_admin_verification: true,
+          promoted_at: new Date().toISOString(),
+          promoted_by: caller.id,
+        },
+      });
+
+      // Invalidate any active sessions so the user must re-login
+      try { await adminClient.auth.admin.signOut(userId, "global"); } catch (_e) { /* non-fatal */ }
+
+      // 3. Generate a fresh email verification link (Supabase sends the email when SMTP is configured)
+      try {
+        await adminClient.auth.admin.generateLink({ type: "signup", email: targetEmail });
+      } catch (_e) { /* non-fatal */ }
+
+      await adminClient.from("activity_logs").insert({
+        user_id: caller.id, action: "User Promoted to Admin",
+        detail: `Promoted ${targetEmail} to admin; email verification required`, entity_type: "user", entity_id: userId,
+      });
+      return new Response(JSON.stringify({ success: true, email: targetEmail }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     if (action === "toggle_active") {
       await adminClient.from("profiles").update({ is_active: isActive }).eq("id", userId);
       await adminClient.from("activity_logs").insert({
