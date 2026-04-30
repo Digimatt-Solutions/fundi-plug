@@ -99,6 +99,19 @@ export default function UserManagementPage() {
     if (ok) { toast({ title: "User deleted permanently" }); setDeleteDialog(null); loadUsers(); }
   };
 
+  const handlePromote = async () => {
+    if (!promoteDialog) return;
+    const ok = await callAdminApi({ action: "promote_to_admin", userId: promoteDialog.id });
+    if (ok) {
+      toast({
+        title: "Promoted to Admin",
+        description: `${promoteDialog.name} must verify their email before signing in as admin.`,
+      });
+      setPromoteDialog(null);
+      loadUsers();
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
