@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import { ThemeProvider } from "next-themes";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -8,7 +9,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { supabase } from "@/integrations/supabase/client";
 import Auth from "@/pages/Auth";
+import SetupAdminPage from "@/pages/SetupAdminPage";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
 import ReportsPage from "@/pages/ReportsPage";
@@ -38,6 +41,27 @@ import VisitTracker from "@/components/VisitTracker";
 
 const queryClient = new QueryClient();
 
+const SetupGate = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("admin_exists");
+      if (cancelled) return;
+      if (!error && data === false && location.pathname !== "/setup-admin") {
+        navigate("/setup-admin", { replace: true });
+      }
+      setChecked(true);
+    })();
+    return () => { cancelled = true; };
+  }, [location.pathname, navigate]);
+
+  return null;
+};
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
     <QueryClientProvider client={queryClient}>
@@ -48,10 +72,12 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <SetupGate />
             <VisitTracker />
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/setup-admin" element={<SetupAdminPage />} />
               <Route path="/reviews/:workerId" element={<PublicReviewsPage />} />
               <Route path="/verify-fundi/:workerId" element={<VerifyFundiPage />} />
               <Route path="/dashboard" element={<DashboardLayout />}>
