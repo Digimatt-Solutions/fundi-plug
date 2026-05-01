@@ -105,7 +105,7 @@ export default function UserManagementPage() {
     if (ok) {
       toast({
         title: "Promoted to Admin",
-        description: `${promoteDialog.name} must verify their email before signing in as admin.`,
+        description: `${promoteDialog.name} now has administrator access.`,
       });
       setPromoteDialog(null);
       loadUsers();
