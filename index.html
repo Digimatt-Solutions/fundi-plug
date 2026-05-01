@@ -3,15 +3,86 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FundiPlug - Skilled Workers Marketplace</title>
-    <meta name="description" content="Connect with verified skilled workers on demand" />
+
+    <!-- Primary SEO -->
+    <title>FundiPlug Kenya | Hire Verified Fundis, Plumbers, Electricians & Skilled Workers</title>
+    <meta name="description" content="FundiPlug is Kenya's trusted marketplace to hire verified fundis - plumbers, electricians, masons, painters, carpenters, mechanics, cleaners and movers. Book skilled workers near you instantly. Pay safely with M-Pesa." />
+    <meta name="keywords" content="fundi, fundis Kenya, hire fundi, plumber Nairobi, electrician Kenya, mason, painter, carpenter, handyman Kenya, FundiPlug, fundi plug, skilled workers Kenya, jobs Kenya, M-Pesa fundi, fundiplug.ke" />
+    <meta name="author" content="Digimatt Solutions" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="geo.region" content="KE" />
+    <meta name="geo.placename" content="Kenya" />
+    <link rel="canonical" href="https://fundiplug.ke/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FundiPlug" />
+    <meta property="og:title" content="FundiPlug Kenya | Hire Verified Fundis Near You" />
+    <meta property="og:description" content="Kenya's trusted marketplace for verified fundis. Hire plumbers, electricians, masons, carpenters and more. Pay with M-Pesa." />
+    <meta property="og:url" content="https://fundiplug.ke/" />
+    <meta property="og:locale" content="en_KE" />
+    <meta property="og:image" content="https://fundiplug.ke/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="FundiPlug - Hire verified fundis in Kenya" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@fundiplug" />
+    <meta name="twitter:title" content="FundiPlug Kenya | Hire Verified Fundis Near You" />
+    <meta name="twitter:description" content="Kenya's trusted marketplace for verified fundis. Plumbers, electricians, masons, carpenters - hired instantly. Pay with M-Pesa." />
+    <meta name="twitter:image" content="https://fundiplug.ke/og-image.jpg" />
+
     <link rel="icon" href="/favicon.png" type="image/png" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#f0620e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="FundiPlug" />
     <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- JSON-LD: Organization + WebSite + LocalBusiness -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://fundiplug.ke/#organization",
+          "name": "FundiPlug",
+          "url": "https://fundiplug.ke/",
+          "logo": "https://fundiplug.ke/pwa-icon-512.png",
+          "description": "Kenya's trusted marketplace to hire verified fundis - plumbers, electricians, masons, carpenters and skilled workers.",
+          "areaServed": { "@type": "Country", "name": "Kenya" },
+          "sameAs": []
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://fundiplug.ke/#website",
+          "url": "https://fundiplug.ke/",
+          "name": "FundiPlug",
+          "publisher": { "@id": "https://fundiplug.ke/#organization" },
+          "inLanguage": "en-KE",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://fundiplug.ke/find-workers?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "LocalBusiness",
+          "@id": "https://fundiplug.ke/#localbusiness",
+          "name": "FundiPlug",
+          "image": "https://fundiplug.ke/og-image.jpg",
+          "url": "https://fundiplug.ke/",
+          "priceRange": "KSH",
+          "address": { "@type": "PostalAddress", "addressCountry": "KE" },
+          "areaServed": "Kenya"
+        }
+      ]
+    }
+    </script>
     <style>
       /* Splash screen - visible before React mounts. Removed once #root has children. */
       /* Only shown on small screens (mobile) and PWA standalone mode, not on large screens. */
