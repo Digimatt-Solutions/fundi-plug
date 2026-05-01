@@ -153,7 +153,6 @@ const Auth = () => {
       return;
     }
     setError("");
-    setPromotionMessage("");
     setLoading(true);
     try {
       if (isSignIn) {
