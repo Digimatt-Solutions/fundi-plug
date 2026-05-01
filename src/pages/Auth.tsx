@@ -265,14 +265,7 @@ const Auth = () => {
               </div>
             )}
 
-            {promotionMessage && (
-              <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-700 dark:text-green-400 text-sm flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>{promotionMessage}</span>
-              </div>
-            )}
-
-            {error && !promotionMessage && (
+            {error && (
               <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                 {error}
               </div>
