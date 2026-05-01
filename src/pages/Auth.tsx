@@ -186,20 +186,6 @@ const Auth = () => {
         });
       }
     } catch (err: any) {
-      const rawMsg = (err?.message || "").toLowerCase();
-      // Detect promoted-admin pending email verification
-      if (isSignIn && (rawMsg.includes("email not confirmed") || rawMsg.includes("email_not_confirmed"))) {
-        try {
-          const { data: pending } = await supabase.rpc("is_pending_admin_promotion", { _email: email });
-          if (pending === true) {
-            setPromotionMessage(
-              "Congratulations - you have been promoted to Admin. Please check your inbox and click the verification link to confirm your email before signing in."
-            );
-            setLoading(false);
-            return;
-          }
-        } catch { /* non-fatal */ }
-      }
       const msg = friendlyError(err);
       setError(msg);
       toast({ title: "Sign in problem", description: msg, variant: "destructive" });
