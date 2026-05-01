@@ -47,33 +47,23 @@ Deno.serve(async (req) => {
         await adminClient.from("user_roles").insert({ user_id: userId, role: "admin" });
       }
 
-      // 2. Force email re-verification: revoke email confirmation and sign user out of all sessions
+      // 2. Auto-confirm the user's email so they have immediate admin access on next sign-in.
       const { data: userData } = await adminClient.auth.admin.getUserById(userId);
       const targetEmail = userData?.user?.email;
       if (!targetEmail) throw new Error("Target user email not found");
 
-      // Mark email as unconfirmed and tag metadata so the login UI can detect promotion
       await adminClient.auth.admin.updateUserById(userId, {
-        email_confirm: false,
+        email_confirm: true,
         user_metadata: {
           ...(userData?.user?.user_metadata || {}),
-          pending_admin_verification: true,
-          promoted_at: new Date().toISOString(),
+          promoted_to_admin_at: new Date().toISOString(),
           promoted_by: caller.id,
         },
       });
 
-      // Invalidate any active sessions so the user must re-login
-      try { await adminClient.auth.admin.signOut(userId, "global"); } catch (_e) { /* non-fatal */ }
-
-      // 3. Generate a fresh email verification link (Supabase sends the email when SMTP is configured)
-      try {
-        await adminClient.auth.admin.generateLink({ type: "signup", email: targetEmail });
-      } catch (_e) { /* non-fatal */ }
-
       await adminClient.from("activity_logs").insert({
         user_id: caller.id, action: "User Promoted to Admin",
-        detail: `Promoted ${targetEmail} to admin; email verification required`, entity_type: "user", entity_id: userId,
+        detail: `Promoted ${targetEmail} to admin (no verification required)`, entity_type: "user", entity_id: userId,
       });
       return new Response(JSON.stringify({ success: true, email: targetEmail }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
