@@ -51,7 +51,7 @@ export default function SetupAdminPage() {
       return;
     }
     setDone(true);
-    toast({ title: "Admin created", description: "Check your email to verify the account." });
+    toast({ title: "Admin created", description: "You can sign in immediately." });
   };
 
   if (checking) {
