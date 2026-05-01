@@ -28,7 +28,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [promotionMessage, setPromotionMessage] = useState("");
+  
   const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
