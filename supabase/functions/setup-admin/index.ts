@@ -39,27 +39,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Password must be at least 8 characters" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Create the auth user. email_confirm = false so Supabase sends a verification email.
+    // Create the auth user with email auto-confirmed so the admin can sign in immediately.
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
       email,
       password,
-      email_confirm: false,
+      email_confirm: true,
       user_metadata: { name, role: "admin", is_setup_admin: true },
     });
     if (createErr) throw createErr;
     if (!created.user) throw new Error("User creation failed");
-
-    // Generate a signup verification link so the user receives the standard Supabase verify email.
-    // (createUser with email_confirm:false already triggers Supabase's confirmation email when SMTP is configured.)
-    try {
-      await admin.auth.admin.generateLink({
-        type: "signup",
-        email,
-        password,
-      });
-    } catch (_e) {
-      // non-fatal — primary email already sent by createUser
-    }
 
     return new Response(JSON.stringify({ success: true, userId: created.user.id }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },

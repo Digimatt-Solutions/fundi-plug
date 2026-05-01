@@ -1,30 +1,50 @@
+## Goal
 
-## GitHub Connection Deadlock
+Remove the email re-verification step for admins. Both newly-promoted admins (via User Management) and admins created via `/setup-admin` should be able to sign in immediately with no email confirmation required.
 
-The "Lovable is currently editing this project, try when it's done" message is shown by Lovable's platform itself, not by anything in your project's code. It appears when the platform thinks an AI edit job is still in-flight on this project, which blocks the GitHub connect handshake (the connect flow requires an exclusive lock on the project so it can push the initial commit cleanly).
+## Changes
 
-This is a platform-side state, not something I can clear by editing files. There is nothing in the codebase causing it and no migration or code change will release it.
+### 1. Edge function: `supabase/functions/admin-manage-user/index.ts` (`promote_to_admin` action)
 
-## How to clear it
+- Stop setting `email_confirm: false`. Instead set `email_confirm: true` so the account is auto-confirmed.
+- Remove the `pending_admin_verification` / `promoted_at` metadata flags (no longer needed).
+- Remove the `auth.admin.signOut(userId, "global")` call so the user isn't kicked out.
+- Remove the `generateLink({ type: "signup" })` call (no verification email needed).
+- Keep: role upsert to `admin` and the activity log entry (update detail text to "no verification required").
+- Return `{ success: true, email }` as before.
 
-Try these in order — usually step 1 or 2 is enough:
+### 2. Edge function: `supabase/functions/setup-admin/index.ts`
 
-1. **Hard refresh the editor tab** (Cmd/Ctrl + Shift + R). The lock is often just a stale UI state from a previous generation that already finished server-side.
-2. **Wait ~60 seconds and retry.** If a previous run is genuinely still finalizing (saving files, running migrations), the lock auto-releases when it completes.
-3. **Close any other Lovable tabs** open on this same project, then reload. A second tab mid-edit can hold the lock.
-4. **Open Project History** (clock icon, top nav) and confirm the latest entry is marked complete. If the most recent run shows as still running but nothing is actually happening, click into it — viewing it sometimes reconciles the state.
-5. **Send a tiny no-op chat message** (e.g. "ok") and let it finish. This forces the queue to drain and releases the lock on completion.
-6. If it still won't release after all of the above, it's a stuck server-side job and needs Lovable support to clear — ping support from the in-app help menu with your project ID: `7ef41c6d-8355-45a2-b7bd-1ba2ac20201d`.
+- Change `admin.auth.admin.createUser` to use `email_confirm: true` so the bootstrap admin can sign in immediately without checking email.
+- Remove the follow-up `generateLink({ type: "signup" })` call.
+- Response unchanged.
 
-## Then connect GitHub
+### 3. Frontend: `src/pages/UserManagementPage.tsx`
 
-Once the lock clears:
+- Update the Promote dialog copy: remove the amber "must re-verify email" warning. Replace with a simple confirmation that the user will gain admin access on their next sign-in (or immediately if already signed in).
+- Update the success toast: "Promoted to Admin - {name} now has administrator access."
+- Update button label from "Promote & Send Verification" to just "Promote to Admin".
 
-- Desktop: **Connectors** (root of left sidebar) → **GitHub** → **Connect project** → authorize the Lovable GitHub App → pick the account/org → **Create Repository**.
-- Mobile: `...` (bottom right, Chat mode) → **Connectors** → **GitHub** → same flow.
+### 4. Frontend: `src/pages/Auth.tsx`
 
-After that, sync is bidirectional and automatic — pushes to GitHub flow back into Lovable and vice versa.
+- Remove the `is_pending_admin_promotion` RPC check and the green `promotionMessage` banner block (lines ~190-196 and ~282-288), since promotion no longer triggers a pending-verification state.
+- Drop the now-unused `promotionMessage` state and the `ShieldCheck` import if unused elsewhere.
 
-## Note on the .env diff
+### 5. Frontend: `src/pages/SetupAdminPage.tsx` (verify and adjust copy)
 
-The last diff shows your `.env` was reverted from a second Supabase project (`qxcbfdozzwfctvlcpdal`) back to the original Lovable Cloud project (`frhxkbnicrbguxtvzzwx`). That's the correct one for this project — leave it as-is. Don't hand-edit `.env`; it's managed by Lovable Cloud.
+- Read the page and update any "check your email to verify" success copy to reflect that the admin can sign in immediately at `/auth`.
+
+### 6. Database
+
+- The `is_pending_admin_promotion` SQL function becomes dead code. Leave it in place (no migration) to avoid touching the schema unnecessarily; it simply won't be called anymore.
+- No migration required.
+
+## Out of scope
+
+- Email infrastructure / SMTP setup (no longer relevant for this flow).
+- Changes to client/fundi signup, which still go through normal email verification per Supabase auth settings.
+
+## Verification steps after implementation
+
+1. From `/setup-admin` (with no admin in DB), create an admin → sign in immediately at `/auth` with no email step.
+2. As admin, promote a regular user via User Management → that user signs out and back in (or refreshes session) and lands on the admin dashboard with no verification prompt.
