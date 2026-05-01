@@ -252,16 +252,13 @@ export default function UserManagementPage() {
           <DialogHeader><DialogTitle>Promote {promoteDialog?.name} to Admin?</DialogTitle></DialogHeader>
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground">
-              This will grant <strong>{promoteDialog?.name}</strong> full administrator access.
+              This will grant <strong>{promoteDialog?.name}</strong> full administrator access. They will see the admin dashboard the next time they sign in - no email verification required.
             </p>
-            <div className="p-3 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs leading-relaxed">
-              For security, the user will be signed out of all sessions and required to <strong>re-verify their email address</strong> before they can sign in as admin. A verification link will be emailed to <strong>{promoteDialog?.email}</strong>.
-            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPromoteDialog(null)}>Cancel</Button>
             <Button onClick={handlePromote} disabled={actionLoading}>
-              {actionLoading ? "Promoting..." : "Promote & Send Verification"}
+              {actionLoading ? "Promoting..." : "Promote to Admin"}
             </Button>
           </DialogFooter>
         </DialogContent>
