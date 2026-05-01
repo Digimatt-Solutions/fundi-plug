@@ -72,14 +72,14 @@ export default function SetupAdminPage() {
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Create the Admin Account</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            No admin exists yet. Set up the platform administrator below. A verification link will be sent to the email provided.
+            No admin exists yet. Set up the platform administrator below. The account will be active immediately - no email verification required.
           </p>
         </div>
 
         {done ? (
           <div className="space-y-4 text-center">
             <div className="p-4 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 text-sm">
-              Admin created. We've sent a verification email to <strong>{email}</strong>. Click the link to verify, then sign in.
+              Admin account created for <strong>{email}</strong>. You can sign in right away.
             </div>
             <Button className="w-full" onClick={() => navigate("/auth")}>Go to Sign In</Button>
           </div>
