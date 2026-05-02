@@ -594,6 +594,8 @@ export default function CustomerDashboard() {
         ))}
       </div>
 
+      <LatestPostsWidget />
+
       {/* Worker Profile Dialog */}
       <Dialog open={!!selectedWorker && !hireDialog} onOpenChange={(open) => !open && setSelectedWorker(null)}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
