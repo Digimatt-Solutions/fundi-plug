@@ -513,9 +513,9 @@ export default function CustomerDashboard() {
                   >
                     <div className="flex items-center gap-3">
                       {worker.avatar_url ? (
-                        <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-11 h-11 rounded-full object-cover" />
+                        <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-14 h-14 sm:w-11 sm:h-11 rounded-full object-cover" />
                       ) : (
-                        <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+                        <div className="w-14 h-14 sm:w-11 sm:h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-base sm:text-sm">
                           {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
                         </div>
                       )}
@@ -537,7 +537,12 @@ export default function CustomerDashboard() {
                         <Navigation className="w-3 h-3" /> {formatDistance(dist)}
                       </div>
                     )}
-                    <Button size="sm" className="w-full active:scale-[0.97] transition-transform" onClick={(e) => { e.stopPropagation(); openHireDialog(worker); }}>{t("Hire Now")}</Button>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" className="flex-1 sm:hidden active:scale-[0.97] transition-transform" onClick={(e) => { e.stopPropagation(); openWorkerProfile(worker); }}>
+                        {t("View")}
+                      </Button>
+                      <Button size="sm" className="flex-1 active:scale-[0.97] transition-transform" onClick={(e) => { e.stopPropagation(); openHireDialog(worker); }}>{t("Hire Now")}</Button>
+                    </div>
                   </div>
                 );
               })}
