@@ -248,9 +248,9 @@ export default function FindWorkersPage() {
       <div key={w.id} className="stat-card space-y-3 cursor-pointer hover:border-primary/40 transition-colors animate-fade-in" style={{ animationDelay: `${i * 40}ms` }} onClick={() => openWorkerProfile(w)}>
         <div className="flex items-center gap-3">
           {w.avatar_url ? (
-            <img loading="lazy" decoding="async" src={w.avatar_url} alt={w.name} className="w-12 h-12 rounded-full object-cover" />
+            <img loading="lazy" decoding="async" src={w.avatar_url} alt={w.name} className="w-16 h-16 sm:w-12 sm:h-12 rounded-full object-cover" />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+            <div className="w-16 h-16 sm:w-12 sm:h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-base sm:text-sm">
               {w.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
             </div>
           )}
@@ -279,9 +279,14 @@ export default function FindWorkersPage() {
             <span className="flex items-center gap-1 text-primary font-medium"><Navigation className="w-3 h-3" /> {formatDistance(dist)}</span>
           )}
         </div>
-        <Button size="sm" className="w-full" onClick={(e) => { e.stopPropagation(); openHireDialog(w); }}>
-          <Briefcase className="w-3.5 h-3.5 mr-1" /> {t("Hire")}
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" className="flex-1 sm:hidden" onClick={(e) => { e.stopPropagation(); openWorkerProfile(w); }}>
+            {t("View")}
+          </Button>
+          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); openHireDialog(w); }}>
+            <Briefcase className="w-3.5 h-3.5 mr-1" /> {t("Hire Now")}
+          </Button>
+        </div>
       </div>
     );
   };
