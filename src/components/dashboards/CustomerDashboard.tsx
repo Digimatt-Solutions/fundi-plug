@@ -21,6 +21,7 @@ import { maskEmail, maskPhone } from "@/lib/mask";
 import { MapPreview } from "@/components/MapPreview";
 import ChatButton from "@/components/chat/ChatButton";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
+import LatestPostsWidget from "@/components/community/LatestPostsWidget";
 import { MessageCircle } from "lucide-react";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
