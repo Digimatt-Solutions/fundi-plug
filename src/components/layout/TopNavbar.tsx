@@ -2,10 +2,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
-import { Bell, LogOut, Sun, Moon, User, Settings, Globe, Check } from "lucide-react";
+import { Bell, LogOut, Sun, Moon, User, Settings, Globe, Check, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useState } from "react";
+import logo from "@/assets/logo.png";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
