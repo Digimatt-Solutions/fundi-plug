@@ -2,10 +2,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
-import { Bell, LogOut, Sun, Moon, User, Settings, Globe, Check } from "lucide-react";
+import { Bell, LogOut, Sun, Moon, User, Settings, Globe, Check, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useState } from "react";
+import logo from "@/assets/logo.png";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -14,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function TopNavbar() {
   const { user, logout } = useAuth();
+  const { toggleSidebar } = useSidebar();
   const { language, setLanguage, t } = useLanguage();
   const { notifications, unreadCount, markAllRead, markRead } = useNotifications();
   const navigate = useNavigate();
@@ -36,9 +38,24 @@ export function TopNavbar() {
 
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
-      <div className="flex items-center gap-3">
-        <SidebarTrigger className="lg:hidden" />
-        <span className="text-sm text-muted-foreground">
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Mobile: elegant hamburger */}
+        <button
+          onClick={toggleSidebar}
+          aria-label="Open menu"
+          className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        {/* Mobile: brand mark replaces welcome message */}
+        <div className="flex items-center gap-2 lg:hidden min-w-0">
+          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
+            <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-full h-full object-cover" />
+          </div>
+          <span className="font-bold text-primary text-base truncate">FundiPlug</span>
+        </div>
+        {/* Desktop: welcome message */}
+        <span className="hidden lg:inline text-sm text-muted-foreground">
           {t("Welcome")}, <span className="text-foreground font-medium">{user?.name || "User"}</span>
         </span>
       </div>
@@ -126,7 +143,11 @@ export function TopNavbar() {
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-3 py-2 border-b border-border">
+              <p className="text-xs text-muted-foreground">{t("Welcome")},</p>
+              <p className="text-sm font-semibold text-foreground truncate">{user?.name || "User"}</p>
+            </div>
             <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
               <User className="w-4 h-4 mr-2" /> {t("Profile")}
             </DropdownMenuItem>

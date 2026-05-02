@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Users, Briefcase, CreditCard, Wrench, TrendingUp, CheckCircle, DollarSign } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
+import LatestPostsWidget from "@/components/community/LatestPostsWidget";
 
 const COLORS = ["hsl(22, 93%, 49%)", "hsl(173, 58%, 39%)", "hsl(197, 71%, 53%)", "hsl(43, 96%, 56%)", "hsl(280, 65%, 60%)"];
 const today = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
@@ -110,6 +111,8 @@ export default function AdminDashboard() {
           ) : <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">No category data yet</div>}
         </div>
       </div>
+
+      <LatestPostsWidget />
     </div>
   );
 }
