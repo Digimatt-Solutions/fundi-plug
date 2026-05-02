@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LatestPostsWidget from "@/components/community/LatestPostsWidget";
 
 export default function WorkerDashboard() {
   const { user } = useAuth();
@@ -197,6 +198,8 @@ export default function WorkerDashboard() {
           )}
         </div>
       </div>
+
+      <LatestPostsWidget />
 
     </div>
   );
