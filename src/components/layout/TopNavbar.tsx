@@ -143,7 +143,11 @@ export function TopNavbar() {
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-3 py-2 border-b border-border">
+              <p className="text-xs text-muted-foreground">{t("Welcome")},</p>
+              <p className="text-sm font-semibold text-foreground truncate">{user?.name || "User"}</p>
+            </div>
             <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
               <User className="w-4 h-4 mr-2" /> {t("Profile")}
             </DropdownMenuItem>
