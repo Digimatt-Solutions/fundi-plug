@@ -167,6 +167,32 @@ export default function WorkerMyJobsPage() {
     loadData();
   };
 
+  const submitClientReview = async () => {
+    if (!reviewDialog || !user) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("reviews").insert({
+      job_id: reviewDialog.id,
+      reviewer_id: user.id,
+      reviewee_id: reviewDialog.customer_id,
+      rating: clientRating,
+      comment: clientComment || null,
+    });
+    if (error) {
+      toast({ title: "Review failed", description: friendlyError(error), variant: "destructive" });
+    } else {
+      toast({ title: "Client reviewed!", description: "Your rating helps other fundis." });
+    }
+    setReviewDialog(null); setClientRating(5); setClientComment("");
+    setSubmitting(false); loadData();
+  };
+
+  const renderStars = (avg: number, count: number) => (
+    <span className="inline-flex items-center gap-1 text-xs text-chart-4">
+      <Star className="w-3 h-3 fill-current" />
+      {avg.toFixed(1)} ({count})
+    </span>
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
