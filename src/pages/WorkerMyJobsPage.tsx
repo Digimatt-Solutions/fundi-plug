@@ -60,8 +60,33 @@ export default function WorkerMyJobsPage() {
     const paymentMap: Record<string, string> = {};
     (paymentsData || []).forEach(p => { paymentMap[p.job_id] = p.status; });
 
+    // Reviews this worker has already left for clients
+    const { data: myReviews } = assignedJobIds.length > 0
+      ? await supabase.from("reviews").select("job_id").eq("reviewer_id", user.id).in("job_id", assignedJobIds)
+      : { data: [] };
+    const reviewedJobIds = new Set((myReviews || []).map(r => r.job_id));
+
+    // Aggregate client ratings (reviews where reviewee is a customer)
+    const allCustomerIds = customerIds;
+    const { data: clientReviews } = allCustomerIds.length > 0
+      ? await supabase.from("reviews").select("reviewee_id, rating").in("reviewee_id", allCustomerIds)
+      : { data: [] };
+    const ratingMap: Record<string, { sum: number; count: number }> = {};
+    (clientReviews || []).forEach((r: any) => {
+      if (!ratingMap[r.reviewee_id]) ratingMap[r.reviewee_id] = { sum: 0, count: 0 };
+      ratingMap[r.reviewee_id].sum += r.rating;
+      ratingMap[r.reviewee_id].count += 1;
+    });
+    const finalRatings: Record<string, { avg: number; count: number }> = {};
+    Object.keys(ratingMap).forEach(k => {
+      finalRatings[k] = { avg: ratingMap[k].sum / ratingMap[k].count, count: ratingMap[k].count };
+    });
+    setClientRatings(finalRatings);
+
     setAvailableJobs((availRes.data || []).filter((j: any) => !appliedJobIds.has(j.id) && j.worker_id === null).map(j => ({
-      ...j, customerName: profileMap[j.customer_id]?.name || "Client",
+      ...j,
+      customerName: profileMap[j.customer_id]?.name || "Client",
+      customerId: j.customer_id,
     })));
     setMyApplications((appsRes.data || []).map(app => ({
       ...app, jobTitle: (app as any).jobs?.title || "Job",
@@ -72,6 +97,7 @@ export default function WorkerMyJobsPage() {
        customerEmail: profileMap[j.customer_id]?.email || "",
        customerPhone: profileMap[j.customer_id]?.phone || "",
       paymentStatus: paymentMap[j.id] || null,
+      hasReview: reviewedJobIds.has(j.id),
     })));
     setHireRequests((hireRes.data || []).map(j => ({
        ...j,
