@@ -409,6 +409,32 @@ export default function WorkerMyJobsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!reviewDialog} onOpenChange={(open) => !open && setReviewDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Rate Client: {reviewDialog?.customerName}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Rating</label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} type="button" onClick={() => setClientRating(n)}>
+                    <Star className={`w-8 h-8 ${n <= clientRating ? "fill-chart-4 text-chart-4" : "text-muted-foreground"}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Comment (optional)</label>
+              <Textarea value={clientComment} onChange={(e) => setClientComment(e.target.value)} placeholder="How was working with this client?" className="bg-muted/50" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewDialog(null)}>Cancel</Button>
+            <Button onClick={submitClientReview} disabled={submitting}>{submitting ? "Submitting..." : "Submit Review"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
