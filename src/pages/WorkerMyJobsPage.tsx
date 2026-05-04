@@ -290,7 +290,7 @@ export default function WorkerMyJobsPage() {
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address || "No location"}</span>
                     <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
-                    <span>by {job.customerName}</span>
+                    <span className="flex items-center gap-1">by {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</span>
                   </div>
                 </div>
               </div>
