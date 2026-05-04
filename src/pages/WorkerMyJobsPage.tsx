@@ -25,6 +25,10 @@ export default function WorkerMyJobsPage() {
   const [proposedRate, setProposedRate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [workerProfile, setWorkerProfile] = useState<any>(null);
+  const [reviewDialog, setReviewDialog] = useState<any>(null);
+  const [clientRating, setClientRating] = useState(5);
+  const [clientComment, setClientComment] = useState("");
+  const [clientRatings, setClientRatings] = useState<Record<string, { avg: number; count: number }>>({});
 
   async function loadData() {
     if (!user) return;
