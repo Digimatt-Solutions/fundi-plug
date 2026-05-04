@@ -355,6 +355,14 @@ export default function WorkerMyJobsPage() {
                     {job.status === "completed" && !job.paymentStatus && (
                       <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
                     )}
+                    {job.status === "completed" && job.paymentStatus === "completed" && !job.hasReview && (
+                      <Button size="sm" variant="outline" onClick={() => setReviewDialog(job)}>
+                        <Star className="w-4 h-4 mr-1" /> Review Client
+                      </Button>
+                    )}
+                    {job.hasReview && (
+                      <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                    )}
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
