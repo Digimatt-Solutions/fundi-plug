@@ -367,7 +367,7 @@ export default function WorkerMyJobsPage() {
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
+                    <p className="text-xs font-medium text-foreground flex items-center gap-2 flex-wrap">Client: {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</p>
                     {job.customer_id && (
                       <ChatButton
                         peer={{ id: job.customer_id, name: job.customerName, jobId: job.id }}
