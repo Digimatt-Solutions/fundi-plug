@@ -250,7 +250,7 @@ export default function WorkerMyJobsPage() {
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-                   <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
+                   <p className="text-xs font-medium text-foreground flex items-center gap-2 flex-wrap">Client: {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</p>
                   {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3 shrink-0" /> <span className="truncate">{maskEmail(job.customerEmail)}</span></p>}
                   {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" /> {maskPhone(job.customerPhone)}</p>}
                   <p className="text-[10px] text-muted-foreground italic">Full contact details revealed once you accept the request.</p>
