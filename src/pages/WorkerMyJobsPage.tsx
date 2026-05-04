@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X } from "lucide-react";
+import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, Star } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -25,6 +25,10 @@ export default function WorkerMyJobsPage() {
   const [proposedRate, setProposedRate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [workerProfile, setWorkerProfile] = useState<any>(null);
+  const [reviewDialog, setReviewDialog] = useState<any>(null);
+  const [clientRating, setClientRating] = useState(5);
+  const [clientComment, setClientComment] = useState("");
+  const [clientRatings, setClientRatings] = useState<Record<string, { avg: number; count: number }>>({});
 
   async function loadData() {
     if (!user) return;
@@ -56,8 +60,33 @@ export default function WorkerMyJobsPage() {
     const paymentMap: Record<string, string> = {};
     (paymentsData || []).forEach(p => { paymentMap[p.job_id] = p.status; });
 
+    // Reviews this worker has already left for clients
+    const { data: myReviews } = assignedJobIds.length > 0
+      ? await supabase.from("reviews").select("job_id").eq("reviewer_id", user.id).in("job_id", assignedJobIds)
+      : { data: [] };
+    const reviewedJobIds = new Set((myReviews || []).map(r => r.job_id));
+
+    // Aggregate client ratings (reviews where reviewee is a customer)
+    const allCustomerIds = customerIds;
+    const { data: clientReviews } = allCustomerIds.length > 0
+      ? await supabase.from("reviews").select("reviewee_id, rating").in("reviewee_id", allCustomerIds)
+      : { data: [] };
+    const ratingMap: Record<string, { sum: number; count: number }> = {};
+    (clientReviews || []).forEach((r: any) => {
+      if (!ratingMap[r.reviewee_id]) ratingMap[r.reviewee_id] = { sum: 0, count: 0 };
+      ratingMap[r.reviewee_id].sum += r.rating;
+      ratingMap[r.reviewee_id].count += 1;
+    });
+    const finalRatings: Record<string, { avg: number; count: number }> = {};
+    Object.keys(ratingMap).forEach(k => {
+      finalRatings[k] = { avg: ratingMap[k].sum / ratingMap[k].count, count: ratingMap[k].count };
+    });
+    setClientRatings(finalRatings);
+
     setAvailableJobs((availRes.data || []).filter((j: any) => !appliedJobIds.has(j.id) && j.worker_id === null).map(j => ({
-      ...j, customerName: profileMap[j.customer_id]?.name || "Client",
+      ...j,
+      customerName: profileMap[j.customer_id]?.name || "Client",
+      customerId: j.customer_id,
     })));
     setMyApplications((appsRes.data || []).map(app => ({
       ...app, jobTitle: (app as any).jobs?.title || "Job",
@@ -68,6 +97,7 @@ export default function WorkerMyJobsPage() {
        customerEmail: profileMap[j.customer_id]?.email || "",
        customerPhone: profileMap[j.customer_id]?.phone || "",
       paymentStatus: paymentMap[j.id] || null,
+      hasReview: reviewedJobIds.has(j.id),
     })));
     setHireRequests((hireRes.data || []).map(j => ({
        ...j,
@@ -137,6 +167,32 @@ export default function WorkerMyJobsPage() {
     loadData();
   };
 
+  const submitClientReview = async () => {
+    if (!reviewDialog || !user) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("reviews").insert({
+      job_id: reviewDialog.id,
+      reviewer_id: user.id,
+      reviewee_id: reviewDialog.customer_id,
+      rating: clientRating,
+      comment: clientComment || null,
+    });
+    if (error) {
+      toast({ title: "Review failed", description: friendlyError(error), variant: "destructive" });
+    } else {
+      toast({ title: "Client reviewed!", description: "Your rating helps other fundis." });
+    }
+    setReviewDialog(null); setClientRating(5); setClientComment("");
+    setSubmitting(false); loadData();
+  };
+
+  const renderStars = (avg: number, count: number) => (
+    <span className="inline-flex items-center gap-1 text-xs text-chart-4">
+      <Star className="w-3 h-3 fill-current" />
+      {avg.toFixed(1)} ({count})
+    </span>
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -194,7 +250,7 @@ export default function WorkerMyJobsPage() {
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-                   <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
+                   <p className="text-xs font-medium text-foreground flex items-center gap-2 flex-wrap">Client: {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</p>
                   {job.customerEmail && <p className="text-xs text-muted-foreground flex items-center gap-1"><Mail className="w-3 h-3 shrink-0" /> <span className="truncate">{maskEmail(job.customerEmail)}</span></p>}
                   {job.customerPhone && <p className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3 shrink-0" /> {maskPhone(job.customerPhone)}</p>}
                   <p className="text-[10px] text-muted-foreground italic">Full contact details revealed once you accept the request.</p>
@@ -234,7 +290,7 @@ export default function WorkerMyJobsPage() {
                     <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address || "No location"}</span>
                     <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
-                    <span>by {job.customerName}</span>
+                    <span className="flex items-center gap-1">by {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</span>
                   </div>
                 </div>
               </div>
@@ -299,11 +355,19 @@ export default function WorkerMyJobsPage() {
                     {job.status === "completed" && !job.paymentStatus && (
                       <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
                     )}
+                    {job.status === "completed" && job.paymentStatus === "completed" && !job.hasReview && (
+                      <Button size="sm" variant="outline" onClick={() => setReviewDialog(job)}>
+                        <Star className="w-4 h-4 mr-1" /> Review Client
+                      </Button>
+                    )}
+                    {job.hasReview && (
+                      <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                    )}
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <p className="text-xs font-medium text-foreground">Client: {job.customerName}</p>
+                    <p className="text-xs font-medium text-foreground flex items-center gap-2 flex-wrap">Client: {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</p>
                     {job.customer_id && (
                       <ChatButton
                         peer={{ id: job.customer_id, name: job.customerName, jobId: job.id }}
@@ -342,6 +406,32 @@ export default function WorkerMyJobsPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setApplyDialog(null)}>Cancel</Button>
             <Button onClick={applyToJob} disabled={submitting}>{submitting ? "Sending..." : "Send Application"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!reviewDialog} onOpenChange={(open) => !open && setReviewDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Rate Client: {reviewDialog?.customerName}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Rating</label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button key={n} type="button" onClick={() => setClientRating(n)}>
+                    <Star className={`w-8 h-8 ${n <= clientRating ? "fill-chart-4 text-chart-4" : "text-muted-foreground"}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Comment (optional)</label>
+              <Textarea value={clientComment} onChange={(e) => setClientComment(e.target.value)} placeholder="How was working with this client?" className="bg-muted/50" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewDialog(null)}>Cancel</Button>
+            <Button onClick={submitClientReview} disabled={submitting}>{submitting ? "Submitting..." : "Submit Review"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
