@@ -34,11 +34,6 @@ export function TopNavbar() {
       .subscribe();
     return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [user?.id]);
-  const { toggleSidebar } = useSidebar();
-  const { language, setLanguage, t } = useLanguage();
-  const { notifications, unreadCount, markAllRead, markRead } = useNotifications();
-  const navigate = useNavigate();
-  const [dark, setDark] = useState(document.documentElement.classList.contains("dark"));
 
   const toggleTheme = () => {
     document.documentElement.classList.toggle("dark");
