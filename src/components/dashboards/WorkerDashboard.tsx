@@ -200,7 +200,7 @@ export default function WorkerDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((stat, i) => (
           <div key={stat.label}
-            className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${stat.gradient} p-4 sm:p-5 animate-fade-in hover:shadow-lg transition-all`}
+            className="relative overflow-hidden rounded-2xl border bg-card p-4 sm:p-5 animate-fade-in hover:shadow-lg transition-all"
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="flex items-start justify-between gap-2">
