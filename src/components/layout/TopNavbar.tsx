@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Bell, LogOut, Sun, Moon, User, Settings, Globe, Check, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -15,6 +16,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function TopNavbar() {
   const { user, logout } = useAuth();
+  const { toggleSidebar } = useSidebar();
+  const { language, setLanguage, t } = useLanguage();
+  const { notifications, unreadCount, markAllRead, markRead } = useNotifications();
+  const navigate = useNavigate();
+  const [dark, setDark] = useState(document.documentElement.classList.contains("dark"));
+  const [isOnline, setIsOnline] = useState(false);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    supabase.from("profiles").select("is_online").eq("id", user.id).single()
+      .then(({ data }) => { if (!cancelled) setIsOnline(!!data?.is_online); });
+    const ch = supabase.channel(`presence-${user.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
+        (payload: any) => setIsOnline(!!payload.new?.is_online))
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
+  }, [user?.id]);
   const { toggleSidebar } = useSidebar();
   const { language, setLanguage, t } = useLanguage();
   const { notifications, unreadCount, markAllRead, markRead } = useNotifications();
