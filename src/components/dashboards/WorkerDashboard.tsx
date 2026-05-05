@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Briefcase, CreditCard, Star, Clock, ToggleLeft, ToggleRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Briefcase, CreditCard, Star, Clock, Power, TrendingUp, Wallet, MessageSquare, Calendar, Sparkles, ArrowUpRight, MapPin, CheckCircle2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
