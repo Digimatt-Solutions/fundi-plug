@@ -142,13 +142,18 @@ export function TopNavbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-3 ml-2 pl-3 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
-              {avatarUrl ? (
-                <img loading="lazy" decoding="async" src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-                  {initials}
-                </div>
-              )}
+              <div className="relative">
+                {avatarUrl ? (
+                  <img loading="lazy" decoding="async" src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
+                    {initials}
+                  </div>
+                )}
+                {isOnline && (
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card" />
+                )}
+              </div>
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-medium text-foreground leading-none">{user?.name}</p>
                 <p className="text-xs text-muted-foreground capitalize">
