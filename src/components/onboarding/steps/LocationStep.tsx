@@ -79,15 +79,6 @@ export default function LocationStep({ data, setData }: Props) {
           onChange={(e) => setData({ exact_address: e.target.value })}
         />
       </div>
-      <div>
-        <Label>Nearest Landmark</Label>
-        <Input
-          placeholder="e.g. Next to Total petrol station"
-          value={data.landmark || ""}
-          onChange={(e) => setData({ landmark: e.target.value })}
-        />
-      </div>
-
       {/* GPS picker */}
       <div className="rounded-lg border bg-muted/30 p-3 space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">

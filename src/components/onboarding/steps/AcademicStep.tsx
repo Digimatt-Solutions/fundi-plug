@@ -16,7 +16,7 @@ interface Props {
   userId: string;
 }
 
-const LEVELS = ["Primary", "Secondary / KCSE", "Certificate", "Diploma", "Degree", "Masters", "PhD", "Trade / Vocational"];
+const LEVELS = ["None", "Primary", "Secondary / KCSE", "Certificate", "Diploma", "Degree", "Masters", "PhD", "Trade / Vocational"];
 const STATUSES = ["Completed", "Ongoing", "Dropped"];
 
 export default function AcademicStep({ userId }: Props) {
@@ -35,15 +35,19 @@ export default function AcademicStep({ userId }: Props) {
   }, [userId]);
 
   const addRow = async () => {
-    if (!draft.level || !draft.institution) {
-      toast({ title: "Add Level and Institution", variant: "destructive" });
+    if (!draft.level) {
+      toast({ title: "Select a level", variant: "destructive" });
+      return;
+    }
+    if (draft.level !== "None" && !draft.institution) {
+      toast({ title: "Add Institution", variant: "destructive" });
       return;
     }
     setAdding(true);
     const payload = {
       worker_id: userId,
       level: draft.level,
-      institution: draft.institution,
+      institution: draft.institution || (draft.level === "None" ? "N/A" : ""),
       course: draft.course || null,
       status: draft.status || null,
       start_date: draft.start_date || null,
@@ -113,39 +117,45 @@ export default function AcademicStep({ userId }: Props) {
                 <SelectContent>{LEVELS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label>Status</Label>
-              <Select value={draft.status} onValueChange={(v) => setDraft({ ...draft, status: v })}>
-                <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
-                <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label>Institution *</Label>
-              <Input placeholder="e.g. Kenya Technical Trainers College" value={draft.institution} onChange={(e) => setDraft({ ...draft, institution: e.target.value })} />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label>Course</Label>
-              <Input placeholder="e.g. Diploma in Electrical Engineering" value={draft.course} onChange={(e) => setDraft({ ...draft, course: e.target.value })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Start</Label>
-              <Input type="date" value={draft.start_date} onChange={(e) => setDraft({ ...draft, start_date: e.target.value })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>End</Label>
-              <Input type="date" value={draft.end_date} onChange={(e) => setDraft({ ...draft, end_date: e.target.value })} />
-            </div>
+            {draft.level && draft.level !== "None" && (
+              <>
+                <div className="space-y-1.5">
+                  <Label>Status</Label>
+                  <Select value={draft.status} onValueChange={(v) => setDraft({ ...draft, status: v })}>
+                    <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+                    <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label>Institution *</Label>
+                  <Input placeholder="e.g. Kenya Technical Trainers College" value={draft.institution} onChange={(e) => setDraft({ ...draft, institution: e.target.value })} />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label>Course</Label>
+                  <Input placeholder="e.g. Diploma in Electrical Engineering" value={draft.course} onChange={(e) => setDraft({ ...draft, course: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Start</Label>
+                  <Input type="date" value={draft.start_date} onChange={(e) => setDraft({ ...draft, start_date: e.target.value })} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>End</Label>
+                  <Input type="date" value={draft.end_date} onChange={(e) => setDraft({ ...draft, end_date: e.target.value })} />
+                </div>
+              </>
+            )}
           </div>
-          <FileUploader
-            bucket="verification-docs"
-            userId={userId}
-            value={draft.file_url}
-            onChange={(url) => setDraft({ ...draft, file_url: url || "" })}
-            label="Certificate (optional)"
-            accept="image/*,application/pdf"
-            prefix="education"
-          />
+          {draft.level && draft.level !== "None" && (
+            <FileUploader
+              bucket="verification-docs"
+              userId={userId}
+              value={draft.file_url}
+              onChange={(url) => setDraft({ ...draft, file_url: url || "" })}
+              label="Certificate (optional)"
+              accept="image/*,application/pdf"
+              prefix="education"
+            />
+          )}
           <Button onClick={addRow} disabled={adding} size="sm">
             {adding ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Plus className="w-3.5 h-3.5 mr-1" />}
             Add entry
