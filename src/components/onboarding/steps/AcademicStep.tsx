@@ -47,7 +47,7 @@ export default function AcademicStep({ userId }: Props) {
     const payload = {
       worker_id: userId,
       level: draft.level,
-      institution: draft.institution,
+      institution: draft.institution || (draft.level === "None" ? "N/A" : ""),
       course: draft.course || null,
       status: draft.status || null,
       start_date: draft.start_date || null,
