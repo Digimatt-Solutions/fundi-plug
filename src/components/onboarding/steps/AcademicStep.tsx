@@ -16,7 +16,7 @@ interface Props {
   userId: string;
 }
 
-const LEVELS = ["Primary", "Secondary / KCSE", "Certificate", "Diploma", "Degree", "Masters", "PhD", "Trade / Vocational"];
+const LEVELS = ["None", "Primary", "Secondary / KCSE", "Certificate", "Diploma", "Degree", "Masters", "PhD", "Trade / Vocational"];
 const STATUSES = ["Completed", "Ongoing", "Dropped"];
 
 export default function AcademicStep({ userId }: Props) {
