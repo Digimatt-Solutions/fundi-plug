@@ -1,6 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Briefcase, CreditCard, Star, Clock, Power, TrendingUp, Wallet, MessageSquare, Calendar, Sparkles, ArrowUpRight, MapPin, CheckCircle2 } from "lucide-react";
+import { Briefcase, CreditCard, Star, Clock, Power, TrendingUp, Wallet, MessageSquare, Calendar, ArrowUpRight, MapPin, CheckCircle2 } from "lucide-react";
+
+const JOB_IMAGES: Record<string, string> = {
+  plumb: "https://images.unsplash.com/photo-1606613734004-37ad8fbe9e2d?w=200&h=200&fit=crop",
+  electric: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=200&fit=crop",
+  clean: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&h=200&fit=crop",
+  paint: "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=200&h=200&fit=crop",
+  carpen: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200&h=200&fit=crop",
+  garden: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&h=200&fit=crop",
+  mason: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=200&h=200&fit=crop",
+  weld: "https://images.unsplash.com/photo-1567789884554-0b844b597180?w=200&h=200&fit=crop",
+  car: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=200&h=200&fit=crop",
+  mov: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop",
+  default: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=200&h=200&fit=crop",
+};
+function jobImage(job: any): string {
+  const key = `${job.title || ""} ${job.category || ""}`.toLowerCase();
+  for (const k of Object.keys(JOB_IMAGES)) if (k !== "default" && key.includes(k)) return JOB_IMAGES[k];
+  return JOB_IMAGES.default;
+}
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
