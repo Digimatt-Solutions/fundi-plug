@@ -10,10 +10,14 @@ import LatestPostsWidget from "@/components/community/LatestPostsWidget";
 export default function WorkerDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(false);
-  const [stats, setStats] = useState({ earnings: 0, completed: 0, rating: 0, pending: 0 });
+  const [profile, setProfile] = useState<any>(null);
+  const [stats, setStats] = useState({ earnings: 0, completed: 0, rating: 0, pending: 0, reviews: 0, weekEarnings: 0 });
   const [recentJobs, setRecentJobs] = useState<any[]>([]);
+  const [upcomingJobs, setUpcomingJobs] = useState<any[]>([]);
   const [earningsData, setEarningsData] = useState<any[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
