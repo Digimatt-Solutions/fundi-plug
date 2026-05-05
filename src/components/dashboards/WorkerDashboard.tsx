@@ -35,7 +35,7 @@ export default function WorkerDashboard() {
         supabase.from("payments").select("amount").eq("payee_id", user!.id).eq("status", "completed"),
         supabase.from("reviews").select("rating").eq("reviewee_id", user!.id),
         supabase.from("payments").select("amount").eq("payee_id", user!.id).eq("status", "completed").gte("created_at", sevenDaysAgo.toISOString()),
-        supabase.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", user!.id).eq("read", false),
+        supabase.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", user!.id).is("read_at", null),
         supabase.from("jobs").select("*, profiles!jobs_customer_id_fkey(name)").eq("worker_id", user!.id).in("status", ["pending", "in_progress"]).order("created_at", { ascending: false }).limit(3),
       ]);
 
