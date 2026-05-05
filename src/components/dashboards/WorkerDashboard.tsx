@@ -153,10 +153,10 @@ export default function WorkerDashboard() {
   const verified = profile?.verification_status === "approved";
 
   const statCards = [
-    { label: t("Total Earnings"), value: `KSH ${stats.earnings.toLocaleString()}`, sub: `+KSH ${stats.weekEarnings.toLocaleString()} this week`, icon: Wallet, gradient: "from-primary/20 via-primary/5 to-transparent", iconBg: "bg-primary/15 text-primary" },
-    { label: t("Jobs Completed"), value: String(stats.completed), sub: `${stats.pending} pending`, icon: CheckCircle2, gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent", iconBg: "bg-emerald-500/15 text-emerald-500" },
-    { label: t("Average Rating"), value: stats.rating > 0 ? stats.rating.toFixed(1) : "-", sub: `${stats.reviews} reviews`, icon: Star, gradient: "from-amber-500/20 via-amber-500/5 to-transparent", iconBg: "bg-amber-500/15 text-amber-500" },
-    { label: t("Pending Jobs"), value: String(stats.pending), sub: t("Awaiting action"), icon: Clock, gradient: "from-sky-500/20 via-sky-500/5 to-transparent", iconBg: "bg-sky-500/15 text-sky-500" },
+    { label: t("Total Earnings"), value: `KSH ${stats.earnings.toLocaleString()}`, sub: `+KSH ${stats.weekEarnings.toLocaleString()} this week`, icon: Wallet, iconBg: "bg-primary/15 text-primary" },
+    { label: t("Jobs Completed"), value: String(stats.completed), sub: `${stats.pending} pending`, icon: CheckCircle2, iconBg: "bg-emerald-500/15 text-emerald-500" },
+    { label: t("Average Rating"), value: stats.rating > 0 ? stats.rating.toFixed(1) : "-", sub: `${stats.reviews} reviews`, icon: Star, iconBg: "bg-amber-500/15 text-amber-500" },
+    { label: t("Pending Jobs"), value: String(stats.pending), sub: t("Awaiting action"), icon: Clock, iconBg: "bg-sky-500/15 text-sky-500" },
   ];
 
   return (
