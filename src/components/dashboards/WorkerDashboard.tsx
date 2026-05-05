@@ -246,104 +246,83 @@ export default function WorkerDashboard() {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-2xl border bg-card p-5 animate-fade-in">
+        {/* Jobs Overview replaces Weekly Jobs */}
+        <div className="rounded-2xl border bg-card p-5 animate-fade-in flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Jobs")}</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">{jobsData.reduce((s, d) => s + d.jobs, 0)} {t("jobs this week")}</p>
-            </div>
+            <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-primary" /> {t("Jobs Overview")}
+            </h3>
             <button onClick={() => navigate("/dashboard/my-jobs")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
               {t("View all")} <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={jobsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--primary) / 0.25)" horizontal={false} />
-              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
-              <Bar dataKey="jobs" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
 
-      {/* Combined Upcoming + Recent Jobs */}
-      <div className="rounded-2xl border bg-card p-5 animate-fade-in">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <Briefcase className="w-4 h-4 text-primary" /> {t("Jobs Overview")}
-          </h3>
-          <button onClick={() => navigate("/dashboard/my-jobs")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-            {t("View all")} <ArrowUpRight className="w-3 h-3" />
-          </button>
-        </div>
-
-        {upcomingJobs.length > 0 && (
-          <div className="mb-5">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="w-3.5 h-3.5 text-primary" />
-              <p className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">{t("Upcoming")}</p>
-            </div>
-            <div className="space-y-2">
-              {upcomingJobs.map((job) => (
-                <button key={job.id} onClick={() => navigate("/dashboard/my-jobs")}
-                  className="w-full text-left flex items-center gap-3 p-3 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors">
-                  <img src={jobImage(job)} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" loading="lazy" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{job.profiles?.name || t("Client")}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    {job.budget && <p className="text-sm font-semibold text-foreground">KSH {Number(job.budget).toLocaleString()}</p>}
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize whitespace-nowrap ${
-                      job.status === "in_progress" ? "bg-primary/15 text-primary" : "bg-amber-500/15 text-amber-600"
-                    }`}>{job.status.replace("_", " ")}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">{t("Recent")}</p>
-          </div>
-          {recentJobs.length > 0 ? (
-            <div className="space-y-2">
-              {recentJobs.map((job) => (
-                <div key={job.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors">
-                  <img src={jobImage(job)} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" loading="lazy" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
-                    <p className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
-                      {(job as any).profiles?.name || t("Client")}
-                      {job.location && <><span>·</span><MapPin className="w-3 h-3" />{job.location}</>}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold text-foreground">{job.budget ? `KSH ${Number(job.budget).toLocaleString()}` : "-"}</p>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize ${
-                      job.status === "completed" ? "bg-emerald-500/10 text-emerald-600" :
-                      job.status === "in_progress" ? "bg-primary/10 text-primary" :
-                      "bg-amber-500/10 text-amber-600"
-                    }`}>{job.status.replace("_", " ")}</span>
-                  </div>
+          <div className="flex-1 overflow-y-auto max-h-[260px] pr-1 space-y-4">
+            {upcomingJobs.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="w-3.5 h-3.5 text-primary" />
+                  <p className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">{t("Upcoming")}</p>
                 </div>
-              ))}
+                <div className="space-y-2">
+                  {upcomingJobs.map((job) => (
+                    <button key={job.id} onClick={() => navigate("/dashboard/my-jobs")}
+                      className="w-full text-left flex items-center gap-3 p-2.5 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors">
+                      <img src={jobImage(job)} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" loading="lazy" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{job.profiles?.name || t("Client")}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        {job.budget && <p className="text-xs font-semibold text-foreground">KSH {Number(job.budget).toLocaleString()}</p>}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize whitespace-nowrap ${
+                          job.status === "in_progress" ? "bg-primary/15 text-primary" : "bg-amber-500/15 text-amber-600"
+                        }`}>{job.status.replace("_", " ")}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                <p className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">{t("Recent")}</p>
+              </div>
+              {recentJobs.length > 0 ? (
+                <div className="space-y-2">
+                  {recentJobs.map((job) => (
+                    <div key={job.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/50 transition-colors">
+                      <img src={jobImage(job)} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" loading="lazy" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-foreground truncate">{job.title}</p>
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1 truncate">
+                          {(job as any).profiles?.name || t("Client")}
+                          {job.location && <><span>·</span><MapPin className="w-3 h-3" />{job.location}</>}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs font-semibold text-foreground">{job.budget ? `KSH ${Number(job.budget).toLocaleString()}` : "-"}</p>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize ${
+                          job.status === "completed" ? "bg-emerald-500/10 text-emerald-600" :
+                          job.status === "in_progress" ? "bg-primary/10 text-primary" :
+                          "bg-amber-500/10 text-amber-600"
+                        }`}>{job.status.replace("_", " ")}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-24 flex flex-col items-center justify-center text-center text-muted-foreground text-sm gap-2">
+                  <Briefcase className="w-8 h-8 opacity-30" />
+                  {t("No jobs yet")}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="h-32 flex flex-col items-center justify-center text-center text-muted-foreground text-sm gap-2">
-              <Briefcase className="w-10 h-10 opacity-30" />
-              {t("No jobs yet - go online to start receiving requests")}
-            </div>
-          )}
+          </div>
         </div>
       </div>
-
-      <LatestPostsWidget />
     </div>
   );
 }
