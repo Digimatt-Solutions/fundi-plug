@@ -323,6 +323,8 @@ export default function WorkerDashboard() {
           </div>
         </div>
       </div>
+
+      <LatestPostsWidget />
     </div>
   );
 }
