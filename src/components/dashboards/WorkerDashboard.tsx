@@ -161,33 +161,33 @@ export default function WorkerDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Hero header - orange shade verification card */}
-      <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/25 via-primary/10 to-orange-200/30 dark:to-orange-900/10 p-5 sm:p-7">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary/30 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+      {/* Hero header - full brand orange */}
+      <div className="relative overflow-hidden rounded-2xl p-5 sm:p-7" style={{ backgroundColor: "#f37021" }}>
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-white/10 blur-3xl pointer-events-none" />
         <div className="relative flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-4 min-w-0">
             <div className="relative shrink-0">
               {profile?.profile_photo_url ? (
-                <img src={profile.profile_photo_url} alt={firstName} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-primary/40" />
+                <img src={profile.profile_photo_url} alt={firstName} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-white/60" />
               ) : (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/30 flex items-center justify-center text-primary text-2xl font-bold ring-2 ring-primary/40">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/25 flex items-center justify-center text-white text-2xl font-bold ring-2 ring-white/60">
                   {firstName.charAt(0)}
                 </div>
               )}
-              <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background ${isOnline ? "bg-emerald-500" : "bg-muted-foreground"}`} />
+              <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${isOnline ? "bg-emerald-500" : "bg-gray-400"}`} />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("Hi")}, {firstName}</h1>
-                {verified && <span className="text-[10px] uppercase tracking-wide bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-semibold">{t("Verified")}</span>}
+                <h1 className="text-xl sm:text-2xl font-bold text-white truncate">{t("Hi")}, {firstName}</h1>
+                {verified && <span className="text-[10px] uppercase tracking-wide bg-white text-[#f37021] px-2 py-0.5 rounded-full font-semibold">{t("Verified")}</span>}
               </div>
-              <p className="text-sm text-muted-foreground mt-0.5">{isOnline ? t("You're online and discoverable") : t("Go online to start receiving job requests")}</p>
+              <p className="text-sm text-white/90 mt-0.5">{isOnline ? t("You're online and discoverable") : t("Go online to start receiving job requests")}</p>
             </div>
           </div>
           <button onClick={toggleOnline}
             className={`group relative flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg ${
-              isOnline ? "bg-emerald-500 text-white shadow-emerald-500/30 hover:bg-emerald-600" : "bg-foreground/90 text-background hover:bg-foreground"
+              isOnline ? "bg-emerald-500 text-white shadow-emerald-600/40 hover:bg-emerald-600" : "bg-white text-[#f37021] hover:bg-white/90"
             }`}
           >
             <Power className="w-4 h-4" />
