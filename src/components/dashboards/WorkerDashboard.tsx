@@ -176,7 +176,7 @@ export default function WorkerDashboard() {
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("Hi")}, {firstName} <Sparkles className="inline w-5 h-5 text-amber-500" /></h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("Hi")}, {firstName}</h1>
                 {verified && <span className="text-[10px] uppercase tracking-wide bg-emerald-500/15 text-emerald-500 px-2 py-0.5 rounded-full font-semibold">{t("Verified")}</span>}
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">{isOnline ? t("You're online and discoverable") : t("Go online to start receiving job requests")}</p>
