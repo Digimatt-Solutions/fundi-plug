@@ -35,8 +35,12 @@ export default function AcademicStep({ userId }: Props) {
   }, [userId]);
 
   const addRow = async () => {
-    if (!draft.level || !draft.institution) {
-      toast({ title: "Add Level and Institution", variant: "destructive" });
+    if (!draft.level) {
+      toast({ title: "Select a level", variant: "destructive" });
+      return;
+    }
+    if (draft.level !== "None" && !draft.institution) {
+      toast({ title: "Add Institution", variant: "destructive" });
       return;
     }
     setAdding(true);
