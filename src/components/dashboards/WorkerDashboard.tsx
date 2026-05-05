@@ -20,7 +20,7 @@ function jobImage(job: any): string {
   for (const k of Object.keys(JOB_IMAGES)) if (k !== "default" && key.includes(k)) return JOB_IMAGES[k];
   return JOB_IMAGES.default;
 }
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -36,6 +36,7 @@ export default function WorkerDashboard() {
   const [recentJobs, setRecentJobs] = useState<any[]>([]);
   const [upcomingJobs, setUpcomingJobs] = useState<any[]>([]);
   const [earningsData, setEarningsData] = useState<any[]>([]);
+  const [jobsData, setJobsData] = useState<any[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -98,6 +99,15 @@ export default function WorkerDashboard() {
       });
       setEarningsData(orderedDays.map(day => ({ day, amount: dayCounts[day] })));
 
+      const { data: weekJobs } = await supabase.from("jobs").select("created_at").eq("worker_id", user!.id).gte("created_at", sevenDaysAgo.toISOString());
+      const jobDayCounts: Record<string, number> = {};
+      orderedDays.forEach(d => { jobDayCounts[d] = 0; });
+      (weekJobs || []).forEach((j: any) => {
+        const day = days[new Date(j.created_at).getDay()];
+        jobDayCounts[day] = (jobDayCounts[day] || 0) + 1;
+      });
+      setJobsData(orderedDays.map(day => ({ day, jobs: jobDayCounts[day] })));
+
       setLoading(false);
     }
     load();
@@ -143,10 +153,10 @@ export default function WorkerDashboard() {
   const verified = profile?.verification_status === "approved";
 
   const statCards = [
-    { label: t("Total Earnings"), value: `KSH ${stats.earnings.toLocaleString()}`, sub: `+KSH ${stats.weekEarnings.toLocaleString()} this week`, icon: Wallet, gradient: "from-primary/20 via-primary/5 to-transparent", iconBg: "bg-primary/15 text-primary" },
-    { label: t("Jobs Completed"), value: String(stats.completed), sub: `${stats.pending} pending`, icon: CheckCircle2, gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent", iconBg: "bg-emerald-500/15 text-emerald-500" },
-    { label: t("Average Rating"), value: stats.rating > 0 ? stats.rating.toFixed(1) : "-", sub: `${stats.reviews} reviews`, icon: Star, gradient: "from-amber-500/20 via-amber-500/5 to-transparent", iconBg: "bg-amber-500/15 text-amber-500" },
-    { label: t("Pending Jobs"), value: String(stats.pending), sub: t("Awaiting action"), icon: Clock, gradient: "from-sky-500/20 via-sky-500/5 to-transparent", iconBg: "bg-sky-500/15 text-sky-500" },
+    { label: t("Total Earnings"), value: `KSH ${stats.earnings.toLocaleString()}`, sub: `+KSH ${stats.weekEarnings.toLocaleString()} this week`, icon: Wallet, iconBg: "bg-primary/15 text-primary" },
+    { label: t("Jobs Completed"), value: String(stats.completed), sub: `${stats.pending} pending`, icon: CheckCircle2, iconBg: "bg-emerald-500/15 text-emerald-500" },
+    { label: t("Average Rating"), value: stats.rating > 0 ? stats.rating.toFixed(1) : "-", sub: `${stats.reviews} reviews`, icon: Star, iconBg: "bg-amber-500/15 text-amber-500" },
+    { label: t("Pending Jobs"), value: String(stats.pending), sub: t("Awaiting action"), icon: Clock, iconBg: "bg-sky-500/15 text-sky-500" },
   ];
 
   return (
@@ -190,7 +200,7 @@ export default function WorkerDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((stat, i) => (
           <div key={stat.label}
-            className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${stat.gradient} p-4 sm:p-5 animate-fade-in hover:shadow-lg transition-all`}
+            className="relative overflow-hidden rounded-2xl border bg-card p-4 sm:p-5 animate-fade-in hover:shadow-lg transition-all"
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="flex items-start justify-between gap-2">
@@ -207,32 +217,55 @@ export default function WorkerDashboard() {
         ))}
       </div>
 
-      {/* Earnings chart */}
-      <div className="rounded-2xl border bg-card p-5 animate-fade-in">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Earnings")}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">KSH {stats.weekEarnings.toLocaleString()} {t("this week")}</p>
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="rounded-2xl border bg-card p-5 animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Earnings")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">KSH {stats.weekEarnings.toLocaleString()} {t("this week")}</p>
+            </div>
+            <button onClick={() => navigate("/dashboard/earnings")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+              {t("View all")} <ArrowUpRight className="w-3 h-3" />
+            </button>
           </div>
-          <button onClick={() => navigate("/dashboard/earnings")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-            {t("View all")} <ArrowUpRight className="w-3 h-3" />
-          </button>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={earningsData}>
+              <defs>
+                <linearGradient id="earnGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--primary) / 0.25)" horizontal={false} />
+              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
+              <Area type="monotone" dataKey="amount" stroke="hsl(var(--primary))" fill="url(#earnGrad)" strokeWidth={2.5} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
-        <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={earningsData}>
-            <defs>
-              <linearGradient id="earnGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-            <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
-            <Area type="monotone" dataKey="amount" stroke="hsl(var(--primary))" fill="url(#earnGrad)" strokeWidth={2.5} />
-          </AreaChart>
-        </ResponsiveContainer>
+
+        <div className="rounded-2xl border bg-card p-5 animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Jobs")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{jobsData.reduce((s, d) => s + d.jobs, 0)} {t("jobs this week")}</p>
+            </div>
+            <button onClick={() => navigate("/dashboard/my-jobs")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+              {t("View all")} <ArrowUpRight className="w-3 h-3" />
+            </button>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={jobsData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--primary) / 0.25)" horizontal={false} />
+              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
+              <Bar dataKey="jobs" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Combined Upcoming + Recent Jobs */}
