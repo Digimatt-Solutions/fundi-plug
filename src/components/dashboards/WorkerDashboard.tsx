@@ -99,6 +99,15 @@ export default function WorkerDashboard() {
       });
       setEarningsData(orderedDays.map(day => ({ day, amount: dayCounts[day] })));
 
+      const { data: weekJobs } = await supabase.from("jobs").select("created_at").eq("worker_id", user!.id).gte("created_at", sevenDaysAgo.toISOString());
+      const jobDayCounts: Record<string, number> = {};
+      orderedDays.forEach(d => { jobDayCounts[d] = 0; });
+      (weekJobs || []).forEach((j: any) => {
+        const day = days[new Date(j.created_at).getDay()];
+        jobDayCounts[day] = (jobDayCounts[day] || 0) + 1;
+      });
+      setJobsData(orderedDays.map(day => ({ day, jobs: jobDayCounts[day] })));
+
       setLoading(false);
     }
     load();
