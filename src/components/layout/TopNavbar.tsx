@@ -148,7 +148,15 @@ export function TopNavbar() {
               <p className="text-xs text-muted-foreground">{t("Welcome")},</p>
               <p className="text-sm font-semibold text-foreground truncate">{user?.name || "User"}</p>
             </div>
-            <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>
+            <DropdownMenuItem
+              onClick={() =>
+                navigate(
+                  user?.role === "worker"
+                    ? "/dashboard/profile"
+                    : "/dashboard/account"
+                )
+              }
+            >
               <User className="w-4 h-4 mr-2" /> {t("Profile")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/dashboard/settings")}>
