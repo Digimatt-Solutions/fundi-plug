@@ -149,13 +149,6 @@ export default function WorkerDashboard() {
     { label: t("Pending Jobs"), value: String(stats.pending), sub: t("Awaiting action"), icon: Clock, gradient: "from-sky-500/20 via-sky-500/5 to-transparent", iconBg: "bg-sky-500/15 text-sky-500" },
   ];
 
-  const quickActions = [
-    { label: t("Browse Jobs"), icon: Briefcase, to: "/dashboard/my-jobs", color: "text-primary" },
-    { label: t("Earnings"), icon: TrendingUp, to: "/dashboard/earnings", color: "text-emerald-500" },
-    { label: t("Reviews"), icon: Star, to: "/dashboard/reviews", color: "text-amber-500" },
-    { label: t("Messages"), icon: MessageSquare, to: "/dashboard/chat", color: "text-sky-500", badge: unreadMessages },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Hero header - orange shade verification card */}
