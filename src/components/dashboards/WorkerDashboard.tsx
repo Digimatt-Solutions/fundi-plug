@@ -20,7 +20,7 @@ function jobImage(job: any): string {
   for (const k of Object.keys(JOB_IMAGES)) if (k !== "default" && key.includes(k)) return JOB_IMAGES[k];
   return JOB_IMAGES.default;
 }
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
