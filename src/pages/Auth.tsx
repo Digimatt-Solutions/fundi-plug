@@ -416,19 +416,27 @@ const Auth = () => {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                disabled={loading || resetting || signupDisabled || resetDisabled}
-                className="w-full h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
-              >
-                {isForgot
-                  ? (resetting ? "Updating..." : "Update Password")
-                  : loading
-                    ? "Please wait..."
-                    : isSignIn
-                      ? "Sign In"
-                      : "Create Account"}
-              </Button>
+              <div className="flex items-stretch gap-2">
+                <Button
+                  type="submit"
+                  disabled={loading || resetting || signupDisabled || resetDisabled}
+                  className="flex-1 h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
+                >
+                  {isForgot
+                    ? (resetting ? "Updating..." : "Update Password")
+                    : loading
+                      ? "Please wait..."
+                      : isSignIn
+                        ? "Sign In"
+                        : "Create Account"}
+                </Button>
+                {isSignIn && (
+                  <>
+                    <AuthVoiceButton compact />
+                    <AuthFingerprintButton />
+                  </>
+                )}
+              </div>
 
               {signupDisabled && (
                 <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
