@@ -143,6 +143,23 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           });
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        (payload: any) => {
+          const m = payload.new;
+          if (m.recipient_id !== user.id) return;
+          const isSupport = typeof m.content === "string" && m.content.startsWith("[Support]");
+          pushNotif({
+            id: "msg-" + m.id,
+            title: isSupport ? "New Support Request" : "New Message",
+            body: (m.content || "Sent an attachment").slice(0, 100),
+            time: new Date().toLocaleTimeString(),
+            read: false,
+            link: "/dashboard/chat",
+          });
+        }
+      )
       .subscribe();
 
     return () => {

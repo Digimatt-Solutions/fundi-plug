@@ -27,6 +27,7 @@ const adminNav = [
   { title: "Categories", url: "/dashboard/categories", icon: ClipboardList, key: "categories" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
   { title: "Disbursements", url: "/dashboard/disbursements", icon: ArrowDownCircle, key: "disbursements" },
+  { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Reports", url: "/dashboard/reports", icon: BarChart3, key: "reports" },
   { title: "Activity Logs", url: "/dashboard/activity", icon: Activity, key: "activity" },
