@@ -48,6 +48,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
+      setShowVoiceRow(false);
       navigate("/dashboard", { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
