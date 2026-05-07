@@ -225,11 +225,6 @@ const Auth = () => {
               <p className="text-muted-foreground text-sm">Skilled Workers Marketplace</p>
             </div>
 
-            <div className="flex items-stretch gap-2 mb-4">
-              <div className="flex-1"><AuthVoiceButton /></div>
-              <AuthFingerprintButton />
-            </div>
-
             {!isForgot && (
               <div className="flex bg-muted rounded-lg p-1 mb-6">
                 <button
