@@ -121,25 +121,37 @@ export default function WorkerDashboard() {
     if (newStatus && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
-          await supabase.from("worker_profiles").update({
-            is_online: true,
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          }).eq("user_id", user.id);
+          await Promise.all([
+            supabase.from("worker_profiles").update({ is_online: true, latitude: pos.coords.latitude, longitude: pos.coords.longitude }).eq("user_id", user.id),
+            supabase.from("profiles").update({ is_online: true, latitude: pos.coords.latitude, longitude: pos.coords.longitude }).eq("id", user.id),
+          ]);
         },
         async () => {
-          await supabase.from("worker_profiles").update({ is_online: true }).eq("user_id", user.id);
+          await Promise.all([
+            supabase.from("worker_profiles").update({ is_online: true }).eq("user_id", user.id),
+            supabase.from("profiles").update({ is_online: true }).eq("id", user.id),
+          ]);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
     } else {
-      await supabase.from("worker_profiles").update({
-        is_online: false,
-        latitude: null,
-        longitude: null,
-      }).eq("user_id", user.id);
+      await Promise.all([
+        supabase.from("worker_profiles").update({ is_online: false, latitude: null, longitude: null }).eq("user_id", user.id),
+        supabase.from("profiles").update({ is_online: false }).eq("id", user.id),
+      ]);
     }
   };
+
+  // Realtime: keep local toggle in sync if profile updates elsewhere
+  useEffect(() => {
+    if (!user) return;
+    const ch = supabase
+      .channel(`wp-online-${user.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "worker_profiles", filter: `user_id=eq.${user.id}` },
+        (p: any) => setIsOnline(!!p.new?.is_online))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user]);
 
   if (loading) {
     return (
