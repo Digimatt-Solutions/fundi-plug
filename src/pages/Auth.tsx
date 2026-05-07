@@ -227,6 +227,12 @@ const Auth = () => {
               <p className="text-muted-foreground text-sm">Skilled Workers Marketplace</p>
             </div>
 
+            {!isForgot && isSignIn && showVoiceRow && (
+              <div className="mb-4 animate-fade-in">
+                <AuthVoiceButton autoStart />
+              </div>
+            )}
+
             {!isForgot && (
               <div className="flex bg-muted rounded-lg p-1 mb-6">
                 <button
