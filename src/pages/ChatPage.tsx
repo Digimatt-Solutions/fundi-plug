@@ -182,7 +182,7 @@ export default function ChatPage() {
               </p>
               <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3">
                 <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Verified support</span>
-                <span className="inline-flex items-center gap-1"><Clock3 className="w-3.5 h-3.5 text-primary" /> Avg reply 5 min</span>
+                <span className="inline-flex items-center gap-1"><Clock3 className="w-3.5 h-3.5 text-primary" /> Avg reply 1 hr</span>
               </div>
               <textarea
                 value={supportMsg}
