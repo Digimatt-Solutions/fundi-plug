@@ -18,7 +18,7 @@ import {
  * Full mode: full-width button with label.
  * Flow: tap → asks for email → asks for password → confirms → logs in.
  */
-export const AuthVoiceButton = ({ compact = false }: { compact?: boolean }) => {
+export const AuthVoiceButton = ({ compact = false, autoStart = false, onCompactClick }: { compact?: boolean; autoStart?: boolean; onCompactClick?: () => void }) => {
   const { login } = useAuth();
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
