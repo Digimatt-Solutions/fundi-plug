@@ -440,7 +440,7 @@ const Auth = () => {
                 </Button>
                 {isSignIn && (
                   <>
-                    <AuthVoiceButton compact />
+                    <AuthVoiceButton compact onCompactClick={() => setShowVoiceRow((v) => !v)} />
                     <AuthFingerprintButton />
                   </>
                 )}
