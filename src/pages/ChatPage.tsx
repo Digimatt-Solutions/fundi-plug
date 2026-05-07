@@ -89,9 +89,8 @@ export default function ChatPage() {
   const sendSupport = async () => {
     if (!user || !supportMsg.trim()) return;
     setSupportSending(true);
-    const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "admin").limit(1);
-    const adminId = roles?.[0]?.user_id;
-    if (!adminId) { toast.error("Support is unavailable right now"); setSupportSending(false); return; }
+    const { data: adminId, error: rpcErr } = await supabase.rpc("get_support_admin_id");
+    if (rpcErr || !adminId) { toast.error("Support is unavailable right now"); setSupportSending(false); return; }
     const { error } = await supabase.from("messages").insert({
       sender_id: user.id,
       recipient_id: adminId,
@@ -183,7 +182,7 @@ export default function ChatPage() {
               </p>
               <div className="flex items-center gap-3 text-[11px] text-muted-foreground mb-3">
                 <span className="inline-flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Verified support</span>
-                <span className="inline-flex items-center gap-1"><Clock3 className="w-3.5 h-3.5 text-primary" /> Avg reply 5 min</span>
+                <span className="inline-flex items-center gap-1"><Clock3 className="w-3.5 h-3.5 text-primary" /> Avg reply 1 hr</span>
               </div>
               <textarea
                 value={supportMsg}
