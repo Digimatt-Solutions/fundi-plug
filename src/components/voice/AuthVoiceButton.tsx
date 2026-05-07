@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Mic, MicOff, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,25 +14,32 @@ import {
 
 /**
  * Voice login button for visually-impaired users.
+ * Compact mode: icon-only button (matches fingerprint button styling).
+ * Full mode: full-width button with label.
  * Flow: tap → asks for email → asks for password → confirms → logs in.
- * After successful login, the global VoiceAssistant takes over on the dashboard.
  */
-export const AuthVoiceButton = () => {
+export const AuthVoiceButton = ({ compact = false }: { compact?: boolean }) => {
   const { login } = useAuth();
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string>("");
+  const [popup, setPopup] = useState<{ kind: "ok" | "warn" | "err"; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!popup) return;
+    const t = setTimeout(() => setPopup(null), 6000);
+    return () => clearTimeout(t);
+  }, [popup]);
 
   const run = async () => {
     if (!isSpeechRecognitionSupported()) {
-      toast({
-        title: "Voice not supported",
-        description: "Your browser doesn't support voice input. Try Chrome or Edge.",
-        variant: "destructive",
-      });
+      const msg = "Voice not supported. Try Chrome or Edge.";
+      setPopup({ kind: "err", text: msg });
+      toast({ title: "Voice not supported", description: msg, variant: "destructive" });
       return;
     }
     setBusy(true);
+    setPopup({ kind: "warn", text: "Listening for your email..." });
     try {
       // Email
       await new Promise<void>((r) =>
@@ -41,6 +48,7 @@ export const AuthVoiceButton = () => {
       setStatus("Listening for email...");
       const emailRaw = await listenOnce({ timeoutMs: 12000 });
       const email = parseSpokenEmail(emailRaw);
+      setPopup({ kind: "warn", text: `Heard: ${email}. Now say password.` });
       await new Promise<void>((r) => speak(`I heard ${email}. Now say your password.`, { onEnd: () => r() }));
 
       // Password
@@ -49,14 +57,16 @@ export const AuthVoiceButton = () => {
       const password = parseSpokenPassword(passRaw);
 
       setStatus("Signing you in...");
+      setPopup({ kind: "warn", text: "Signing you in..." });
       speak("Signing you in.");
       await login(email, password);
-      // Mark that the assistant should greet+narrate after redirect
       sessionStorage.setItem("voice_assistant_greet", "1");
+      setPopup({ kind: "ok", text: "Signed in." });
       toast({ title: "Signed in", description: "Welcome back." });
     } catch (e: any) {
       const msg = e?.message || "Voice sign in failed.";
       speak(`Sorry, ${msg}. Please try again or sign in manually.`);
+      setPopup({ kind: "err", text: msg });
       toast({ title: "Voice sign in failed", description: msg, variant: "destructive" });
     } finally {
       setBusy(false);
@@ -64,12 +74,50 @@ export const AuthVoiceButton = () => {
     }
   };
 
+  const handleClick = busy ? () => { stopSpeaking(); setBusy(false); setStatus(""); } : run;
+
+  if (compact) {
+    return (
+      <div className="relative">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={handleClick}
+          aria-label="Sign in with voice"
+          title="Sign in with voice"
+          className="h-12 w-12 shrink-0"
+        >
+          {busy ? (
+            <MicOff className="w-5 h-5 text-primary animate-pulse" />
+          ) : (
+            <Mic className="w-5 h-5 text-primary" />
+          )}
+        </Button>
+        {popup && (
+          <div
+            role="status"
+            className={`absolute z-50 right-0 mt-2 w-72 rounded-lg border p-3 text-xs shadow-lg animate-fade-in ${
+              popup.kind === "ok"
+                ? "bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-300"
+                : popup.kind === "warn"
+                ? "bg-chart-4/10 border-chart-4/30 text-foreground"
+                : "bg-destructive/10 border-destructive/30 text-destructive"
+            }`}
+          >
+            {popup.text}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-2 mb-4">
       <Button
         type="button"
         variant="outline"
-        onClick={busy ? () => { stopSpeaking(); setBusy(false); setStatus(""); } : run}
+        onClick={handleClick}
         className="w-full h-12 gap-2"
         aria-label="Sign in with voice"
       >
