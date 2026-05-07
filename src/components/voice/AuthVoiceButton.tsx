@@ -31,6 +31,9 @@ export const AuthVoiceButton = ({ compact = false, autoStart = false, onCompactC
     return () => clearTimeout(t);
   }, [popup]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (autoStart) { run(); } }, [autoStart]);
+
   const run = async () => {
     if (!isSpeechRecognitionSupported()) {
       const msg = "Voice not supported. Try Chrome or Edge.";
