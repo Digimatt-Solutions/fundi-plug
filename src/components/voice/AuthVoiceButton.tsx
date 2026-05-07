@@ -83,7 +83,7 @@ export const AuthVoiceButton = ({ compact = false, autoStart = false, onCompactC
           type="button"
           variant="outline"
           size="icon"
-          onClick={handleClick}
+          onClick={onCompactClick ?? handleClick}
           aria-label="Sign in with voice"
           title="Sign in with voice"
           className="h-12 w-12 shrink-0"
