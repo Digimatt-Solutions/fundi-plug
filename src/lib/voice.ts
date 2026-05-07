@@ -20,18 +20,27 @@ function pickVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return null;
 
-  const prefer = ["en-ZA", "en-NG", "en-KE", "en-GH", "en-ZW"];
-  for (const lang of prefer) {
-    const v = voices.find((x) => x.lang?.toLowerCase() === lang.toLowerCase());
+  // Prefer the clearest, most audible neural/premium English voices.
+  const preferredNames = [
+    /Google US English/i,
+    /Google UK English Female/i,
+    /Google UK English Male/i,
+    /Microsoft Aria/i,
+    /Microsoft Jenny/i,
+    /Microsoft Guy/i,
+    /Microsoft Davis/i,
+    /Samantha/i, // Apple - very clear
+    /Daniel/i,   // Apple en-GB
+  ];
+  for (const re of preferredNames) {
+    const v = voices.find((x) => re.test(x.name));
     if (v) return v;
   }
-  // Try "African" in name
-  const named = voices.find((v) => /africa|south\s*african|nigeri|kenya|ghan/i.test(v.name));
-  if (named) return named;
-  // Fall back to en-GB then en-US then any English
+  // Fall back to en-US / en-GB then any English
   return (
-    voices.find((v) => v.lang === "en-GB") ||
+    voices.find((v) => v.lang === "en-US" && /female|google|microsoft/i.test(v.name)) ||
     voices.find((v) => v.lang === "en-US") ||
+    voices.find((v) => v.lang === "en-GB") ||
     voices.find((v) => v.lang?.startsWith("en")) ||
     voices[0] ||
     null

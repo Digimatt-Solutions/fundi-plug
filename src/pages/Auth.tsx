@@ -28,6 +28,7 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showVoiceRow, setShowVoiceRow] = useState(false);
   
   const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
+      setShowVoiceRow(false);
       navigate("/dashboard", { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
@@ -225,10 +227,11 @@ const Auth = () => {
               <p className="text-muted-foreground text-sm">Skilled Workers Marketplace</p>
             </div>
 
-            <div className="flex items-stretch gap-2 mb-4">
-              <div className="flex-1"><AuthVoiceButton /></div>
-              <AuthFingerprintButton />
-            </div>
+            {!isForgot && isSignIn && showVoiceRow && (
+              <div className="mb-4 animate-fade-in">
+                <AuthVoiceButton autoStart />
+              </div>
+            )}
 
             {!isForgot && (
               <div className="flex bg-muted rounded-lg p-1 mb-6">
@@ -421,19 +424,27 @@ const Auth = () => {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                disabled={loading || resetting || signupDisabled || resetDisabled}
-                className="w-full h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
-              >
-                {isForgot
-                  ? (resetting ? "Updating..." : "Update Password")
-                  : loading
-                    ? "Please wait..."
-                    : isSignIn
-                      ? "Sign In"
-                      : "Create Account"}
-              </Button>
+              <div className="flex items-stretch gap-2">
+                <Button
+                  type="submit"
+                  disabled={loading || resetting || signupDisabled || resetDisabled}
+                  className="flex-1 h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
+                >
+                  {isForgot
+                    ? (resetting ? "Updating..." : "Update Password")
+                    : loading
+                      ? "Please wait..."
+                      : isSignIn
+                        ? "Sign In"
+                        : "Create Account"}
+                </Button>
+                {isSignIn && (
+                  <>
+                    <AuthVoiceButton compact onCompactClick={() => setShowVoiceRow((v) => !v)} />
+                    <AuthFingerprintButton />
+                  </>
+                )}
+              </div>
 
               {signupDisabled && (
                 <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
