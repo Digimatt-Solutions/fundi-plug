@@ -89,9 +89,8 @@ export default function ChatPage() {
   const sendSupport = async () => {
     if (!user || !supportMsg.trim()) return;
     setSupportSending(true);
-    const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "admin").limit(1);
-    const adminId = roles?.[0]?.user_id;
-    if (!adminId) { toast.error("Support is unavailable right now"); setSupportSending(false); return; }
+    const { data: adminId, error: rpcErr } = await supabase.rpc("get_support_admin_id");
+    if (rpcErr || !adminId) { toast.error("Support is unavailable right now"); setSupportSending(false); return; }
     const { error } = await supabase.from("messages").insert({
       sender_id: user.id,
       recipient_id: adminId,
