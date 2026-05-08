@@ -714,14 +714,23 @@ export default function CustomerDashboard() {
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-card p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-2">
             <p className="text-sm font-semibold text-foreground">{t("Bookings Overview")}</p>
-            <span className="text-[10px] px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">{t("This Month")}</span>
+            <Select value={bookingDuration} onValueChange={(v) => setBookingDuration(v as any)}>
+              <SelectTrigger className="h-7 w-[110px] text-[11px] rounded-md bg-muted border-0 focus:ring-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">{t("This Week")}</SelectItem>
+                <SelectItem value="month">{t("This Month")}</SelectItem>
+                <SelectItem value="year">{t("This Year")}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{stats.bookings}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-sky-600">0</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-amber-600">{unpaidJobs.length}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{bookingCounts.completed}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-sky-600">{bookingCounts.ongoing}</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-amber-600">{bookingCounts.upcoming}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
           </div>
         </div>
 
