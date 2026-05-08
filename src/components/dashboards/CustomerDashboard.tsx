@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock } from "lucide-react";
+import heroFundi from "@/assets/hero-fundi.png";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import * as L from "leaflet";
@@ -364,237 +365,324 @@ export default function CustomerDashboard() {
   }
 
   const onlineFundis = nearbyWorkers.filter(w => w.available && w.latitude && w.longitude);
+  const firstName = (user?.name || "there").split(" ")[0];
+  const trendingCats = categories.slice().sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 7);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("Find Skilled Fundis")}</h1>
-          <p className="text-muted-foreground text-sm">{t("Book trusted professionals near you")}</p>
-        </div>
-        {onlineFundis.length > 0 && (
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowMap(!showMap)}>
-            <MapPin className="w-4 h-4" /> {showMap ? t("Hide Map") : t("Map View")}
-          </Button>
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
+      {/* MAIN COLUMN */}
+      <div className="space-y-6 min-w-0">
+
+        {unpaidJobs.length > 0 && (
+          <div className="rounded-2xl border border-chart-4/40 bg-chart-4/10 p-4 flex items-start gap-3 animate-fade-in">
+            <AlertCircle className="w-5 h-5 text-chart-4 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                Finish payment for {unpaidJobs.length === 1 ? "your completed job" : `${unpaidJobs.length} completed jobs`}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                {unpaidJobs.slice(0, 2).map(j => j.title).join(", ")}
+                {unpaidJobs.length > 2 ? ` and ${unpaidJobs.length - 2} more` : ""} - head to My Bookings to complete the payment.
+              </p>
+            </div>
+            <Button size="sm" className="shrink-0" onClick={() => navigate("/dashboard/bookings")}>
+              <CreditCard className="w-4 h-4 mr-1" /> Finish Payment
+            </Button>
+          </div>
         )}
-      </div>
-
-      {unpaidJobs.length > 0 && (
-        <div className="rounded-xl border border-chart-4/40 bg-chart-4/10 p-4 flex items-start gap-3 animate-fade-in">
-          <AlertCircle className="w-5 h-5 text-chart-4 shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">
-              Finish payment for {unpaidJobs.length === 1 ? "your completed job" : `${unpaidJobs.length} completed jobs`}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5 break-words">
-              {unpaidJobs.slice(0, 2).map(j => j.title).join(", ")}
-              {unpaidJobs.length > 2 ? ` and ${unpaidJobs.length - 2} more` : ""} - head to My Bookings to complete the payment.
-            </p>
+        {showThanks && unpaidJobs.length === 0 && (
+          <div className="rounded-2xl border border-green-500/40 bg-green-500/10 p-4 flex items-start gap-3 animate-fade-in">
+            <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Thank you - payment received!</p>
+              <p className="text-xs text-muted-foreground mt-0.5">All your completed jobs are now paid.</p>
+            </div>
+            <button type="button" onClick={() => setShowThanks(false)} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Dismiss">
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <Button size="sm" className="shrink-0" onClick={() => navigate("/dashboard/bookings")}>
-            <CreditCard className="w-4 h-4 mr-1" /> Finish Payment
-          </Button>
-        </div>
-      )}
+        )}
 
-      {showThanks && unpaidJobs.length === 0 && (
-        <div className="rounded-xl border border-green-500/40 bg-green-500/10 p-4 flex items-start gap-3 animate-fade-in">
-          <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">Thank you - payment received!</p>
-            <p className="text-xs text-muted-foreground mt-0.5">All your completed jobs are now paid.</p>
+        {/* HERO BANNER */}
+        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-orange-50 via-amber-50/40 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-card p-6 sm:p-8 lg:p-10 animate-fade-in">
+          <div className="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-amber-300/20 blur-3xl pointer-events-none" />
+          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+            <div className="space-y-5 max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur border border-white/60 text-xs font-medium text-foreground">
+                <Sparkles className="w-3.5 h-3.5 text-primary" /> {t("Hi")}, {firstName} - {t("welcome back")}
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
+                {t("Find Trusted Fundis,")} <br className="hidden sm:block" />
+                {t("Get Things")} <span className="text-primary">{t("Done")}</span>
+                <Sparkles className="inline-block w-6 h-6 text-amber-500 ml-1" />
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                {t("Connect with verified professionals for all your home and business needs.")}
+              </p>
+              <div className="bg-card rounded-2xl border border-border/70 shadow-lg shadow-black/5 p-2 flex flex-col sm:flex-row items-stretch gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("What service do you need?")} className="pl-10 h-11 border-0 bg-transparent focus-visible:ring-0 shadow-none" />
+                </div>
+                <div className="hidden sm:block w-px bg-border my-2" />
+                <div className="relative flex-1">
+                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                  <Input placeholder="Nairobi, Kenya" className="pl-10 h-11 border-0 bg-transparent focus-visible:ring-0 shadow-none" />
+                </div>
+                <Button className="h-11 px-6 rounded-xl shrink-0">
+                  <Search className="w-4 h-4 mr-1.5" /> {t("Search")}
+                </Button>
+              </div>
+              <div className="flex items-center gap-3 pt-1">
+                <div className="flex -space-x-2">
+                  {nearbyWorkers.slice(0, 4).map((w, i) => (
+                    <div key={w.id} className="w-7 h-7 rounded-full ring-2 ring-background overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
+                      {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/20" />}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">{nearbyWorkers.length}+ {t("clients")}</span> {t("trust FundiPlug")}</p>
+              </div>
+            </div>
+            <div className="relative hidden lg:flex items-center justify-center min-h-[320px]">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-72 h-72 rounded-full bg-gradient-to-br from-primary/30 to-amber-300/20 blur-2xl" />
+              </div>
+              <img src={heroFundi} alt="Fundi" className="relative w-[340px] h-auto object-contain drop-shadow-2xl" />
+              <div className="absolute top-6 left-2 bg-card rounded-2xl shadow-xl border border-border px-3 py-2 flex items-center gap-2 animate-fade-in">
+                <Star className="w-4 h-4 text-amber-500 fill-current" />
+                <div>
+                  <p className="text-sm font-bold text-foreground">4.8</p>
+                  <p className="text-[10px] text-muted-foreground -mt-0.5">{t("Carpenter")}</p>
+                </div>
+              </div>
+              <div className="absolute bottom-10 right-2 bg-card rounded-2xl shadow-xl border border-border px-3 py-2 flex items-center gap-2 animate-fade-in" style={{ animationDelay: "150ms" }}>
+                <Star className="w-4 h-4 text-amber-500 fill-current" />
+                <div>
+                  <p className="text-sm font-bold text-foreground">4.7</p>
+                  <p className="text-[10px] text-muted-foreground -mt-0.5">{t("Cleaner")}</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <button type="button" onClick={() => setShowThanks(false)} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Dismiss">
-            <X className="w-4 h-4" />
+        </section>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform"><FileText className="w-5 h-5" /></div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground">{t("Post a Job")}</p>
+                <p className="text-xs text-muted-foreground">{t("Describe the job - get quotes")}</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+            </div>
+          </button>
+          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform"><UserCheck className="w-5 h-5" /></div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground">{t("Hire Directly")}</p>
+                <p className="text-xs text-muted-foreground">{t("Pick a fundi yourself")}</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+            </div>
           </button>
         </div>
-      )}
 
-      <div className="relative max-w-2xl animate-fade-in">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <Input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("What service do you need?")}
-          className="pl-12 pr-12 h-14 text-base bg-card border-border rounded-xl"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            aria-label="Clear search"
-            onClick={() => setSearchQuery("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            <X className="w-5 h-5" />
-          </button>
+        <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 animate-fade-in">
+          <CategoriesScroller
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelect={(id) => setSelectedCategory(selectedCategory === id ? "all" : id)}
+            onClear={() => setSelectedCategory("all")}
+            t={t}
+          />
+        </section>
+
+        {showMap && customerPos && onlineFundis.length > 0 && (
+          <div className="rounded-2xl border border-border/70 bg-card p-5 animate-fade-in">
+            <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" /> {t("Online Fundis Map")}
+            </h3>
+            <div className="w-full h-80 rounded-xl overflow-hidden border border-border">
+              <MapContainer center={[customerPos.lat, customerPos.lng]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={true}>
+                <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
+                  <Popup>{t("You are here")}</Popup>
+                </Marker>
+                {onlineFundis.map((w) => {
+                  const dist = getWorkerDistance(w);
+                  return (
+                    <Marker key={w.id} position={[w.latitude, w.longitude]} icon={L.divIcon({ className: "", html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })}>
+                      <Popup><div className="text-sm"><p className="font-semibold">{w.name}</p><p className="text-xs">{w.skill}</p>{dist != null && <p className="text-xs text-primary font-medium">{formatDistance(dist)}</p>}</div></Popup>
+                    </Marker>
+                  );
+                })}
+              </MapContainer>
+            </div>
+          </div>
         )}
-      </div>
 
-      <div className="grid grid-cols-2 gap-3 max-w-lg animate-fade-in" style={{ animationDelay: "100ms" }}>
-        <Button
-          variant="outline"
-          onClick={() => navigate("/dashboard/post-job")}
-          className="h-14 justify-start gap-3 bg-primary/5 border-primary/20 hover:bg-primary/10 text-foreground"
-        >
-          <FileText className="w-5 h-5 text-primary" />
-          <div className="text-left">
-            <p className="text-sm font-medium">{t("Post a Job")}</p>
-            <p className="text-xs text-muted-foreground">{t("Describe it, fundis apply")}</p>
+        <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">{t("Available Fundis")}</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{filteredWorkers.length} {t("professionals ready to help")}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {onlineFundis.length > 0 && (
+                <Button variant="outline" size="sm" className="gap-1.5 rounded-full" onClick={() => setShowMap(!showMap)}>
+                  <MapPin className="w-3.5 h-3.5" /> {showMap ? t("Hide Map") : t("Map")}
+                </Button>
+              )}
+              <button onClick={() => navigate("/dashboard/find-workers")} className="text-xs font-medium text-primary hover:underline">{t("See all")}</button>
+            </div>
           </div>
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => navigate("/dashboard/find-workers")}
-          className="h-14 justify-start gap-3 bg-card border-border hover:bg-muted text-foreground"
-        >
-          <UserCheck className="w-5 h-5 text-chart-3" />
-          <div className="text-left">
-            <p className="text-sm font-medium">{t("Hire Directly")}</p>
-            <p className="text-xs text-muted-foreground">{t("Pick a fundi yourself")}</p>
-          </div>
-        </Button>
-      </div>
 
-      {/* Map View */}
-      {showMap && customerPos && onlineFundis.length > 0 && (
-        <div className="stat-card animate-fade-in">
-          <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary" /> {t("Online Fundis Map")}
-          </h3>
-          <div className="w-full h-80 rounded-xl overflow-hidden border border-border">
-            <MapContainer center={[customerPos.lat, customerPos.lng]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={true}>
-              <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
-                <Popup>{t("You are here")}</Popup>
-              </Marker>
-              {onlineFundis.map((w) => {
-                const dist = getWorkerDistance(w);
-                return (
-                  <Marker key={w.id} position={[w.latitude, w.longitude]} icon={L.divIcon({ className: "", html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })}>
-                    <Popup>
-                      <div className="text-sm">
-                        <p className="font-semibold">{w.name}</p>
-                        <p className="text-xs">{w.skill}</p>
-                        {dist != null && <p className="text-xs text-primary font-medium">{formatDistance(dist)}</p>}
-                      </div>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-            </MapContainer>
-          </div>
-        </div>
-      )}
-
-      <CategoriesScroller
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelect={(id) => setSelectedCategory(selectedCategory === id ? "all" : id)}
-        onClear={() => setSelectedCategory("all")}
-        t={t}
-      />
-
-      <div className="animate-fade-in" style={{ animationDelay: "300ms" }}>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-foreground">
-            {t("Available Fundis")}
-            <span className="text-sm font-normal text-muted-foreground ml-2">({filteredWorkers.length})</span>
-          </h2>
-        </div>
-        {paginatedWorkers.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {paginatedWorkers.map((worker) => {
-                const dist = getWorkerDistance(worker);
-                return (
-                  <div
-                    key={worker.id}
-                    className="stat-card space-y-3 cursor-pointer hover:border-primary/40 transition-colors"
-                    onClick={() => openWorkerProfile(worker)}
-                  >
-                    <div className="flex items-center gap-3">
-                      {worker.avatar_url ? (
-                        <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-14 h-14 sm:w-11 sm:h-11 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-14 h-14 sm:w-11 sm:h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-base sm:text-sm">
-                          {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+          {paginatedWorkers.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+                {paginatedWorkers.map((worker) => {
+                  const dist = getWorkerDistance(worker);
+                  return (
+                    <div key={worker.id} className="group relative rounded-2xl border border-border/60 bg-card overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-0.5 hover:border-primary/30 transition-all" onClick={() => openWorkerProfile(worker)}>
+                      <div className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="relative shrink-0">
+                            {worker.avatar_url ? (
+                              <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-background" />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center font-semibold">
+                                {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-card ${worker.available ? "bg-emerald-500" : "bg-gray-400"}`} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-foreground truncate flex items-center gap-1">
+                              {worker.name}
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">{worker.skill}</p>
+                          </div>
+                          <button onClick={(e) => { e.stopPropagation(); }} className="text-muted-foreground hover:text-rose-500 transition-colors shrink-0" aria-label="Save"><Heart className="w-4 h-4" /></button>
                         </div>
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{worker.name}</p>
-                        <p className="text-xs text-muted-foreground">{worker.skill}</p>
+                        <div className="flex items-center gap-2 mt-3 text-xs">
+                          <span className="flex items-center gap-1 font-medium text-foreground"><Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> {worker.rating > 0 ? worker.rating : t("New")}</span>
+                          <span className="text-muted-foreground">·</span>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${worker.available ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}`}>{worker.available ? t("Online") : t("Offline")}</span>
+                        </div>
+                        {dist != null && (<div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-2"><Navigation className="w-3 h-3" /> {formatDistance(dist)}</div>)}
+                        <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("From")}</p>
+                            <p className="text-sm font-bold text-foreground">{worker.hourly_rate ? `KSH ${worker.hourly_rate}` : "KSH 500"}<span className="text-xs font-normal text-muted-foreground">/hr</span></p>
+                          </div>
+                          <Button size="sm" className="rounded-full px-4" onClick={(e) => { e.stopPropagation(); openHireDialog(worker); }}>{t("Hire Now")}</Button>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-1 text-chart-4">
-                        <Star className="w-3 h-3 fill-current" /> {worker.rating > 0 ? worker.rating : t("New")}
-                      </span>
-                      <span className={`px-2 py-0.5 rounded-full ${worker.available ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"}`}>
-                        {worker.available ? t("Online") : t("Offline")}
-                      </span>
-                    </div>
-                    {dist != null && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Navigation className="w-3 h-3" /> {formatDistance(dist)}
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1 sm:hidden active:scale-[0.97] transition-transform" onClick={(e) => { e.stopPropagation(); openWorkerProfile(worker); }}>
-                        {t("View")}
-                      </Button>
-                      <Button size="sm" className="flex-1 active:scale-[0.97] transition-transform" onClick={(e) => { e.stopPropagation(); openHireDialog(worker); }}>{t("Hire Now")}</Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6">
-                <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" className="w-9" onClick={() => setCurrentPage(page)}>
-                    {page}
-                  </Button>
-                ))}
-                <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+                  );
+                })}
               </div>
-            )}
-          </>
-        ) : (
-          <div className="stat-card flex flex-col items-center justify-center py-12 text-center">
-            <MapPin className="w-10 h-10 text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">{t("No fundis available right now. Check back soon!")}</p>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" className="w-9" onClick={() => setCurrentPage(page)}>{page}</Button>
+                  ))}
+                  <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-3"><MapPin className="w-7 h-7 text-muted-foreground" /></div>
+              <p className="text-sm font-medium text-foreground">{t("No fundis available right now")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("Check back soon!")}</p>
+            </div>
+          )}
+        </section>
+
+        <LatestPostsWidget />
+      </div>
+
+      {/* RIGHT SIDEBAR */}
+      <aside className="space-y-5 xl:sticky xl:top-4 xl:self-start xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto pr-1">
+        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30 dark:via-card dark:to-card p-5">
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-violet-400/20 blur-2xl" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Wallet className="w-3.5 h-3.5" /> {t("Wallet Balance")} <Eye className="w-3 h-3" /></div>
+              <p className="text-2xl font-bold text-foreground mt-1">KES 0</p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg" />
+          </div>
+          <div className="relative flex items-center gap-2 mt-4">
+            <Button size="sm" variant="outline" className="rounded-full bg-card"><Plus className="w-3.5 h-3.5 mr-1" /> {t("Add Funds")}</Button>
+            <button onClick={() => navigate("/dashboard/payments")} className="text-xs font-medium text-foreground hover:text-primary inline-flex items-center gap-1">{t("Transactions")} <ArrowRight className="w-3 h-3" /></button>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border/70 bg-card p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center"><Gift className="w-5 h-5 text-amber-600" /></div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">{t("Refer & Earn")}</p>
+            <p className="text-xs text-muted-foreground">{t("Invite friends and earn rewards")}</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border/70 bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-semibold text-foreground">{t("Bookings Overview")}</p>
+            <span className="text-[10px] px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">{t("This Month")}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{stats.bookings}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-sky-600">0</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-amber-600">{unpaidJobs.length}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
+          </div>
+        </div>
+
+        {customerPos && (
+          <div className="rounded-2xl border border-border/70 bg-card p-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-semibold text-foreground">{t("Your Location")}</p>
+              <button onClick={() => setShowMap(true)} className="text-xs font-medium text-primary hover:underline">{t("View on map")}</button>
+            </div>
+            <div className="h-32 rounded-xl overflow-hidden border border-border">
+              <MapContainer center={[customerPos.lat, customerPos.lng]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={false} dragging={false} zoomControl={false} attributionControl={false}>
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:14px;height:14px;border-radius:50%;background:hsl(22 93% 49%);border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })} />
+              </MapContainer>
+            </div>
           </div>
         )}
-      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
-        {[
-          { label: t("My Bookings"), value: String(stats.bookings), icon: Briefcase, color: "text-primary", bg: "bg-primary/10" },
-          { label: t("Total Spent"), value: `KSH ${stats.spent.toLocaleString()}`, icon: CreditCard, color: "text-chart-2", bg: "bg-chart-2/10" },
-          { label: t("Avg. Rating Given"), value: stats.avgRating > 0 ? String(stats.avgRating) : "N/A", icon: Star, color: "text-chart-4", bg: "bg-chart-4/10" },
-        ].map((s) => (
-          <div key={s.label} className="stat-card">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">{s.label}</p>
-                <p className="text-xl sm:text-3xl font-bold text-foreground mt-1 tabular-nums break-all">{s.value}</p>
-              </div>
-              <div className={`hidden sm:flex w-12 h-12 rounded-xl ${s.bg} items-center justify-center shrink-0`}>
-                <s.icon className={`w-6 h-6 ${s.color}`} />
-              </div>
+        <div className="rounded-2xl border border-border/70 bg-card p-5">
+          <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5"><Activity className="w-4 h-4 text-primary" /> {t("Recent Activity")}</p>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0"><Heart className="w-4 h-4" /></div>
+              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("You booked a fundi")}</p><p className="text-[10px] text-muted-foreground">{t("Today")}</p></div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-medium">{t("Completed")}</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><CreditCard className="w-4 h-4" /></div>
+              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Total spent")}</p><p className="text-[10px] text-muted-foreground">{t("All time")}</p></div>
+              <span className="text-[10px] font-semibold text-foreground">KSH {stats.spent.toLocaleString()}</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0"><Star className="w-4 h-4" /></div>
+              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Avg rating given")}</p><p className="text-[10px] text-muted-foreground">{t("From your reviews")}</p></div>
+              <span className="text-[10px] font-semibold text-foreground">{stats.avgRating > 0 ? stats.avgRating : "N/A"}</span>
             </div>
           </div>
-        ))}
-      </div>
-
-      <LatestPostsWidget />
+        </div>
+      </aside>
 
       {/* Worker Profile Dialog */}
       <Dialog open={!!selectedWorker && !hireDialog} onOpenChange={(open) => !open && setSelectedWorker(null)}>
