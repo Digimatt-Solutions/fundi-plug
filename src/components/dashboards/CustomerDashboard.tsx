@@ -82,6 +82,12 @@ export default function CustomerDashboard() {
   const [workerReviews, setWorkerReviews] = useState<any[]>([]);
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
 
+  // Bookings overview duration + counts
+  const [bookingDuration, setBookingDuration] = useState<"week" | "month" | "year">("month");
+  const [bookingCounts, setBookingCounts] = useState({ completed: 0, ongoing: 0, upcoming: 0 });
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [platformStats, setPlatformStats] = useState({ avgRating: 4.9, totalClients: 2500 });
+
   useEffect(() => {
     if (!user) return;
     (async () => {
