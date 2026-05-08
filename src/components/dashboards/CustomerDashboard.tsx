@@ -369,7 +369,7 @@ export default function CustomerDashboard() {
   const trendingCats = categories.slice().sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 7);
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_290px] gap-5">
       {/* MAIN COLUMN */}
       <div className="space-y-6 min-w-0">
 
@@ -403,67 +403,47 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        {/* HERO BANNER */}
-        <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-orange-50 via-amber-50/40 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-card p-6 sm:p-8 lg:p-10 animate-fade-in">
-          <div className="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-amber-300/20 blur-3xl pointer-events-none" />
-          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-            <div className="space-y-5 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur border border-white/60 text-xs font-medium text-foreground">
-                <Sparkles className="w-3.5 h-3.5 text-primary" /> {t("Hi")}, {firstName} - {t("welcome back")}
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
-                {t("Find Trusted Fundis,")} <br className="hidden sm:block" />
-                {t("Get Things")} <span className="text-primary">{t("Done")}</span>
-                <Sparkles className="inline-block w-6 h-6 text-amber-500 ml-1" />
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                {t("Connect with verified professionals for all your home and business needs.")}
-              </p>
-              <div className="bg-card rounded-2xl border border-border/70 shadow-lg shadow-black/5 p-2 flex flex-col sm:flex-row items-stretch gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("What service do you need?")} className="pl-10 h-11 border-0 bg-transparent focus-visible:ring-0 shadow-none" />
-                </div>
-                <div className="hidden sm:block w-px bg-border my-2" />
-                <div className="relative flex-1">
-                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-                  <Input placeholder="Nairobi, Kenya" className="pl-10 h-11 border-0 bg-transparent focus-visible:ring-0 shadow-none" />
-                </div>
-                <Button className="h-11 px-6 rounded-xl shrink-0">
-                  <Search className="w-4 h-4 mr-1.5" /> {t("Search")}
-                </Button>
-              </div>
-              <div className="flex items-center gap-3 pt-1">
-                <div className="flex -space-x-2">
-                  {nearbyWorkers.slice(0, 4).map((w, i) => (
-                    <div key={w.id} className="w-7 h-7 rounded-full ring-2 ring-background overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
-                      {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/20" />}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground"><span className="font-semibold text-foreground">{nearbyWorkers.length}+ {t("clients")}</span> {t("trust FundiPlug")}</p>
-              </div>
+        {/* HERO BANNER - compact */}
+        <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-orange-50 via-amber-50/40 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-card px-5 sm:px-7 py-5 sm:py-6 animate-fade-in">
+          <div className="absolute -top-16 -right-12 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-amber-300/20 blur-3xl pointer-events-none" />
+          <div className="relative flex flex-col items-center text-center gap-3 max-w-3xl mx-auto">
+            <div className="relative">
+              <img src={heroFundi} alt="Fundi" className="w-14 h-14 rounded-full object-cover ring-4 ring-white/70 dark:ring-white/10 shadow-md" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-card" />
             </div>
-            <div className="relative hidden lg:flex items-center justify-center min-h-[320px]">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-72 h-72 rounded-full bg-gradient-to-br from-primary/30 to-amber-300/20 blur-2xl" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur border border-white/60 text-[11px] font-medium text-foreground">
+              <Sparkles className="w-3 h-3 text-primary" /> {t("Hi")}, {firstName}
+            </div>
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
+              {t("Find Trusted Fundis,")} <span className="text-primary">{t("Get Things Done")}</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground -mt-1">
+              {t("Connect with verified professionals near you.")}
+            </p>
+            <div className="w-full bg-card rounded-full border border-border/70 shadow-sm p-1.5 flex items-center gap-1 mt-1">
+              <div className="relative flex-[2] min-w-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("What service do you need?")} className="pl-9 h-9 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
               </div>
-              <img src={heroFundi} alt="Fundi" className="relative w-[340px] h-auto object-contain drop-shadow-2xl" />
-              <div className="absolute top-6 left-2 bg-card rounded-2xl shadow-xl border border-border px-3 py-2 flex items-center gap-2 animate-fade-in">
-                <Star className="w-4 h-4 text-amber-500 fill-current" />
-                <div>
-                  <p className="text-sm font-bold text-foreground">4.8</p>
-                  <p className="text-[10px] text-muted-foreground -mt-0.5">{t("Carpenter")}</p>
-                </div>
+              <div className="hidden sm:block w-px h-5 bg-border" />
+              <div className="relative flex-1 min-w-0 hidden sm:block">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary" />
+                <Input placeholder="Nairobi, Kenya" className="pl-9 h-9 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
               </div>
-              <div className="absolute bottom-10 right-2 bg-card rounded-2xl shadow-xl border border-border px-3 py-2 flex items-center gap-2 animate-fade-in" style={{ animationDelay: "150ms" }}>
-                <Star className="w-4 h-4 text-amber-500 fill-current" />
-                <div>
-                  <p className="text-sm font-bold text-foreground">4.7</p>
-                  <p className="text-[10px] text-muted-foreground -mt-0.5">{t("Cleaner")}</p>
-                </div>
+              <Button className="h-9 px-5 rounded-full shrink-0 text-sm">
+                <Search className="w-3.5 h-3.5 mr-1" /> {t("Search")}
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 pt-0.5">
+              <div className="flex -space-x-2">
+                {nearbyWorkers.slice(0, 4).map((w, i) => (
+                  <div key={w.id} className="w-5 h-5 rounded-full ring-2 ring-background overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
+                    {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/20" />}
+                  </div>
+                ))}
               </div>
+              <p className="text-[11px] text-muted-foreground"><span className="font-semibold text-foreground">{nearbyWorkers.length}+ {t("clients")}</span> {t("trust FundiPlug")}</p>
             </div>
           </div>
         </section>
@@ -612,27 +592,32 @@ export default function CustomerDashboard() {
 
       {/* RIGHT SIDEBAR */}
       <aside className="space-y-5 xl:sticky xl:top-4 xl:self-start xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto pr-1">
-        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30 dark:via-card dark:to-card p-5">
+        {/* Spending Overview - replaces Wallet */}
+        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30 dark:via-card dark:to-card p-4">
           <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-violet-400/20 blur-2xl" />
           <div className="relative flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Wallet className="w-3.5 h-3.5" /> {t("Wallet Balance")} <Eye className="w-3 h-3" /></div>
-              <p className="text-2xl font-bold text-foreground mt-1">KES 0</p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Wallet className="w-3.5 h-3.5" /> {t("Total Spending")}</div>
+              <p className="text-2xl font-bold text-foreground mt-1 truncate">KSH {stats.spent.toLocaleString()}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{t("Across")} {stats.bookings} {t("bookings")}</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg flex items-center justify-center shrink-0">
+              <TrendingUp className="w-5 h-5 text-white" />
+            </div>
           </div>
-          <div className="relative flex items-center gap-2 mt-4">
-            <Button size="sm" variant="outline" className="rounded-full bg-card"><Plus className="w-3.5 h-3.5 mr-1" /> {t("Add Funds")}</Button>
-            <button onClick={() => navigate("/dashboard/payments")} className="text-xs font-medium text-foreground hover:text-primary inline-flex items-center gap-1">{t("Transactions")} <ArrowRight className="w-3 h-3" /></button>
+          <div className="relative grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border/60">
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Avg / Booking")}</p>
+              <p className="text-sm font-semibold text-foreground">KSH {stats.bookings > 0 ? Math.round(stats.spent / stats.bookings).toLocaleString() : 0}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Your Rating")}</p>
+              <p className="text-sm font-semibold text-foreground flex items-center gap-1"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> {stats.avgRating > 0 ? stats.avgRating : "-"}</p>
+            </div>
           </div>
-        </div>
-
-        <div className="rounded-2xl border border-border/70 bg-card p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center"><Gift className="w-5 h-5 text-amber-600" /></div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">{t("Refer & Earn")}</p>
-            <p className="text-xs text-muted-foreground">{t("Invite friends and earn rewards")}</p>
-          </div>
+          <button onClick={() => navigate("/dashboard/payments")} className="relative mt-3 text-[11px] font-medium text-primary hover:underline inline-flex items-center gap-1">
+            {t("View transactions")} <ArrowRight className="w-3 h-3" />
+          </button>
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-card p-5">
