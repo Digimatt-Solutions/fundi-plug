@@ -752,21 +752,45 @@ export default function CustomerDashboard() {
         <div className="rounded-2xl border border-border/70 bg-card p-5">
           <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5"><Activity className="w-4 h-4 text-primary" /> {t("Recent Activity")}</p>
           <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0"><Heart className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("You booked a fundi")}</p><p className="text-[10px] text-muted-foreground">{t("Today")}</p></div>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-medium">{t("Completed")}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><CreditCard className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Total spent")}</p><p className="text-[10px] text-muted-foreground">{t("All time")}</p></div>
-              <span className="text-[10px] font-semibold text-foreground">KSH {stats.spent.toLocaleString()}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0"><Star className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Avg rating given")}</p><p className="text-[10px] text-muted-foreground">{t("From your reviews")}</p></div>
-              <span className="text-[10px] font-semibold text-foreground">{stats.avgRating > 0 ? stats.avgRating : "N/A"}</span>
-            </div>
+            {recentActivities.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">{t("No recent activity yet")}</p>
+            ) : (
+              recentActivities.map((act) => {
+                const action = (act.action || "").toLowerCase();
+                let Icon = Activity;
+                let color = "primary";
+                if (action.includes("hire") || action.includes("book")) { Icon = Briefcase; color = "primary"; }
+                else if (action.includes("payment") || action.includes("paid")) { Icon = CreditCard; color = "emerald"; }
+                else if (action.includes("review") || action.includes("rating")) { Icon = Star; color = "amber"; }
+                else if (action.includes("login") || action.includes("register")) { Icon = UserCheck; color = "sky"; }
+                else if (action.includes("complet")) { Icon = CheckCircle2; color = "emerald"; }
+                const colorMap: Record<string, string> = {
+                  primary: "bg-primary/10 text-primary",
+                  emerald: "bg-emerald-500/10 text-emerald-600",
+                  amber: "bg-amber-500/10 text-amber-600",
+                  sky: "bg-sky-500/10 text-sky-600",
+                };
+                const time = new Date(act.created_at);
+                const diffMs = Date.now() - time.getTime();
+                const diffMin = Math.floor(diffMs / 60000);
+                const timeLabel = diffMin < 1 ? t("Just now")
+                  : diffMin < 60 ? `${diffMin}m ${t("ago")}`
+                  : diffMin < 1440 ? `${Math.floor(diffMin / 60)}h ${t("ago")}`
+                  : `${Math.floor(diffMin / 1440)}d ${t("ago")}`;
+                return (
+                  <div key={act.id} className="flex items-start gap-3">
+                    <div className={`w-8 h-8 rounded-lg ${colorMap[color]} flex items-center justify-center shrink-0`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{act.action}</p>
+                      {act.detail && <p className="text-[10px] text-muted-foreground truncate">{act.detail}</p>}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0 whitespace-nowrap">{timeLabel}</span>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </aside>
