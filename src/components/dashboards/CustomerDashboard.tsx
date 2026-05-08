@@ -489,28 +489,29 @@ export default function CustomerDashboard() {
                   <img src={heroFundi} alt="Fundi" className="relative w-full h-full object-contain object-bottom" />
                 </div>
               </div>
-              {/* Rating card 1 */}
+              {/* Avg Rating */}
               <div className="absolute top-1 left-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
-                <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                <div className="leading-tight">
-                  <p className="text-xs font-bold text-foreground">4.8</p>
-                  <p className="text-[9px] text-muted-foreground">{t("Carpenter")}</p>
-                </div>
-                <Star className="w-3 h-3 fill-amber-400 text-amber-400 ml-1" />
-              </div>
-              {/* Rating card 2 */}
-              <div className="absolute top-3 right-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 <div className="leading-tight">
-                  <p className="text-xs font-bold text-foreground">4.7</p>
-                  <p className="text-[9px] text-muted-foreground">{t("Cleaner")}</p>
+                  <p className="text-xs font-bold text-foreground">{platformStats.avgRating}</p>
+                  <p className="text-[9px] text-muted-foreground">{t("Avg rating")}</p>
+                </div>
+              </div>
+              {/* 24/7 Support */}
+              <div className="absolute top-3 right-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <Headphones className="w-3 h-3" />
+                </div>
+                <div className="leading-tight">
+                  <p className="text-xs font-bold text-foreground">24/7</p>
+                  <p className="text-[9px] text-muted-foreground">{t("Support")}</p>
                 </div>
               </div>
               {/* Trusted by card */}
               <div className="absolute bottom-0 left-2 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-2 animate-fade-in">
                 <div className="leading-tight">
                   <p className="text-[9px] text-muted-foreground">{t("Trusted by")}</p>
-                  <p className="text-[11px] font-bold text-foreground">{Math.max(nearbyWorkers.length * 50, 2500)}+ {t("clients")}</p>
+                  <p className="text-[11px] font-bold text-foreground">{platformStats.totalClients.toLocaleString()}+ {t("clients")}</p>
                 </div>
                 <div className="flex -space-x-1.5">
                   {nearbyWorkers.slice(0, 3).map((w, i) => (
