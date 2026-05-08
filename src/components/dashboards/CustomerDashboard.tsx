@@ -403,48 +403,80 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        {/* HERO BANNER - compact */}
-        <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-orange-50 via-amber-50/40 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-card px-5 sm:px-7 py-5 sm:py-6 animate-fade-in">
-          <div className="absolute -top-16 -right-12 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        {/* HERO BANNER */}
+        <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-orange-50 via-amber-50/40 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-card px-5 sm:px-8 py-6 sm:py-7 animate-fade-in">
+          <div className="absolute -top-16 -right-12 w-72 h-72 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-amber-300/20 blur-3xl pointer-events-none" />
-          <div className="relative flex flex-col items-center text-center gap-3 max-w-3xl mx-auto">
-            <div className="relative">
-              <img src={heroFundi} alt="Fundi" className="w-14 h-14 rounded-full object-cover ring-4 ring-white/70 dark:ring-white/10 shadow-md" />
-              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-card" />
+
+          <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto] gap-5 items-center">
+            {/* LEFT: copy */}
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
+                {t("Find Trusted Fundis,")}<br />
+                {t("Get Things")} <span className="text-primary">{t("Done")}</span>
+                <Sparkles className="inline w-4 h-4 text-primary ml-1 -mt-3" />
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-md">
+                {t("Connect with verified professionals for all your home and business needs.")}
+              </p>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur border border-white/60 text-[11px] font-medium text-foreground">
-              <Sparkles className="w-3 h-3 text-primary" /> {t("Hi")}, {firstName}
-            </div>
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
-              {t("Find Trusted Fundis,")} <span className="text-primary">{t("Get Things Done")}</span>
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground -mt-1">
-              {t("Connect with verified professionals near you.")}
-            </p>
-            <div className="w-full bg-card rounded-full border border-border/70 shadow-sm p-1.5 flex items-center gap-1 mt-1">
-              <div className="relative flex-[2] min-w-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("What service do you need?")} className="pl-9 h-9 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+
+            {/* RIGHT: fundi image with floating cards */}
+            <div className="relative hidden md:block w-[280px] h-[140px] shrink-0">
+              <div className="absolute inset-0 flex justify-center items-end">
+                <div className="relative w-[150px] h-[140px]">
+                  <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl" />
+                  <img src={heroFundi} alt="Fundi" className="relative w-full h-full object-contain object-bottom" />
+                </div>
               </div>
-              <div className="hidden sm:block w-px h-5 bg-border" />
-              <div className="relative flex-1 min-w-0 hidden sm:block">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary" />
-                <Input placeholder="Nairobi, Kenya" className="pl-9 h-9 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+              {/* Rating card 1 */}
+              <div className="absolute top-1 left-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
+                <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                <div className="leading-tight">
+                  <p className="text-xs font-bold text-foreground">4.8</p>
+                  <p className="text-[9px] text-muted-foreground">{t("Carpenter")}</p>
+                </div>
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400 ml-1" />
               </div>
-              <Button className="h-9 px-5 rounded-full shrink-0 text-sm">
-                <Search className="w-3.5 h-3.5 mr-1" /> {t("Search")}
-              </Button>
-            </div>
-            <div className="flex items-center gap-2 pt-0.5">
-              <div className="flex -space-x-2">
-                {nearbyWorkers.slice(0, 4).map((w, i) => (
-                  <div key={w.id} className="w-5 h-5 rounded-full ring-2 ring-background overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
-                    {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/20" />}
-                  </div>
-                ))}
+              {/* Rating card 2 */}
+              <div className="absolute top-3 right-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <div className="leading-tight">
+                  <p className="text-xs font-bold text-foreground">4.7</p>
+                  <p className="text-[9px] text-muted-foreground">{t("Cleaner")}</p>
+                </div>
               </div>
-              <p className="text-[11px] text-muted-foreground"><span className="font-semibold text-foreground">{nearbyWorkers.length}+ {t("clients")}</span> {t("trust FundiPlug")}</p>
+              {/* Trusted by card */}
+              <div className="absolute bottom-0 left-2 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-2 animate-fade-in">
+                <div className="leading-tight">
+                  <p className="text-[9px] text-muted-foreground">{t("Trusted by")}</p>
+                  <p className="text-[11px] font-bold text-foreground">{Math.max(nearbyWorkers.length * 50, 2500)}+ {t("clients")}</p>
+                </div>
+                <div className="flex -space-x-1.5">
+                  {nearbyWorkers.slice(0, 3).map((w, i) => (
+                    <div key={w.id} className="w-5 h-5 rounded-full ring-2 ring-card overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
+                      {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/30" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* SEARCH BAR - full width */}
+          <div className="relative mt-5 w-full bg-card rounded-full border border-border/70 shadow-sm p-1.5 flex items-center gap-1">
+            <div className="relative flex-[2] min-w-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("What service do you need?")} className="pl-9 h-10 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+            </div>
+            <div className="hidden sm:block w-px h-6 bg-border" />
+            <div className="relative flex-1 min-w-0 hidden sm:block">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+              <Input placeholder="Nairobi, Kenya" className="pl-9 h-10 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+            </div>
+            <Button className="h-10 px-6 rounded-full shrink-0 text-sm font-semibold">
+              {t("Search")}
+            </Button>
           </div>
         </section>
 
