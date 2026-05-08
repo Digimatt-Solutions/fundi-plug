@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock, Headphones, Users } from "lucide-react";
 import heroFundi from "@/assets/hero-fundi.png";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
