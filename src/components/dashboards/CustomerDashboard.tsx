@@ -322,6 +322,60 @@ export default function CustomerDashboard() {
     return () => clearTimeout(t);
   }, [showThanks]);
 
+  // Fetch real recent activities for the user
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("activity_logs")
+        .select("id, action, detail, created_at, entity_type")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      setRecentActivities(data || []);
+    })();
+  }, [user]);
+
+  // Fetch booking counts based on selected duration
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const now = new Date();
+      const since = new Date(now);
+      if (bookingDuration === "week") since.setDate(now.getDate() - 7);
+      else if (bookingDuration === "month") since.setMonth(now.getMonth() - 1);
+      else since.setFullYear(now.getFullYear() - 1);
+      const { data } = await supabase
+        .from("jobs")
+        .select("status, scheduled_at, created_at")
+        .eq("customer_id", user.id)
+        .gte("created_at", since.toISOString());
+      const rows = data || [];
+      const completed = rows.filter((j: any) => j.status === "completed").length;
+      const ongoing = rows.filter((j: any) => ["accepted", "in_progress"].includes(j.status)).length;
+      const upcoming = rows.filter((j: any) => j.status === "pending" || (j.scheduled_at && new Date(j.scheduled_at) > now)).length;
+      setBookingCounts({ completed, ongoing, upcoming });
+    })();
+  }, [user, bookingDuration]);
+
+  // Platform stats for hero card (trust signals)
+  useEffect(() => {
+    (async () => {
+      const [reviewsRes, clientsRes] = await Promise.all([
+        supabase.from("reviews").select("rating"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+      ]);
+      const reviews = reviewsRes.data || [];
+      const avg = reviews.length > 0
+        ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+        : 4.9;
+      setPlatformStats({
+        avgRating: Math.round(avg * 10) / 10 || 4.9,
+        totalClients: clientsRes.count || 2500,
+      });
+    })();
+  }, []);
+
   // Filter workers by selected category and search query
   const filteredWorkers = useMemo(() => {
     let list = nearbyWorkers;
