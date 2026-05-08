@@ -369,7 +369,7 @@ export default function CustomerDashboard() {
   const trendingCats = categories.slice().sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 7);
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6">
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_290px] gap-5">
       {/* MAIN COLUMN */}
       <div className="space-y-6 min-w-0">
 
