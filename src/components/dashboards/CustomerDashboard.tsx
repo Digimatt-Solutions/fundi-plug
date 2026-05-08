@@ -592,27 +592,32 @@ export default function CustomerDashboard() {
 
       {/* RIGHT SIDEBAR */}
       <aside className="space-y-5 xl:sticky xl:top-4 xl:self-start xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto pr-1">
-        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30 dark:via-card dark:to-card p-5">
+        {/* Spending Overview - replaces Wallet */}
+        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30 dark:via-card dark:to-card p-4">
           <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-violet-400/20 blur-2xl" />
           <div className="relative flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><Wallet className="w-3.5 h-3.5" /> {t("Wallet Balance")} <Eye className="w-3 h-3" /></div>
-              <p className="text-2xl font-bold text-foreground mt-1">KES 0</p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Wallet className="w-3.5 h-3.5" /> {t("Total Spending")}</div>
+              <p className="text-2xl font-bold text-foreground mt-1 truncate">KSH {stats.spent.toLocaleString()}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{t("Across")} {stats.bookings} {t("bookings")}</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg flex items-center justify-center shrink-0">
+              <TrendingUp className="w-5 h-5 text-white" />
+            </div>
           </div>
-          <div className="relative flex items-center gap-2 mt-4">
-            <Button size="sm" variant="outline" className="rounded-full bg-card"><Plus className="w-3.5 h-3.5 mr-1" /> {t("Add Funds")}</Button>
-            <button onClick={() => navigate("/dashboard/payments")} className="text-xs font-medium text-foreground hover:text-primary inline-flex items-center gap-1">{t("Transactions")} <ArrowRight className="w-3 h-3" /></button>
+          <div className="relative grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border/60">
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Avg / Booking")}</p>
+              <p className="text-sm font-semibold text-foreground">KSH {stats.bookings > 0 ? Math.round(stats.spent / stats.bookings).toLocaleString() : 0}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Your Rating")}</p>
+              <p className="text-sm font-semibold text-foreground flex items-center gap-1"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> {stats.avgRating > 0 ? stats.avgRating : "-"}</p>
+            </div>
           </div>
-        </div>
-
-        <div className="rounded-2xl border border-border/70 bg-card p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center"><Gift className="w-5 h-5 text-amber-600" /></div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">{t("Refer & Earn")}</p>
-            <p className="text-xs text-muted-foreground">{t("Invite friends and earn rewards")}</p>
-          </div>
+          <button onClick={() => navigate("/dashboard/payments")} className="relative mt-3 text-[11px] font-medium text-primary hover:underline inline-flex items-center gap-1">
+            {t("View transactions")} <ArrowRight className="w-3 h-3" />
+          </button>
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-card p-5">
