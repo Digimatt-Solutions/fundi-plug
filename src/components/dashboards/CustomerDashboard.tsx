@@ -365,8 +365,6 @@ export default function CustomerDashboard() {
   }
 
   const onlineFundis = nearbyWorkers.filter(w => w.available && w.latitude && w.longitude);
-
-  const onlineFundis = nearbyWorkers.filter(w => w.available && w.latitude && w.longitude);
   const firstName = (user?.name || "there").split(" ")[0];
   const trendingCats = categories.slice().sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 7);
 
