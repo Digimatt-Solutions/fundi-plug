@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock, Headphones, Users } from "lucide-react";
 import heroFundi from "@/assets/hero-fundi.png";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -81,6 +81,12 @@ export default function CustomerDashboard() {
   const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
   const [workerReviews, setWorkerReviews] = useState<any[]>([]);
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
+
+  // Bookings overview duration + counts
+  const [bookingDuration, setBookingDuration] = useState<"week" | "month" | "year">("month");
+  const [bookingCounts, setBookingCounts] = useState({ completed: 0, ongoing: 0, upcoming: 0 });
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [platformStats, setPlatformStats] = useState({ avgRating: 4.9, totalClients: 2500 });
 
   useEffect(() => {
     if (!user) return;
@@ -316,6 +322,60 @@ export default function CustomerDashboard() {
     return () => clearTimeout(t);
   }, [showThanks]);
 
+  // Fetch real recent activities for the user
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("activity_logs")
+        .select("id, action, detail, created_at, entity_type")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      setRecentActivities(data || []);
+    })();
+  }, [user]);
+
+  // Fetch booking counts based on selected duration
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const now = new Date();
+      const since = new Date(now);
+      if (bookingDuration === "week") since.setDate(now.getDate() - 7);
+      else if (bookingDuration === "month") since.setMonth(now.getMonth() - 1);
+      else since.setFullYear(now.getFullYear() - 1);
+      const { data } = await supabase
+        .from("jobs")
+        .select("status, scheduled_at, created_at")
+        .eq("customer_id", user.id)
+        .gte("created_at", since.toISOString());
+      const rows = data || [];
+      const completed = rows.filter((j: any) => j.status === "completed").length;
+      const ongoing = rows.filter((j: any) => ["accepted", "in_progress"].includes(j.status)).length;
+      const upcoming = rows.filter((j: any) => j.status === "pending" || (j.scheduled_at && new Date(j.scheduled_at) > now)).length;
+      setBookingCounts({ completed, ongoing, upcoming });
+    })();
+  }, [user, bookingDuration]);
+
+  // Platform stats for hero card (trust signals)
+  useEffect(() => {
+    (async () => {
+      const [reviewsRes, clientsRes] = await Promise.all([
+        supabase.from("reviews").select("rating"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+      ]);
+      const reviews = reviewsRes.data || [];
+      const avg = reviews.length > 0
+        ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+        : 4.9;
+      setPlatformStats({
+        avgRating: Math.round(avg * 10) / 10 || 4.9,
+        totalClients: clientsRes.count || 2500,
+      });
+    })();
+  }, []);
+
   // Filter workers by selected category and search query
   const filteredWorkers = useMemo(() => {
     let list = nearbyWorkers;
@@ -429,28 +489,29 @@ export default function CustomerDashboard() {
                   <img src={heroFundi} alt="Fundi" className="relative w-full h-full object-contain object-bottom" />
                 </div>
               </div>
-              {/* Rating card 1 */}
+              {/* Avg Rating */}
               <div className="absolute top-1 left-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
-                <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                <div className="leading-tight">
-                  <p className="text-xs font-bold text-foreground">4.8</p>
-                  <p className="text-[9px] text-muted-foreground">{t("Carpenter")}</p>
-                </div>
-                <Star className="w-3 h-3 fill-amber-400 text-amber-400 ml-1" />
-              </div>
-              {/* Rating card 2 */}
-              <div className="absolute top-3 right-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 <div className="leading-tight">
-                  <p className="text-xs font-bold text-foreground">4.7</p>
-                  <p className="text-[9px] text-muted-foreground">{t("Cleaner")}</p>
+                  <p className="text-xs font-bold text-foreground">{platformStats.avgRating}</p>
+                  <p className="text-[9px] text-muted-foreground">{t("Avg rating")}</p>
+                </div>
+              </div>
+              {/* 24/7 Support */}
+              <div className="absolute top-3 right-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <Headphones className="w-3 h-3" />
+                </div>
+                <div className="leading-tight">
+                  <p className="text-xs font-bold text-foreground">24/7</p>
+                  <p className="text-[9px] text-muted-foreground">{t("Support")}</p>
                 </div>
               </div>
               {/* Trusted by card */}
               <div className="absolute bottom-0 left-2 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-2 animate-fade-in">
                 <div className="leading-tight">
                   <p className="text-[9px] text-muted-foreground">{t("Trusted by")}</p>
-                  <p className="text-[11px] font-bold text-foreground">{Math.max(nearbyWorkers.length * 50, 2500)}+ {t("clients")}</p>
+                  <p className="text-[11px] font-bold text-foreground">{platformStats.totalClients.toLocaleString()}+ {t("clients")}</p>
                 </div>
                 <div className="flex -space-x-1.5">
                   {nearbyWorkers.slice(0, 3).map((w, i) => (
@@ -480,25 +541,25 @@ export default function CustomerDashboard() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform"><FileText className="w-5 h-5" /></div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
+          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4 sm:w-5 sm:h-5" /></div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground">{t("Post a Job")}</p>
-                <p className="text-xs text-muted-foreground">{t("Describe the job - get quotes")}</p>
+                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Post a Job")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Describe the job - get quotes")}</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </button>
-          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform"><UserCheck className="w-5 h-5" /></div>
+          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><UserCheck className="w-4 h-4 sm:w-5 sm:h-5" /></div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground">{t("Hire Directly")}</p>
-                <p className="text-xs text-muted-foreground">{t("Pick a fundi yourself")}</p>
+                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Hire Directly")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Pick a fundi yourself")}</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
             </div>
           </button>
         </div>
@@ -653,14 +714,23 @@ export default function CustomerDashboard() {
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-card p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-2">
             <p className="text-sm font-semibold text-foreground">{t("Bookings Overview")}</p>
-            <span className="text-[10px] px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">{t("This Month")}</span>
+            <Select value={bookingDuration} onValueChange={(v) => setBookingDuration(v as any)}>
+              <SelectTrigger className="h-7 w-[110px] text-[11px] rounded-md bg-muted border-0 focus:ring-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">{t("This Week")}</SelectItem>
+                <SelectItem value="month">{t("This Month")}</SelectItem>
+                <SelectItem value="year">{t("This Year")}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{stats.bookings}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-sky-600">0</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-amber-600">{unpaidJobs.length}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{bookingCounts.completed}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-sky-600">{bookingCounts.ongoing}</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-amber-600">{bookingCounts.upcoming}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
           </div>
         </div>
 
@@ -682,21 +752,45 @@ export default function CustomerDashboard() {
         <div className="rounded-2xl border border-border/70 bg-card p-5">
           <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5"><Activity className="w-4 h-4 text-primary" /> {t("Recent Activity")}</p>
           <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0"><Heart className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("You booked a fundi")}</p><p className="text-[10px] text-muted-foreground">{t("Today")}</p></div>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-medium">{t("Completed")}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><CreditCard className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Total spent")}</p><p className="text-[10px] text-muted-foreground">{t("All time")}</p></div>
-              <span className="text-[10px] font-semibold text-foreground">KSH {stats.spent.toLocaleString()}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0"><Star className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Avg rating given")}</p><p className="text-[10px] text-muted-foreground">{t("From your reviews")}</p></div>
-              <span className="text-[10px] font-semibold text-foreground">{stats.avgRating > 0 ? stats.avgRating : "N/A"}</span>
-            </div>
+            {recentActivities.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">{t("No recent activity yet")}</p>
+            ) : (
+              recentActivities.map((act) => {
+                const action = (act.action || "").toLowerCase();
+                let Icon = Activity;
+                let color = "primary";
+                if (action.includes("hire") || action.includes("book")) { Icon = Briefcase; color = "primary"; }
+                else if (action.includes("payment") || action.includes("paid")) { Icon = CreditCard; color = "emerald"; }
+                else if (action.includes("review") || action.includes("rating")) { Icon = Star; color = "amber"; }
+                else if (action.includes("login") || action.includes("register")) { Icon = UserCheck; color = "sky"; }
+                else if (action.includes("complet")) { Icon = CheckCircle2; color = "emerald"; }
+                const colorMap: Record<string, string> = {
+                  primary: "bg-primary/10 text-primary",
+                  emerald: "bg-emerald-500/10 text-emerald-600",
+                  amber: "bg-amber-500/10 text-amber-600",
+                  sky: "bg-sky-500/10 text-sky-600",
+                };
+                const time = new Date(act.created_at);
+                const diffMs = Date.now() - time.getTime();
+                const diffMin = Math.floor(diffMs / 60000);
+                const timeLabel = diffMin < 1 ? t("Just now")
+                  : diffMin < 60 ? `${diffMin}m ${t("ago")}`
+                  : diffMin < 1440 ? `${Math.floor(diffMin / 60)}h ${t("ago")}`
+                  : `${Math.floor(diffMin / 1440)}d ${t("ago")}`;
+                return (
+                  <div key={act.id} className="flex items-start gap-3">
+                    <div className={`w-8 h-8 rounded-lg ${colorMap[color]} flex items-center justify-center shrink-0`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">{act.action}</p>
+                      {act.detail && <p className="text-[10px] text-muted-foreground truncate">{act.detail}</p>}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground shrink-0 whitespace-nowrap">{timeLabel}</span>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </aside>

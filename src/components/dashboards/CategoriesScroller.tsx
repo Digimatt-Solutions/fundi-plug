@@ -63,7 +63,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
             type="button"
             aria-label="Scroll left"
             onClick={() => scrollBy(-1)}
-            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+            className="flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -73,7 +73,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
             type="button"
             aria-label="Scroll right"
             onClick={() => scrollBy(1)}
-            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-9 h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+            className="flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-card border border-border shadow-md items-center justify-center text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
