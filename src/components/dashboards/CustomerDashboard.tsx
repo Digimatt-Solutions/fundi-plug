@@ -541,25 +541,25 @@ export default function CustomerDashboard() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
-          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform"><FileText className="w-5 h-5" /></div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
+          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4 sm:w-5 sm:h-5" /></div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground">{t("Post a Job")}</p>
-                <p className="text-xs text-muted-foreground">{t("Describe the job - get quotes")}</p>
+                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Post a Job")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Describe the job - get quotes")}</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </button>
-          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform"><UserCheck className="w-5 h-5" /></div>
+          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><UserCheck className="w-4 h-4 sm:w-5 sm:h-5" /></div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-foreground">{t("Hire Directly")}</p>
-                <p className="text-xs text-muted-foreground">{t("Pick a fundi yourself")}</p>
+                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Hire Directly")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Pick a fundi yourself")}</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
             </div>
           </button>
         </div>
