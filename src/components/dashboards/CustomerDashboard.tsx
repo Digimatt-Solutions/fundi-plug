@@ -541,7 +541,7 @@ export default function CustomerDashboard() {
           </div>
         </section>
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 animate-fade-in">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 animate-fade-in w-full lg:w-1/2">
           <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-xl border border-primary/30 bg-primary/10 p-2.5 sm:p-3 text-left hover:shadow-md hover:bg-primary/15 hover:border-primary/50 transition-all">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-primary/25 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4" /></div>
