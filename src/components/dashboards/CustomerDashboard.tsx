@@ -606,7 +606,7 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 animate-fade-in">
+        <section className="animate-fade-in">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
               <h2 className="text-lg font-semibold text-foreground">{t("Available Fundis")}</h2>
