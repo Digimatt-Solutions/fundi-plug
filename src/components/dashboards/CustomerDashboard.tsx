@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock, Headphones, Users } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock } from "lucide-react";
 import heroFundi from "@/assets/hero-fundi.png";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -81,12 +81,6 @@ export default function CustomerDashboard() {
   const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
   const [workerReviews, setWorkerReviews] = useState<any[]>([]);
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
-
-  // Bookings overview duration + counts
-  const [bookingDuration, setBookingDuration] = useState<"week" | "month" | "year">("month");
-  const [bookingCounts, setBookingCounts] = useState({ completed: 0, ongoing: 0, upcoming: 0 });
-  const [recentActivities, setRecentActivities] = useState<any[]>([]);
-  const [platformStats, setPlatformStats] = useState({ avgRating: 4.9, totalClients: 2500 });
 
   useEffect(() => {
     if (!user) return;
@@ -322,60 +316,6 @@ export default function CustomerDashboard() {
     return () => clearTimeout(t);
   }, [showThanks]);
 
-  // Fetch real recent activities for the user
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase
-        .from("activity_logs")
-        .select("id, action, detail, created_at, entity_type")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      setRecentActivities(data || []);
-    })();
-  }, [user]);
-
-  // Fetch booking counts based on selected duration
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const now = new Date();
-      const since = new Date(now);
-      if (bookingDuration === "week") since.setDate(now.getDate() - 7);
-      else if (bookingDuration === "month") since.setMonth(now.getMonth() - 1);
-      else since.setFullYear(now.getFullYear() - 1);
-      const { data } = await supabase
-        .from("jobs")
-        .select("status, scheduled_at, created_at")
-        .eq("customer_id", user.id)
-        .gte("created_at", since.toISOString());
-      const rows = data || [];
-      const completed = rows.filter((j: any) => j.status === "completed").length;
-      const ongoing = rows.filter((j: any) => ["accepted", "in_progress"].includes(j.status)).length;
-      const upcoming = rows.filter((j: any) => j.status === "pending" || (j.scheduled_at && new Date(j.scheduled_at) > now)).length;
-      setBookingCounts({ completed, ongoing, upcoming });
-    })();
-  }, [user, bookingDuration]);
-
-  // Platform stats for hero card (trust signals)
-  useEffect(() => {
-    (async () => {
-      const [reviewsRes, clientsRes] = await Promise.all([
-        supabase.from("reviews").select("rating"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-      ]);
-      const reviews = reviewsRes.data || [];
-      const avg = reviews.length > 0
-        ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-        : 4.9;
-      setPlatformStats({
-        avgRating: Math.round(avg * 10) / 10 || 4.9,
-        totalClients: clientsRes.count || 2500,
-      });
-    })();
-  }, []);
-
   // Filter workers by selected category and search query
   const filteredWorkers = useMemo(() => {
     let list = nearbyWorkers;
@@ -463,103 +403,70 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        {/* HERO BANNER */}
-        <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-orange-50 via-amber-50/40 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-card px-5 sm:px-8 py-6 sm:py-7 animate-fade-in">
-          <div className="absolute -top-16 -right-12 w-72 h-72 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+        {/* HERO BANNER - compact */}
+        <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-orange-50 via-amber-50/40 to-rose-50 dark:from-orange-950/30 dark:via-card dark:to-card px-5 sm:px-7 py-5 sm:py-6 animate-fade-in">
+          <div className="absolute -top-16 -right-12 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-amber-300/20 blur-3xl pointer-events-none" />
-
-          <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto] gap-5 items-center">
-            {/* LEFT: copy */}
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
-                {t("Find Trusted Fundis,")}<br />
-                {t("Get Things")} <span className="text-primary">{t("Done")}</span>
-                <Sparkles className="inline w-4 h-4 text-primary ml-1 -mt-3" />
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-md">
-                {t("Connect with verified professionals for all your home and business needs.")}
-              </p>
+          <div className="relative flex flex-col items-center text-center gap-3 max-w-3xl mx-auto">
+            <div className="relative">
+              <img src={heroFundi} alt="Fundi" className="w-14 h-14 rounded-full object-cover ring-4 ring-white/70 dark:ring-white/10 shadow-md" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-card" />
             </div>
-
-            {/* RIGHT: fundi image with floating cards */}
-            <div className="relative hidden md:block w-[280px] h-[140px] shrink-0">
-              <div className="absolute inset-0 flex justify-center items-end">
-                <div className="relative w-[150px] h-[140px]">
-                  <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl" />
-                  <img src={heroFundi} alt="Fundi" className="relative w-full h-full object-contain object-bottom" />
-                </div>
-              </div>
-              {/* Avg Rating */}
-              <div className="absolute top-1 left-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <div className="leading-tight">
-                  <p className="text-xs font-bold text-foreground">{platformStats.avgRating}</p>
-                  <p className="text-[9px] text-muted-foreground">{t("Avg rating")}</p>
-                </div>
-              </div>
-              {/* 24/7 Support */}
-              <div className="absolute top-3 right-0 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-1.5 animate-fade-in">
-                <div className="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                  <Headphones className="w-3 h-3" />
-                </div>
-                <div className="leading-tight">
-                  <p className="text-xs font-bold text-foreground">24/7</p>
-                  <p className="text-[9px] text-muted-foreground">{t("Support")}</p>
-                </div>
-              </div>
-              {/* Trusted by card */}
-              <div className="absolute bottom-0 left-2 bg-card rounded-xl shadow-lg border border-border/60 px-2.5 py-1.5 flex items-center gap-2 animate-fade-in">
-                <div className="leading-tight">
-                  <p className="text-[9px] text-muted-foreground">{t("Trusted by")}</p>
-                  <p className="text-[11px] font-bold text-foreground">{platformStats.totalClients.toLocaleString()}+ {t("clients")}</p>
-                </div>
-                <div className="flex -space-x-1.5">
-                  {nearbyWorkers.slice(0, 3).map((w, i) => (
-                    <div key={w.id} className="w-5 h-5 rounded-full ring-2 ring-card overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
-                      {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/30" />}
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 dark:bg-white/10 backdrop-blur border border-white/60 text-[11px] font-medium text-foreground">
+              <Sparkles className="w-3 h-3 text-primary" /> {t("Hi")}, {firstName}
             </div>
-          </div>
-
-          {/* SEARCH BAR - full width */}
-          <div className="relative mt-5 w-full bg-card rounded-full border border-border/70 shadow-sm p-1.5 flex items-center gap-1">
-            <div className="relative flex-[2] min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("What service do you need?")} className="pl-9 h-10 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
+              {t("Find Trusted Fundis,")} <span className="text-primary">{t("Get Things Done")}</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground -mt-1">
+              {t("Connect with verified professionals near you.")}
+            </p>
+            <div className="w-full bg-card rounded-full border border-border/70 shadow-sm p-1.5 flex items-center gap-1 mt-1">
+              <div className="relative flex-[2] min-w-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("What service do you need?")} className="pl-9 h-9 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+              </div>
+              <div className="hidden sm:block w-px h-5 bg-border" />
+              <div className="relative flex-1 min-w-0 hidden sm:block">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary" />
+                <Input placeholder="Nairobi, Kenya" className="pl-9 h-9 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+              </div>
+              <Button className="h-9 px-5 rounded-full shrink-0 text-sm">
+                <Search className="w-3.5 h-3.5 mr-1" /> {t("Search")}
+              </Button>
             </div>
-            <div className="hidden sm:block w-px h-6 bg-border" />
-            <div className="relative flex-1 min-w-0 hidden sm:block">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-              <Input placeholder="Nairobi, Kenya" className="pl-9 h-10 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+            <div className="flex items-center gap-2 pt-0.5">
+              <div className="flex -space-x-2">
+                {nearbyWorkers.slice(0, 4).map((w, i) => (
+                  <div key={w.id} className="w-5 h-5 rounded-full ring-2 ring-background overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
+                    {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/20" />}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground"><span className="font-semibold text-foreground">{nearbyWorkers.length}+ {t("clients")}</span> {t("trust FundiPlug")}</p>
             </div>
-            <Button className="h-10 px-6 rounded-full shrink-0 text-sm font-semibold">
-              {t("Search")}
-            </Button>
           </div>
         </section>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
-          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4 sm:w-5 sm:h-5" /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform"><FileText className="w-5 h-5" /></div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Post a Job")}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Describe the job - get quotes")}</p>
+                <p className="font-semibold text-foreground">{t("Post a Job")}</p>
+                <p className="text-xs text-muted-foreground">{t("Describe the job - get quotes")}</p>
               </div>
-              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </button>
-          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><UserCheck className="w-4 h-4 sm:w-5 sm:h-5" /></div>
+          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform"><UserCheck className="w-5 h-5" /></div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Hire Directly")}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Pick a fundi yourself")}</p>
+                <p className="font-semibold text-foreground">{t("Hire Directly")}</p>
+                <p className="text-xs text-muted-foreground">{t("Pick a fundi yourself")}</p>
               </div>
-              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
             </div>
           </button>
         </div>
@@ -714,23 +621,14 @@ export default function CustomerDashboard() {
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-card p-5">
-          <div className="flex items-center justify-between mb-4 gap-2">
+          <div className="flex items-center justify-between mb-4">
             <p className="text-sm font-semibold text-foreground">{t("Bookings Overview")}</p>
-            <Select value={bookingDuration} onValueChange={(v) => setBookingDuration(v as any)}>
-              <SelectTrigger className="h-7 w-[110px] text-[11px] rounded-md bg-muted border-0 focus:ring-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">{t("This Week")}</SelectItem>
-                <SelectItem value="month">{t("This Month")}</SelectItem>
-                <SelectItem value="year">{t("This Year")}</SelectItem>
-              </SelectContent>
-            </Select>
+            <span className="text-[10px] px-2 py-1 rounded-md bg-muted text-muted-foreground font-medium">{t("This Month")}</span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{bookingCounts.completed}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-sky-600">{bookingCounts.ongoing}</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-amber-600">{bookingCounts.upcoming}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{stats.bookings}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-sky-600">0</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
+            <div className="text-center"><p className="text-xl font-bold text-amber-600">{unpaidJobs.length}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
           </div>
         </div>
 
