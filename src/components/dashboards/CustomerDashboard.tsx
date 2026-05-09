@@ -542,18 +542,18 @@ export default function CustomerDashboard() {
         </section>
 
         <div className="grid grid-cols-2 gap-2 sm:gap-3 animate-fade-in">
-          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-2.5 sm:p-3 text-left hover:shadow-md hover:border-primary/40 transition-all">
+          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-xl border border-primary/30 bg-primary/10 p-2.5 sm:p-3 text-left hover:shadow-md hover:bg-primary/15 hover:border-primary/50 transition-all">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4" /></div>
+              <div className="w-9 h-9 rounded-xl bg-primary/25 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4" /></div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{t("Post a Job")}</p>
                 <p className="text-[10px] text-muted-foreground truncate">{t("Get quotes")}</p>
               </div>
             </div>
           </button>
-          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-2.5 sm:p-3 text-left hover:shadow-md hover:border-emerald-500/40 transition-all">
+          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 sm:p-3 text-left hover:shadow-md hover:bg-emerald-500/15 hover:border-emerald-500/50 transition-all">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><UserCheck className="w-4 h-4" /></div>
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/25 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><UserCheck className="w-4 h-4" /></div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{t("Hire Directly")}</p>
                 <p className="text-[10px] text-muted-foreground truncate">{t("Pick a fundi")}</p>
@@ -616,7 +616,7 @@ export default function CustomerDashboard() {
                 {paginatedWorkers.map((worker) => {
                   const dist = getWorkerDistance(worker);
                   return (
-                    <div key={worker.id} className="group relative rounded-2xl border border-border/60 bg-card overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-0.5 hover:border-primary/30 transition-all" onClick={() => openWorkerProfile(worker)}>
+                    <div key={worker.id} className="group relative rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 via-card to-card shadow-sm overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-0.5 hover:border-primary/30 transition-all" onClick={() => openWorkerProfile(worker)}>
                       <div className="p-4">
                         <div className="flex items-start gap-3">
                           <div className="relative shrink-0">
