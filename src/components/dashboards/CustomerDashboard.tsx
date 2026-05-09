@@ -541,38 +541,46 @@ export default function CustomerDashboard() {
           </div>
         </section>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
-          <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-primary/40 transition-all">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4 sm:w-5 sm:h-5" /></div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Post a Job")}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Describe the job - get quotes")}</p>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 animate-fade-in">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <button onClick={() => navigate("/dashboard/post-job")} className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-2.5 sm:p-3 text-left hover:shadow-md hover:border-primary/40 transition-all">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><FileText className="w-4 h-4" /></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{t("Post a Job")}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{t("Get quotes")}</p>
+                </div>
               </div>
-              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-            </div>
-          </button>
-          <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-3 sm:p-5 text-left hover:shadow-lg hover:border-emerald-500/40 transition-all">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><UserCheck className="w-4 h-4 sm:w-5 sm:h-5" /></div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm sm:text-base font-semibold text-foreground truncate">{t("Hire Directly")}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{t("Pick a fundi yourself")}</p>
+            </button>
+            <button onClick={() => navigate("/dashboard/find-workers")} className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-2.5 sm:p-3 text-left hover:shadow-md hover:border-emerald-500/40 transition-all">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><UserCheck className="w-4 h-4" /></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{t("Hire Directly")}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{t("Pick a fundi")}</p>
+                </div>
               </div>
-              <ArrowRight className="hidden sm:block w-5 h-5 text-muted-foreground group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+            </button>
+          </div>
+          <button onClick={() => setShowMap(!showMap)} className="group relative overflow-hidden rounded-xl border border-border/70 bg-card p-2.5 sm:p-3 text-left hover:shadow-md hover:border-blue-500/40 transition-all">
+            <div className="flex items-center gap-2 sm:gap-3 h-full">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-500/15 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0"><MapPin className="w-4 h-4 sm:w-5 sm:h-5" /></div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{t("Fundi Map")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{showMap ? t("Hide nearby map") : t("View nearby fundis")}</p>
+              </div>
+              <ArrowRight className="hidden sm:block w-4 h-4 text-muted-foreground group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
             </div>
           </button>
         </div>
 
-        <section className="rounded-2xl border border-border/70 bg-card p-5 sm:p-6 animate-fade-in">
-          <CategoriesScroller
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelect={(id) => setSelectedCategory(selectedCategory === id ? "all" : id)}
-            onClear={() => setSelectedCategory("all")}
-            t={t}
-          />
-        </section>
+        <CategoriesScroller
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelect={(id) => setSelectedCategory(selectedCategory === id ? "all" : id)}
+          onClear={() => setSelectedCategory("all")}
+          t={t}
+        />
 
         {showMap && customerPos && onlineFundis.length > 0 && (
           <div className="rounded-2xl border border-border/70 bg-card p-5 animate-fade-in">
