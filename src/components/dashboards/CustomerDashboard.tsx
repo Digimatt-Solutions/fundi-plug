@@ -600,7 +600,14 @@ export default function CustomerDashboard() {
               <h2 className="text-lg font-semibold text-foreground">{t("Available Fundis")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{filteredWorkers.length} {t("professionals ready to help")}</p>
             </div>
-            <button onClick={() => navigate("/dashboard/find-workers")} className="text-xs font-medium text-primary hover:underline">{t("See all")}</button>
+            <div className="flex items-center gap-3">
+              <button onClick={() => navigate("/dashboard/find-workers")} className="text-xs font-medium text-primary hover:underline">{t("See all")}</button>
+              {onlineFundis.length > 0 && (
+                <Button variant="outline" size="sm" className="gap-1.5 rounded-full" onClick={() => setShowMap(!showMap)}>
+                  <MapPin className="w-3.5 h-3.5" /> {showMap ? t("Hide Map") : t("Map")}
+                </Button>
+              )}
+            </div>
           </div>
 
           {paginatedWorkers.length > 0 ? (
