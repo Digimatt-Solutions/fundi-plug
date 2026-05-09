@@ -429,7 +429,7 @@ export default function CustomerDashboard() {
   const trendingCats = categories.slice().sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, 7);
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr_290px] gap-5">
+    <div className="space-y-5">
       {/* MAIN COLUMN */}
       <div className="space-y-6 min-w-0">
 
@@ -682,94 +682,6 @@ export default function CustomerDashboard() {
 
         <LatestPostsWidget />
       </div>
-
-      {/* RIGHT SIDEBAR */}
-      <aside className="space-y-5 xl:sticky xl:top-4 xl:self-start xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto pr-1">
-        {/* Spending Overview - replaces Wallet */}
-        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-br from-violet-50 via-card to-card dark:from-violet-950/30 dark:via-card dark:to-card p-4">
-          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-violet-400/20 blur-2xl" />
-          <div className="relative flex items-start justify-between">
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Wallet className="w-3.5 h-3.5" /> {t("Total Spending")}</div>
-              <p className="text-2xl font-bold text-foreground mt-1 truncate">KSH {stats.spent.toLocaleString()}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{t("Across")} {stats.bookings} {t("bookings")}</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 shadow-lg flex items-center justify-center shrink-0">
-              <TrendingUp className="w-5 h-5 text-white" />
-            </div>
-          </div>
-          <div className="relative grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-border/60">
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Avg / Booking")}</p>
-              <p className="text-sm font-semibold text-foreground">KSH {stats.bookings > 0 ? Math.round(stats.spent / stats.bookings).toLocaleString() : 0}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("Your Rating")}</p>
-              <p className="text-sm font-semibold text-foreground flex items-center gap-1"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> {stats.avgRating > 0 ? stats.avgRating : "-"}</p>
-            </div>
-          </div>
-          <button onClick={() => navigate("/dashboard/payments")} className="relative mt-3 text-[11px] font-medium text-primary hover:underline inline-flex items-center gap-1">
-            {t("View transactions")} <ArrowRight className="w-3 h-3" />
-          </button>
-        </div>
-
-        <div className="rounded-2xl border border-border/70 bg-card p-5">
-          <div className="flex items-center justify-between mb-4 gap-2">
-            <p className="text-sm font-semibold text-foreground">{t("Bookings Overview")}</p>
-            <Select value={bookingDuration} onValueChange={(v) => setBookingDuration(v as any)}>
-              <SelectTrigger className="h-7 w-[110px] text-[11px] rounded-md bg-muted border-0 focus:ring-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">{t("This Week")}</SelectItem>
-                <SelectItem value="month">{t("This Month")}</SelectItem>
-                <SelectItem value="year">{t("This Year")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="text-center"><p className="text-xl font-bold text-emerald-600">{bookingCounts.completed}</p><p className="text-[10px] text-muted-foreground">{t("Completed")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-sky-600">{bookingCounts.ongoing}</p><p className="text-[10px] text-muted-foreground">{t("Ongoing")}</p></div>
-            <div className="text-center"><p className="text-xl font-bold text-amber-600">{bookingCounts.upcoming}</p><p className="text-[10px] text-muted-foreground">{t("Upcoming")}</p></div>
-          </div>
-        </div>
-
-        {customerPos && (
-          <div className="rounded-2xl border border-border/70 bg-card p-4">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-semibold text-foreground">{t("Your Location")}</p>
-              <button onClick={() => setShowMap(true)} className="text-xs font-medium text-primary hover:underline">{t("View on map")}</button>
-            </div>
-            <div className="h-32 rounded-xl overflow-hidden border border-border">
-              <MapContainer center={[customerPos.lat, customerPos.lng]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={false} dragging={false} zoomControl={false} attributionControl={false}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:14px;height:14px;border-radius:50%;background:hsl(22 93% 49%);border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })} />
-              </MapContainer>
-            </div>
-          </div>
-        )}
-
-        <div className="rounded-2xl border border-border/70 bg-card p-5">
-          <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5"><Activity className="w-4 h-4 text-primary" /> {t("Recent Activity")}</p>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0"><Heart className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("You booked a fundi")}</p><p className="text-[10px] text-muted-foreground">{t("Today")}</p></div>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 font-medium">{t("Completed")}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"><CreditCard className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Total spent")}</p><p className="text-[10px] text-muted-foreground">{t("All time")}</p></div>
-              <span className="text-[10px] font-semibold text-foreground">KSH {stats.spent.toLocaleString()}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0"><Star className="w-4 h-4" /></div>
-              <div className="flex-1 min-w-0"><p className="text-xs font-medium text-foreground">{t("Avg rating given")}</p><p className="text-[10px] text-muted-foreground">{t("From your reviews")}</p></div>
-              <span className="text-[10px] font-semibold text-foreground">{stats.avgRating > 0 ? stats.avgRating : "N/A"}</span>
-            </div>
-          </div>
-        </div>
-      </aside>
 
       {/* Worker Profile Dialog */}
       <Dialog open={!!selectedWorker && !hireDialog} onOpenChange={(open) => !open && setSelectedWorker(null)}>

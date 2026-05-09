@@ -1,5 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
+import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
@@ -64,7 +66,8 @@ export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { t } = useLanguage();
   const [disabledModules, setDisabledModules] = useState<Set<string>>(new Set());
   const [unreadChats, setUnreadChats] = useState(0);
@@ -143,19 +146,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border gap-2">
-        {!collapsed && user?.role === "customer" && (
-          <a
-            href="/auth?role=worker"
-            className="mx-2 mb-1 block rounded-xl bg-gradient-to-br from-primary/10 via-amber-100/40 to-rose-100/40 dark:from-primary/15 dark:via-amber-500/10 dark:to-rose-500/10 border border-primary/20 p-3 hover:shadow-md hover:border-primary/40 transition-all"
-          >
-            <p className="text-[13px] font-semibold text-foreground">{t("Become a Fundi")}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{t("Join our network of verified professionals.")}</p>
-            <span className="mt-2 inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-[11px] font-medium px-3 py-1">
-              {t("Join Now")}
-            </span>
-          </a>
-        )}
+      <SidebarFooter className="border-t border-sidebar-border gap-1 p-2">
+        <button
+          onClick={async () => { await logout(); navigate("/auth"); }}
+          className={`flex items-center gap-2 rounded-lg border border-sidebar-border px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40 transition-colors ${collapsed ? "justify-center" : ""}`}
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          {!collapsed && <span>{t("Logout")}</span>}
+        </button>
         <button onClick={toggleSidebar} className="flex items-center gap-2 px-3 py-2 text-sm text-sidebar-foreground hover:text-primary transition-colors">
           <ChevronLeft className={`w-4 h-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
           {!collapsed && <span>{t("Collapse")}</span>}
