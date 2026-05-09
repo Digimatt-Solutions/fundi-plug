@@ -66,7 +66,8 @@ export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { t } = useLanguage();
   const [disabledModules, setDisabledModules] = useState<Set<string>>(new Set());
   const [unreadChats, setUnreadChats] = useState(0);
