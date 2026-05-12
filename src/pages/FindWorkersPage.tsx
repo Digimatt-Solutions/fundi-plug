@@ -163,6 +163,16 @@ export default function FindWorkersPage() {
     if (hirePhone && hirePhone !== user.phone) {
       await supabase.from("profiles").update({ phone: hirePhone }).eq("id", user.id);
     }
+    let imageUrl: string | null = null;
+    if (hireImage) {
+      const ext = hireImage.name.split(".").pop();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("job-images").upload(path, hireImage);
+      if (!upErr) {
+        const { data } = supabase.storage.from("job-images").getPublicUrl(path);
+        imageUrl = data.publicUrl;
+      }
+    }
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
       description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
@@ -173,6 +183,7 @@ export default function FindWorkersPage() {
       worker_id: hireDialog.user_id,
       status: "pending",
       is_instant: true,
+      image_url: imageUrl,
     }).select().single();
     if (error) {
       toast({ title: t("Failed to hire"), description: friendlyError(error), variant: "destructive" });
@@ -186,6 +197,8 @@ export default function FindWorkersPage() {
     toast({ title: t("Hire request sent!"), description: `${hireDialog.name} ${t("will be notified to accept or reject.")}` });
     setHireDialog(null);
     setSelectedWorker(null);
+    setHireImage(null);
+    setHireImagePreview(null);
     setHiring(false);
     navigate("/dashboard/bookings");
   };
