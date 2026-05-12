@@ -14,6 +14,8 @@ interface Props {
   prefix?: string;
   /** Default front-facing for selfies, rear for documents */
   facing?: "user" | "environment";
+  /** Allow choosing from device files in addition to live capture */
+  allowUpload?: boolean;
 }
 
 /**
@@ -21,7 +23,7 @@ interface Props {
  * Used for selfie-with-ID and profile photo to prevent reusing old images.
  */
 export default function CameraCapture({
-  bucket, userId, value, onChange, label, helper, prefix, facing = "user",
+  bucket, userId, value, onChange, label, helper, prefix, facing = "user", allowUpload = false,
 }: Props) {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
