@@ -106,7 +106,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2 mb-6"><Wrench className="w-5 h-5 text-primary" /><h3 className="text-lg font-semibold text-foreground">Service Categories</h3></div>
           {categoryData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
-              <PieChart><Pie data={categoryData} cx="50%" cy="45%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">{categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Legend iconType="circle" wrapperStyle={{ fontSize: "12px" }} /><Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "hsl(220, 14%, 90%)" }} /></PieChart>
+              <PieChart><Pie data={categoryData} cx="50%" cy="45%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">{categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Legend iconType="circle" wrapperStyle={{ fontSize: "12px" }} /><Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "#ffffff" }} labelStyle={{ color: "#ffffff" }} itemStyle={{ color: "#ffffff" }} /></PieChart>
             </ResponsiveContainer>
           ) : <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">No category data yet</div>}
         </div>
