@@ -124,6 +124,33 @@ export default function CameraCapture({
     setOpen(false);
   };
 
+  const handleUpload = async (file: File | null) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${userId}/${prefix ? prefix + "/" : ""}upload-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        upsert: true, contentType: file.type || "image/jpeg",
+      });
+      if (error) throw error;
+      let url: string;
+      if (bucket === "verification-docs") {
+        const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365);
+        url = data?.signedUrl || path;
+      } else {
+        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+        url = data.publicUrl;
+      }
+      onChange(url);
+      toast({ title: "Photo uploaded" });
+    } catch (e: any) {
+      toast({ title: "Could not upload photo", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-foreground">{label}</p>
