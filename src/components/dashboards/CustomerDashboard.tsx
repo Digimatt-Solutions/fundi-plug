@@ -134,6 +134,20 @@ export default function CustomerDashboard() {
     setHireAddress("");
     setHirePhone(user?.phone || "");
     setHireCategoryId("");
+    setHireImage(null);
+    setHireImagePreview(null);
+  };
+
+  const handleHireImageSelect = (file: File | null) => {
+    if (!file) { setHireImage(null); setHireImagePreview(null); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 5MB allowed", variant: "destructive" });
+      return;
+    }
+    setHireImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setHireImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const hireWorker = async () => {
@@ -145,6 +159,16 @@ export default function CustomerDashboard() {
     if (hirePhone && hirePhone !== user.phone) {
       await supabase.from("profiles").update({ phone: hirePhone }).eq("id", user.id);
     }
+    let imageUrl: string | null = null;
+    if (hireImage) {
+      const ext = hireImage.name.split(".").pop();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("job-images").upload(path, hireImage);
+      if (!upErr) {
+        const { data } = supabase.storage.from("job-images").getPublicUrl(path);
+        imageUrl = data.publicUrl;
+      }
+    }
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
       description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
@@ -155,6 +179,7 @@ export default function CustomerDashboard() {
       worker_id: hireDialog.user_id,
       status: "pending",
       is_instant: true,
+      image_url: imageUrl,
     }).select().single();
     if (error) {
       toast({ title: "Failed to hire", description: friendlyError(error), variant: "destructive" });
