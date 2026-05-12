@@ -340,17 +340,17 @@ export default function WorkerMyJobsPage() {
                     <p className="text-xs text-muted-foreground">KSH {job.budget ? job.budget.toLocaleString() : "No budget"} - {new Date(job.created_at).toLocaleString()}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                      job.status === "completed" ? "bg-green-500/10 text-green-500" :
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                      job.status === "completed" ? "bg-green-500/10 text-green-600" :
                       job.status === "in_progress" ? "bg-primary/10 text-primary" : "bg-chart-4/10 text-chart-4"
-                    }`}>{job.status.replace("_", " ")}</span>
+                    }`}>{job.status === "completed" ? "Job Completed" : job.status === "in_progress" ? "In Progress" : job.status.replace("_", " ")}</span>
                     {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")}>Start</Button>}
                     {job.status === "in_progress" && <Button size="sm" onClick={() => updateJobStatus(job.id, "completed")}>Complete</Button>}
                     {job.status === "completed" && job.paymentStatus && (
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
-                        job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        job.paymentStatus === "completed" ? "bg-green-500/10 text-green-600" :
                         job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
-                      }`}>💰 {job.paymentStatus}</span>
+                      }`}>💰 {job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
                     )}
                     {job.status === "completed" && !job.paymentStatus && (
                       <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
