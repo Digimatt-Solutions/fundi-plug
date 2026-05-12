@@ -279,7 +279,7 @@ const Auth = () => {
                   <Label htmlFor="name" className="text-foreground font-medium">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" className="pl-10 h-12 bg-muted/50 border-border" required />
+                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" className="pl-10 h-12 bg-muted/50 border-2 border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
                   </div>
                 </div>
               )}
@@ -289,7 +289,7 @@ const Auth = () => {
                   <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border-border" required />
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border-2 border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
                   </div>
                 </div>
               )}
@@ -310,7 +310,7 @@ const Auth = () => {
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 pr-10 h-12 bg-muted/50 border-border" required />
+                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 pr-10 h-12 bg-muted/50 border-2 border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -336,7 +336,7 @@ const Auth = () => {
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="2547XXXXXXXX"
-                        className="pl-10 h-12 bg-muted/50 border-border"
+                        className="pl-10 h-12 bg-muted/50 border-2 border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20"
                         disabled={otpVerified}
                         required
                       />
@@ -367,7 +367,7 @@ const Auth = () => {
                           value={otpCode}
                           onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                           placeholder="Enter 6-digit code"
-                          className="h-12 bg-muted/50 border-border text-center tracking-widest text-lg"
+                          className="h-12 bg-muted/50 border-2 border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20 text-center tracking-widest text-lg"
                           maxLength={6}
                         />
                       </div>
@@ -396,7 +396,7 @@ const Auth = () => {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="At least 6 characters"
-                      className="pl-10 pr-10 h-12 bg-muted/50 border-border"
+                      className="pl-10 pr-10 h-12 bg-muted/50 border-2 border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20"
                       minLength={6}
                       required
                     />
