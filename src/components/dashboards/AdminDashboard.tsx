@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Briefcase, CreditCard, Wrench, TrendingUp, CheckCircle, DollarSign } from "lucide-react";
+import { Users, Briefcase, CreditCard, Wrench, TrendingUp, CheckCircle, Coins } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import LatestPostsWidget from "@/components/community/LatestPostsWidget";
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
       { label: "Active Fundis", value: workersRes.count ?? 0, icon: Wrench, color: "text-chart-2", bg: "bg-chart-2/10" },
       { label: "Jobs Completed", value: jobsRes.count ?? 0, icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
       { label: "Revenue", value: `KSH ${revenue.toLocaleString()}`, icon: CreditCard, color: "text-chart-4", bg: "bg-chart-4/10" },
-      { label: "Commission", value: `KSH ${commission.toLocaleString()}`, icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },
+      { label: "Commission", value: `KSH ${commission.toLocaleString()}`, icon: Coins, color: "text-green-500", bg: "bg-green-500/10" },
       { label: "Pending Verifications", value: pendingRes.count ?? 0, icon: TrendingUp, color: "text-chart-5", bg: "bg-chart-5/10" },
     ]);
     const cats = categoriesRes.data || [];
@@ -95,8 +95,8 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={weeklyData}>
                 <defs><linearGradient id="jobGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(22, 93%, 49%)" stopOpacity={0.3} /><stop offset="95%" stopColor="hsl(22, 93%, 49%)" stopOpacity={0} /></linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 20%)" /><XAxis dataKey="day" stroke="hsl(220, 10%, 46%)" fontSize={12} /><YAxis stroke="hsl(220, 10%, 46%)" fontSize={12} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "hsl(220, 14%, 90%)" }} />
+                <XAxis dataKey="day" stroke="hsl(220, 10%, 46%)" fontSize={12} axisLine={false} tickLine={false} /><YAxis stroke="hsl(220, 10%, 46%)" fontSize={12} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "#ffffff" }} labelStyle={{ color: "#ffffff" }} itemStyle={{ color: "#ffffff" }} />
                 <Area type="monotone" dataKey="jobs" stroke="hsl(22, 93%, 49%)" fill="url(#jobGrad)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2 mb-6"><Wrench className="w-5 h-5 text-primary" /><h3 className="text-lg font-semibold text-foreground">Service Categories</h3></div>
           {categoryData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
-              <PieChart><Pie data={categoryData} cx="50%" cy="45%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">{categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Legend iconType="circle" wrapperStyle={{ fontSize: "12px" }} /><Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "hsl(220, 14%, 90%)" }} /></PieChart>
+              <PieChart><Pie data={categoryData} cx="50%" cy="45%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">{categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Legend iconType="circle" wrapperStyle={{ fontSize: "12px" }} /><Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "#ffffff" }} labelStyle={{ color: "#ffffff" }} itemStyle={{ color: "#ffffff" }} /></PieChart>
             </ResponsiveContainer>
           ) : <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">No category data yet</div>}
         </div>

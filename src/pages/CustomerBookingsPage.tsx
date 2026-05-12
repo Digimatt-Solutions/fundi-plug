@@ -204,16 +204,16 @@ export default function CustomerBookingsPage() {
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-foreground truncate">{job.title}</h3>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
-                        job.status === "completed" ? "bg-green-500/10 text-green-500" :
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        job.status === "completed" ? "bg-green-500/10 text-green-600" :
                         job.status === "in_progress" ? "bg-primary/10 text-primary" :
                         "bg-chart-4/10 text-chart-4"
-                      }`}>{job.status.replace("_", " ")}</span>
+                      }`}>{job.status === "completed" ? "Job Completed" : job.status === "in_progress" ? "In Progress" : job.status.replace("_", " ")}</span>
                       {job.paymentStatus && (
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
-                          job.paymentStatus === "completed" ? "bg-green-500/10 text-green-500" :
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          job.paymentStatus === "completed" ? "bg-green-500/10 text-green-600" :
                           job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
-                        }`}>💰 {job.paymentStatus}</span>
+                        }`}>💰 {job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">

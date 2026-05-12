@@ -14,6 +14,8 @@ interface Props {
   prefix?: string;
   /** Default front-facing for selfies, rear for documents */
   facing?: "user" | "environment";
+  /** Allow choosing from device files in addition to live capture */
+  allowUpload?: boolean;
 }
 
 /**
@@ -21,7 +23,7 @@ interface Props {
  * Used for selfie-with-ID and profile photo to prevent reusing old images.
  */
 export default function CameraCapture({
-  bucket, userId, value, onChange, label, helper, prefix, facing = "user",
+  bucket, userId, value, onChange, label, helper, prefix, facing = "user", allowUpload = false,
 }: Props) {
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -122,6 +124,33 @@ export default function CameraCapture({
     setOpen(false);
   };
 
+  const handleUpload = async (file: File | null) => {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${userId}/${prefix ? prefix + "/" : ""}upload-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from(bucket).upload(path, file, {
+        upsert: true, contentType: file.type || "image/jpeg",
+      });
+      if (error) throw error;
+      let url: string;
+      if (bucket === "verification-docs") {
+        const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365);
+        url = data?.signedUrl || path;
+      } else {
+        const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+        url = data.publicUrl;
+      }
+      onChange(url);
+      toast({ title: "Photo uploaded" });
+    } catch (e: any) {
+      toast({ title: "Could not upload photo", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-foreground">{label}</p>
@@ -137,11 +166,17 @@ export default function CameraCapture({
           <p className="text-xs text-muted-foreground">
             {value ? "Live photo captured" : helper || "Live camera photo only - no gallery uploads"}
           </p>
-          <div className="flex gap-2 mt-1.5">
+          <div className="flex gap-2 mt-1.5 flex-wrap">
             <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} disabled={busy}>
               <Camera className="w-3.5 h-3.5 mr-1" />
-              {value ? "Retake" : "Open camera"}
+              {value ? "Retake" : "Take photo"}
             </Button>
+            {allowUpload && (
+              <label className="inline-flex items-center text-xs px-3 h-9 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                <input type="file" accept="image/*" className="sr-only" disabled={busy} onChange={(e) => handleUpload(e.target.files?.[0] || null)} />
+                {value ? "Replace from file" : "Upload photo"}
+              </label>
+            )}
             {value && (
               <Button type="button" size="sm" variant="ghost" onClick={() => onChange(null)} disabled={busy}>
                 <X className="w-3.5 h-3.5 mr-1" /> Remove

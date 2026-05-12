@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock, Headphones, Users } from "lucide-react";
+import { Search, MapPin, Star, Zap, CalendarDays, CreditCard, Briefcase, Navigation, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, X, FileText, UserCheck, CheckCircle, Phone, Mail, Lock, ShieldCheck, Sparkles, ArrowRight, TrendingUp, Heart, Wallet, Eye, Plus, Gift, Activity, Clock, Headphones, Users, ImagePlus } from "lucide-react";
 import heroFundi from "@/assets/hero-fundi.png";
 import { Button } from "@/components/ui/button";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -74,6 +74,8 @@ export default function CustomerDashboard() {
   const [hireAddress, setHireAddress] = useState("");
   const [hirePhone, setHirePhone] = useState("");
   const [hireCategoryId, setHireCategoryId] = useState("");
+  const [hireImage, setHireImage] = useState<File | null>(null);
+  const [hireImagePreview, setHireImagePreview] = useState<string | null>(null);
   const [hiring, setHiring] = useState(false);
 
   // Worker profile dialog
@@ -132,6 +134,20 @@ export default function CustomerDashboard() {
     setHireAddress("");
     setHirePhone(user?.phone || "");
     setHireCategoryId("");
+    setHireImage(null);
+    setHireImagePreview(null);
+  };
+
+  const handleHireImageSelect = (file: File | null) => {
+    if (!file) { setHireImage(null); setHireImagePreview(null); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 5MB allowed", variant: "destructive" });
+      return;
+    }
+    setHireImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setHireImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const hireWorker = async () => {
@@ -143,6 +159,16 @@ export default function CustomerDashboard() {
     if (hirePhone && hirePhone !== user.phone) {
       await supabase.from("profiles").update({ phone: hirePhone }).eq("id", user.id);
     }
+    let imageUrl: string | null = null;
+    if (hireImage) {
+      const ext = hireImage.name.split(".").pop();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("job-images").upload(path, hireImage);
+      if (!upErr) {
+        const { data } = supabase.storage.from("job-images").getPublicUrl(path);
+        imageUrl = data.publicUrl;
+      }
+    }
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
       description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
@@ -153,6 +179,7 @@ export default function CustomerDashboard() {
       worker_id: hireDialog.user_id,
       status: "pending",
       is_instant: true,
+      image_url: imageUrl,
     }).select().single();
     if (error) {
       toast({ title: "Failed to hire", description: friendlyError(error), variant: "destructive" });
@@ -829,6 +856,18 @@ export default function CustomerDashboard() {
             </div>
             <div className="space-y-2"><Label>{t("Address / Location")}</Label><Input value={hireAddress} onChange={(e) => setHireAddress(e.target.value)} placeholder="123 Main St" className="bg-muted/50" /></div>
             <div className="space-y-2"><Label>{t("Your Phone Number")}</Label><Input value={hirePhone} onChange={(e) => setHirePhone(e.target.value)} placeholder="0712345678" className="bg-muted/50" /></div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><ImagePlus className="w-4 h-4" /> {t("Job Image (optional)")}</Label>
+              {hireImagePreview && (
+                <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted">
+                  <img src={hireImagePreview} alt="Job" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => handleHireImageSelect(null)} className="absolute top-1 right-1 bg-background/80 rounded-full p-1 text-destructive hover:bg-background">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              <Input type="file" accept="image/*" onChange={(e) => handleHireImageSelect(e.target.files?.[0] || null)} className="bg-muted/50" />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setHireDialog(null)}>{t("Cancel")}</Button>

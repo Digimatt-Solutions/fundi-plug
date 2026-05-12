@@ -153,9 +153,13 @@ export default function UserManagementPage() {
                 <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
-                        {u.name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
-                      </div>
+                      {u.avatar_url ? (
+                        <img loading="lazy" decoding="async" src={u.avatar_url} alt={u.name} className="w-9 h-9 rounded-full object-cover ring-1 ring-border" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+                          {u.name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
+                        </div>
+                      )}
                       <div>
                         <p className="font-medium text-foreground">{u.name}</p>
                         <p className="text-xs text-muted-foreground">{u.email}</p>

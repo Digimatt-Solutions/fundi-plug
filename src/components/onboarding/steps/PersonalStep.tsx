@@ -24,9 +24,10 @@ export default function PersonalStep({ data, setData, userId }: Props) {
           value={data.profile_photo_url}
           onChange={(url) => setData({ profile_photo_url: url })}
           label="Profile Photo *"
-          helper="Take a clear, live face photo - no gallery"
+          helper="Take a clear face photo or upload one"
           facing="user"
           prefix="profile"
+          allowUpload
         />
         <CameraCapture
           bucket="verification-docs"
