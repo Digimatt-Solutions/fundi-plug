@@ -119,10 +119,11 @@ export function AppSidebar() {
                 const active = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={active} className={`h-10 ${active ? "[&]:text-primary [&]:bg-primary/10" : ""}`}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={t(item.title)} className={`h-10 ${active ? "[&]:text-primary [&]:bg-primary/10" : ""}`}>
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
+                        title={t(item.title)}
                         className={`rounded-lg border transition-all duration-150 text-[13px] font-medium ${
                           active
                             ? "!text-primary bg-primary/10 border-primary/40 shadow-sm"
