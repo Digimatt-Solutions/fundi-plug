@@ -166,11 +166,17 @@ export default function CameraCapture({
           <p className="text-xs text-muted-foreground">
             {value ? "Live photo captured" : helper || "Live camera photo only - no gallery uploads"}
           </p>
-          <div className="flex gap-2 mt-1.5">
+          <div className="flex gap-2 mt-1.5 flex-wrap">
             <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} disabled={busy}>
               <Camera className="w-3.5 h-3.5 mr-1" />
-              {value ? "Retake" : "Open camera"}
+              {value ? "Retake" : "Take photo"}
             </Button>
+            {allowUpload && (
+              <label className="inline-flex items-center text-xs px-3 h-9 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                <input type="file" accept="image/*" className="sr-only" disabled={busy} onChange={(e) => handleUpload(e.target.files?.[0] || null)} />
+                {value ? "Replace from file" : "Upload photo"}
+              </label>
+            )}
             {value && (
               <Button type="button" size="sm" variant="ghost" onClick={() => onChange(null)} disabled={busy}>
                 <X className="w-3.5 h-3.5 mr-1" /> Remove
