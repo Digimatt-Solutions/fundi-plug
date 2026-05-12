@@ -856,6 +856,18 @@ export default function CustomerDashboard() {
             </div>
             <div className="space-y-2"><Label>{t("Address / Location")}</Label><Input value={hireAddress} onChange={(e) => setHireAddress(e.target.value)} placeholder="123 Main St" className="bg-muted/50" /></div>
             <div className="space-y-2"><Label>{t("Your Phone Number")}</Label><Input value={hirePhone} onChange={(e) => setHirePhone(e.target.value)} placeholder="0712345678" className="bg-muted/50" /></div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2"><ImagePlus className="w-4 h-4" /> {t("Job Image (optional)")}</Label>
+              {hireImagePreview && (
+                <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted">
+                  <img src={hireImagePreview} alt="Job" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => handleHireImageSelect(null)} className="absolute top-1 right-1 bg-background/80 rounded-full p-1 text-destructive hover:bg-background">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              <Input type="file" accept="image/*" onChange={(e) => handleHireImageSelect(e.target.files?.[0] || null)} className="bg-muted/50" />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setHireDialog(null)}>{t("Cancel")}</Button>
