@@ -31,7 +31,7 @@ export default function AdminDashboard() {
       { label: "Active Fundis", value: workersRes.count ?? 0, icon: Wrench, color: "text-chart-2", bg: "bg-chart-2/10" },
       { label: "Jobs Completed", value: jobsRes.count ?? 0, icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
       { label: "Revenue", value: `KSH ${revenue.toLocaleString()}`, icon: CreditCard, color: "text-chart-4", bg: "bg-chart-4/10" },
-      { label: "Commission", value: `KSH ${commission.toLocaleString()}`, icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },
+      { label: "Commission", value: `KSH ${commission.toLocaleString()}`, icon: Coins, color: "text-green-500", bg: "bg-green-500/10" },
       { label: "Pending Verifications", value: pendingRes.count ?? 0, icon: TrendingUp, color: "text-chart-5", bg: "bg-chart-5/10" },
     ]);
     const cats = categoriesRes.data || [];
