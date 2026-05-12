@@ -97,9 +97,9 @@ export default function AuthFingerprintButton({ compact = true }: { compact?: bo
         disabled={busy}
         aria-label="Sign in with fingerprint"
         title="Sign in with fingerprint"
-        className={compact ? "h-12 w-12 shrink-0" : "h-12 gap-2"}
+        className={(compact ? "h-12 w-12 shrink-0" : "h-12 gap-2") + " border-2 border-primary/60 hover:bg-primary hover:border-primary group"}
       >
-        <Fingerprint className={`w-5 h-5 ${busy ? "text-primary animate-pulse" : "text-primary"}`} />
+        <Fingerprint className={`w-5 h-5 group-hover:text-white ${busy ? "text-primary animate-pulse" : "text-primary"}`} />
         {!compact && <span>Fingerprint</span>}
       </Button>
       {popup && (

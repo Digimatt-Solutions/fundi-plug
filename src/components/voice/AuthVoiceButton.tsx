@@ -89,12 +89,12 @@ export const AuthVoiceButton = ({ compact = false, autoStart = false, onCompactC
           onClick={onCompactClick ?? handleClick}
           aria-label="Sign in with voice"
           title="Sign in with voice"
-          className="h-12 w-12 shrink-0"
+          className="h-12 w-12 shrink-0 border-2 border-primary/60 hover:bg-primary hover:border-primary group"
         >
           {busy ? (
-            <MicOff className="w-5 h-5 text-primary animate-pulse" />
+            <MicOff className="w-5 h-5 text-primary animate-pulse group-hover:text-white" />
           ) : (
-            <Mic className="w-5 h-5 text-primary" />
+            <Mic className="w-5 h-5 text-primary group-hover:text-white" />
           )}
         </Button>
         {popup && (

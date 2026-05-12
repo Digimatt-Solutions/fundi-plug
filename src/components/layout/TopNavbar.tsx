@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 
 export function TopNavbar() {
   const { user, logout } = useAuth();
@@ -74,13 +75,19 @@ export function TopNavbar() {
         </span>
       </div>
       <div className="flex items-center gap-2">
+        <TooltipProvider delayDuration={150}>
         {/* Language Toggle */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-              <Globe className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                  <Globe className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("Language")}</TooltipContent>
+          </Tooltip>
           <DropdownMenuContent align="end" className="w-36">
             <DropdownMenuItem onClick={() => setLanguage("en")} className={language === "en" ? "bg-primary/10 text-primary" : ""}>
               🇬🇧 English
@@ -91,20 +98,30 @@ export function TopNavbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground hover:text-foreground">
-          {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground hover:text-foreground">
+              {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
-          </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{dark ? t("Light mode") : t("Dark mode")}</TooltipContent>
+        </Tooltip>
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("Notifications")}</TooltipContent>
+          </Tooltip>
           <DropdownMenuContent align="end" className="w-80">
             <div className="flex items-center justify-between px-3 py-2 border-b border-border">
               <span className="font-semibold text-sm">{t("Notifications")}</span>
@@ -140,28 +157,33 @@ export function TopNavbar() {
         </DropdownMenu>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 ml-2 pl-3 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="relative">
-                {avatarUrl ? (
-                  <img loading="lazy" decoding="async" src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
-                ) : (
-                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-                    {initials}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-3 ml-2 pl-3 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
+                  <div className="relative">
+                    {avatarUrl ? (
+                      <img loading="lazy" decoding="async" src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
+                        {initials}
+                      </div>
+                    )}
+                    {isOnline && (
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card" />
+                    )}
                   </div>
-                )}
-                {isOnline && (
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card" />
-                )}
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-foreground leading-none">{user?.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {user?.role === "worker" ? "Fundi" : user?.role === "customer" ? "Client" : user?.role}
-                </p>
-              </div>
-            </button>
-          </DropdownMenuTrigger>
+                  <div className="hidden sm:block text-left">
+                    <p className="text-sm font-medium text-foreground leading-none">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {user?.role === "worker" ? "Fundi" : user?.role === "customer" ? "Client" : user?.role}
+                    </p>
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("Account")}</TooltipContent>
+          </Tooltip>
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-3 py-2 border-b border-border">
               <p className="text-xs text-muted-foreground">{t("Welcome")},</p>
@@ -187,6 +209,7 @@ export function TopNavbar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </TooltipProvider>
       </div>
     </header>
   );
