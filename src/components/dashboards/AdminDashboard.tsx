@@ -95,8 +95,8 @@ export default function AdminDashboard() {
             <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={weeklyData}>
                 <defs><linearGradient id="jobGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(22, 93%, 49%)" stopOpacity={0.3} /><stop offset="95%" stopColor="hsl(22, 93%, 49%)" stopOpacity={0} /></linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 20%)" /><XAxis dataKey="day" stroke="hsl(220, 10%, 46%)" fontSize={12} /><YAxis stroke="hsl(220, 10%, 46%)" fontSize={12} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "hsl(220, 14%, 90%)" }} />
+                <XAxis dataKey="day" stroke="hsl(220, 10%, 46%)" fontSize={12} axisLine={false} tickLine={false} /><YAxis stroke="hsl(220, 10%, 46%)" fontSize={12} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "#ffffff" }} labelStyle={{ color: "#ffffff" }} itemStyle={{ color: "#ffffff" }} />
                 <Area type="monotone" dataKey="jobs" stroke="hsl(22, 93%, 49%)" fill="url(#jobGrad)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
