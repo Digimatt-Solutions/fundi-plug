@@ -53,7 +53,21 @@ export default function FindWorkersPage() {
   const [hireAddress, setHireAddress] = useState("");
   const [hirePhone, setHirePhone] = useState("");
   const [hireCategoryId, setHireCategoryId] = useState("");
+  const [hireImage, setHireImage] = useState<File | null>(null);
+  const [hireImagePreview, setHireImagePreview] = useState<string | null>(null);
   const [hiring, setHiring] = useState(false);
+
+  const handleHireImageSelect = (file: File | null) => {
+    if (!file) { setHireImage(null); setHireImagePreview(null); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: t("Image too large"), description: "Max 5MB allowed", variant: "destructive" });
+      return;
+    }
+    setHireImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setHireImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (navigator.geolocation) {
