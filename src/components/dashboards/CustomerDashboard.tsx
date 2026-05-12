@@ -74,6 +74,8 @@ export default function CustomerDashboard() {
   const [hireAddress, setHireAddress] = useState("");
   const [hirePhone, setHirePhone] = useState("");
   const [hireCategoryId, setHireCategoryId] = useState("");
+  const [hireImage, setHireImage] = useState<File | null>(null);
+  const [hireImagePreview, setHireImagePreview] = useState<string | null>(null);
   const [hiring, setHiring] = useState(false);
 
   // Worker profile dialog
