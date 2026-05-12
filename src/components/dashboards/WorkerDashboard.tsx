@@ -218,10 +218,10 @@ export default function WorkerDashboard() {
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] sm:text-xs uppercase tracking-wide text-muted-foreground font-medium">{stat.label}</p>
-                <p className="text-xl sm:text-2xl font-bold text-foreground mt-1.5 tabular-nums truncate">{stat.value}</p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 truncate">{stat.sub}</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground mt-1.5 tabular-nums break-words leading-tight">{stat.value}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 break-words">{stat.sub}</p>
               </div>
-              <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${stat.iconBg} flex items-center justify-center shrink-0`}>
+              <div className={`hidden sm:flex w-10 h-10 lg:w-11 lg:h-11 rounded-xl ${stat.iconBg} items-center justify-center shrink-0`}>
                 <stat.icon className="w-5 h-5" />
               </div>
             </div>
