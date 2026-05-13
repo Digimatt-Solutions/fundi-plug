@@ -17,5 +17,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-Sitemap: https://fundiplug.ke/sitemap.xml
-Host: https://fundiplug.ke
+Sitemap: https://craft-call-go.lovable.app/sitemap.xml

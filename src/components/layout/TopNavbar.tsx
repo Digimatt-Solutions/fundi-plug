@@ -81,7 +81,7 @@ export function TopNavbar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="icon" aria-label={t("Language")} className="text-muted-foreground hover:text-foreground">
                   <Globe className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -100,7 +100,7 @@ export function TopNavbar() {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" aria-label={dark ? t("Light mode") : t("Dark mode")} onClick={toggleTheme} className="text-muted-foreground hover:text-foreground">
               {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
           </TooltipTrigger>
@@ -110,7 +110,7 @@ export function TopNavbar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="icon" aria-label={`${t("Notifications")}${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`} className="relative text-muted-foreground hover:text-foreground">
                   <Bell className="w-4 h-4" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
@@ -160,7 +160,7 @@ export function TopNavbar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 ml-2 pl-3 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
+                <button aria-label={t("Account")} className="flex items-center gap-3 ml-2 pl-3 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
                   <div className="relative">
                     {avatarUrl ? (
                       <img loading="lazy" decoding="async" src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />

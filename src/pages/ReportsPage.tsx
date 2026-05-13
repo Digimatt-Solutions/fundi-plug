@@ -207,7 +207,7 @@ export default function ReportsPage() {
                 <div className="stat"><div className="stat-value">{payments.length}</div><div className="stat-label">Total Payments</div></div>
               </div>
               <div className="stat-card">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Monthly Revenue, Jobs & Disbursements</h3>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Monthly Revenue, Jobs & Disbursements</h2>
                 {monthlyData.some(d => d.revenue > 0 || d.jobs > 0) ? (
                   <ResponsiveContainer width="100%" height={320}>
                     <BarChart data={monthlyData}>
@@ -225,7 +225,7 @@ export default function ReportsPage() {
               </div>
               {jobStatusData.length > 0 && (
                 <div className="stat-card">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Jobs by Status</h3>
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Jobs by Status</h2>
                   <ResponsiveContainer width="100%" height={280}>
                     <PieChart>
                       <Pie data={jobStatusData} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
@@ -245,7 +245,7 @@ export default function ReportsPage() {
           <PrintableSection title="Fundi Report">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><Users className="w-5 h-5 text-primary" /> Fundi Directory ({workers.length})</h3>
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><Users className="w-5 h-5 text-primary" /> Fundi Directory ({workers.length})</h2>
                 <Button size="sm" variant="outline" onClick={() => exportCSV(workers.map(w => ({
                   Name: w.name, Email: w.email, Phone: w.phone || "", Status: w.wp?.verification_status || "pending",
                   Experience: w.wp?.years_experience || 0, Rate: w.wp?.hourly_rate || "", County: w.wp?.county || "", Gender: w.wp?.gender || "",
@@ -285,7 +285,7 @@ export default function ReportsPage() {
           <PrintableSection title="Client Report">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><Users className="w-5 h-5 text-primary" /> Client Directory ({clients.length})</h3>
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><Users className="w-5 h-5 text-primary" /> Client Directory ({clients.length})</h2>
                 <Button size="sm" variant="outline" onClick={() => exportCSV(clients.map(c => ({
                   Name: c.name, Email: c.email, Phone: c.phone || "", Jobs: c.jobCount, TotalSpent: c.totalSpent, Joined: new Date(c.created_at).toLocaleDateString(),
                 })), "clients_report.csv")} className="gap-1.5"><Download className="w-4 h-4" /> Export CSV</Button>
@@ -321,7 +321,7 @@ export default function ReportsPage() {
           <PrintableSection title="Service Categories Report">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">Service Categories ({categories.length})</h3>
+                <h2 className="text-lg font-semibold text-foreground">Service Categories ({categories.length})</h2>
                 <Button size="sm" variant="outline" onClick={() => exportCSV(categories.map(c => ({
                   Category: c.name, Fundis: c.workerCount, Jobs: c.jobCount, Revenue: c.revenue,
                 })), "categories_report.csv")} className="gap-1.5"><Download className="w-4 h-4" /> Export CSV</Button>
@@ -411,7 +411,7 @@ export default function ReportsPage() {
           <PrintableSection title="Jobs Report">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">All Jobs ({jobs.length})</h3>
+                <h2 className="text-lg font-semibold text-foreground">All Jobs ({jobs.length})</h2>
                 <Button size="sm" variant="outline" onClick={() => exportCSV(jobs.map(j => ({
                   Title: j.title, Category: (j as any).service_categories?.name || "-", Status: j.status, Budget: j.budget || "-",
                   Type: j.is_instant ? "Instant" : "Marketplace", Address: j.address || "", Date: new Date(j.created_at).toLocaleDateString(),
