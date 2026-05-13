@@ -141,7 +141,8 @@ export default function PublicReviewsPage() {
             decoding="async"
             className="w-full rounded-xl border border-border shadow-sm transition-transform group-hover:scale-[1.01]"
           />
-        </a>
+          </a>
+        </section>
 
         <footer className="text-center py-6 text-xs text-muted-foreground">
           Powered by <a href="/" className="text-primary hover:underline">FundiPlug</a> - © Digimatt Solutions 2026
