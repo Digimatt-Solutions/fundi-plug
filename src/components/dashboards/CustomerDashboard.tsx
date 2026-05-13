@@ -513,7 +513,7 @@ export default function CustomerDashboard() {
               <div className="absolute inset-0 flex justify-center items-end">
                 <div className="relative w-[150px] h-[140px]">
                   <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl" />
-                  <img src={heroFundi} alt="Fundi" className="relative w-full h-full object-contain object-bottom" />
+                  <img src={heroFundi} alt="Verified Kenyan fundi ready for hire" className="relative w-full h-full object-contain object-bottom" />
                 </div>
               </div>
               {/* Avg Rating */}
@@ -599,9 +599,9 @@ export default function CustomerDashboard() {
 
         {showMap && customerPos && onlineFundis.length > 0 && (
           <div className="rounded-2xl border border-border/70 bg-card p-5 animate-fade-in">
-            <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+            <h2 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" /> {t("Online Fundis Map")}
-            </h3>
+            </h2>
             <div className="w-full h-80 rounded-xl overflow-hidden border border-border">
               <MapContainer center={[customerPos.lat, customerPos.lng]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={true}>
                 <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -686,11 +686,11 @@ export default function CustomerDashboard() {
 
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-6">
-                  <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
+                  <Button aria-label="Previous page" variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft className="w-4 h-4" /></Button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <Button key={page} variant={page === currentPage ? "default" : "outline"} size="sm" className="w-9" onClick={() => setCurrentPage(page)}>{page}</Button>
+                    <Button key={page} aria-label={`Go to page ${page}`} aria-current={page === currentPage ? "page" : undefined} variant={page === currentPage ? "default" : "outline"} size="sm" className="w-9" onClick={() => setCurrentPage(page)}>{page}</Button>
                   ))}
-                  <Button variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
+                  <Button aria-label="Next page" variant="outline" size="sm" disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight className="w-4 h-4" /></Button>
                 </div>
               )}
             </>

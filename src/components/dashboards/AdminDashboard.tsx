@@ -72,7 +72,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-foreground">Dashboard</h1><p className="text-muted-foreground text-sm">FundiPlug platform overview</p></div>
+        <div><h1 className="text-2xl font-bold text-foreground">Admin Dashboard - FundiPlug Overview</h1><p className="text-muted-foreground text-sm">FundiPlug platform overview</p></div>
         <p className="text-sm text-muted-foreground hidden md:block">{today}</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="stat-card animate-fade-in" style={{ animationDelay: "500ms" }}>
-          <div className="flex items-center gap-2 mb-6"><TrendingUp className="w-5 h-5 text-primary" /><h3 className="text-lg font-semibold text-foreground">Weekly Job Activity</h3></div>
+          <div className="flex items-center gap-2 mb-6"><TrendingUp className="w-5 h-5 text-primary" /><h2 className="text-lg font-semibold text-foreground">Weekly Job Activity</h2></div>
           {weeklyData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={weeklyData}>
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
           ) : <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">No job data yet</div>}
         </div>
         <div className="stat-card animate-fade-in" style={{ animationDelay: "600ms" }}>
-          <div className="flex items-center gap-2 mb-6"><Wrench className="w-5 h-5 text-primary" /><h3 className="text-lg font-semibold text-foreground">Service Categories</h3></div>
+          <div className="flex items-center gap-2 mb-6"><Wrench className="w-5 h-5 text-primary" /><h2 className="text-lg font-semibold text-foreground">Service Categories</h2></div>
           {categoryData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart><Pie data={categoryData} cx="50%" cy="45%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value">{categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Legend iconType="circle" wrapperStyle={{ fontSize: "12px" }} /><Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "#ffffff" }} labelStyle={{ color: "#ffffff" }} itemStyle={{ color: "#ffffff" }} /></PieChart>

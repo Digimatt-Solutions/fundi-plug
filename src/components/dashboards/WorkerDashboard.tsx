@@ -181,7 +181,7 @@ export default function WorkerDashboard() {
           <div className="flex items-center gap-4 min-w-0">
             <div className="relative shrink-0">
               {profile?.profile_photo_url ? (
-                <img src={profile.profile_photo_url} alt={firstName} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-white/60" />
+                <img src={profile.profile_photo_url} alt={`${firstName} fundi profile photo`} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-white/60" />
               ) : (
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/25 flex items-center justify-center text-white text-2xl font-bold ring-2 ring-white/60">
                   {firstName.charAt(0)}
@@ -234,7 +234,7 @@ export default function WorkerDashboard() {
         <div className="rounded-2xl border bg-card p-5 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Earnings")}</h3>
+              <h2 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Earnings")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">KSH {stats.weekEarnings.toLocaleString()} {t("this week")}</p>
             </div>
             <button onClick={() => navigate("/dashboard/earnings")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
@@ -261,7 +261,7 @@ export default function WorkerDashboard() {
         {/* Jobs Overview replaces Weekly Jobs */}
         <div className="rounded-2xl border bg-card p-5 animate-fade-in flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-primary" /> {t("Jobs Overview")}
             </h3>
             <button onClick={() => navigate("/dashboard/my-jobs")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
