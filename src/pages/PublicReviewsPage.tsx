@@ -40,15 +40,64 @@ export default function PublicReviewsPage() {
     load();
   }, [workerId]);
 
-  // SEO
+  // SEO: per-page title, description, canonical, og:*, structured data
   useEffect(() => {
-    if (worker) {
-      document.title = `${worker.name} - Reviews | FundiPlug`;
-      const desc = `${reviews.length} client reviews for ${worker.name} on FundiPlug. Average rating ${avg || "-"}/5.`;
-      let meta = document.querySelector('meta[name="description"]');
-      if (!meta) { meta = document.createElement("meta"); meta.setAttribute("name", "description"); document.head.appendChild(meta); }
-      meta.setAttribute("content", desc);
+    if (!worker) return;
+    const url = window.location.href;
+    document.title = `${worker.name} - Reviews | FundiPlug`;
+    const desc = `${reviews.length} client reviews for ${worker.name} on FundiPlug. Average rating ${avg || "-"}/5.`;
+
+    function setMeta(selector: string, attr: string, key: string, content: string) {
+      let el = document.head.querySelector(selector) as HTMLMetaElement | HTMLLinkElement | null;
+      if (!el) {
+        el = document.createElement(selector.startsWith("link") ? "link" : "meta") as any;
+        el!.setAttribute(attr, key);
+        document.head.appendChild(el!);
+      }
+      el!.setAttribute(selector.startsWith("link") ? "href" : "content", content);
     }
+    setMeta('meta[name="description"]', "name", "description", desc);
+    setMeta('link[rel="canonical"]', "rel", "canonical", url);
+    setMeta('meta[property="og:title"]', "property", "og:title", `${worker.name} - Reviews | FundiPlug`);
+    setMeta('meta[property="og:description"]', "property", "og:description", desc);
+    setMeta('meta[property="og:url"]', "property", "og:url", url);
+    setMeta('meta[property="og:type"]', "property", "og:type", "profile");
+    if (worker.avatar_url) setMeta('meta[property="og:image"]', "property", "og:image", worker.avatar_url);
+
+    // JSON-LD ProfilePage + Reviews
+    const ld = {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      mainEntity: {
+        "@type": "Person",
+        name: worker.name,
+        image: worker.avatar_url || undefined,
+        aggregateRating: reviews.length ? {
+          "@type": "AggregateRating",
+          ratingValue: avg,
+          reviewCount: reviews.length,
+        } : undefined,
+        review: reviews.slice(0, 10).map((r: any) => ({
+          "@type": "Review",
+          author: { "@type": "Person", name: r.reviewerName || "Client" },
+          reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
+          reviewBody: r.comment || undefined,
+          datePublished: r.created_at,
+        })),
+      },
+    };
+    let script = document.getElementById("ld-profile") as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.id = "ld-profile";
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(ld);
+
+    return () => {
+      script?.remove();
+    };
   }, [worker, reviews, avg]);
 
   if (loading) {
