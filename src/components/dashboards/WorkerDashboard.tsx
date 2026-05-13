@@ -263,7 +263,7 @@ export default function WorkerDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-primary" /> {t("Jobs Overview")}
-            </h3>
+            </h2>
             <button onClick={() => navigate("/dashboard/my-jobs")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
               {t("View all")} <ArrowUpRight className="w-3 h-3" />
             </button>
