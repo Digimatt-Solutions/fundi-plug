@@ -1,0 +1,14 @@
+# FundiPlug
+
+> Kenya's marketplace to hire verified fundis - plumbers, electricians, masons, carpenters and skilled workers. Pay safely with M-Pesa.
+
+FundiPlug connects clients with vetted skilled workers ("fundis") across Kenya. Clients can post jobs, hire instantly, chat in-app, and pay via M-Pesa. Fundis manage their profile, accept jobs, track earnings, and withdraw to mobile money.
+
+## Pages
+
+- [Home](/): Overview of FundiPlug and entry point to sign in or sign up.
+- [Sign in / Sign up](/auth): Authentication for clients and fundis.
+
+## Optional
+
+- [Public fundi reviews](/reviews/): Read client reviews for an individual fundi (dynamic route, /reviews/{workerId}).
