@@ -94,7 +94,8 @@ export default function PublicReviewsPage() {
         </section>
 
         {reviews.length > 0 ? (
-          <section className="space-y-3">
+          <section className="space-y-3" aria-labelledby="reviews-heading">
+            <h2 id="reviews-heading" className="text-lg font-semibold text-foreground">Client Reviews</h2>
             {reviews.map((r) => (
               <article key={r.id} className="stat-card">
                 <div className="flex items-start gap-3">
@@ -130,7 +131,9 @@ export default function PublicReviewsPage() {
         )}
 
         {/* Marketing banner */}
-        <a href="/" aria-label="Visit FundiPlug" className="block group">
+        <section aria-labelledby="cta-heading">
+          <h2 id="cta-heading" className="sr-only">Discover more skilled fundis on FundiPlug</h2>
+          <a href="/" aria-label="Visit FundiPlug" className="block group">
           <img
             src={cover}
             alt="Connect with skilled fundis you can rely on - FundiPlug"
