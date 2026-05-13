@@ -218,7 +218,7 @@ export default function WorkerEarningsPage() {
       </div>
 
       <div className="stat-card animate-fade-in" style={{ animationDelay: "300ms" }}>
-        <h3 className="text-lg font-semibold text-foreground mb-4">Weekly Earnings</h3>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Weekly Earnings</h2>
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={weeklyData}>
             <defs>
@@ -239,7 +239,7 @@ export default function WorkerEarningsPage() {
       {/* Withdrawal History */}
       {withdrawals.length > 0 && (
         <div className="stat-card animate-fade-in" style={{ animationDelay: "400ms" }}>
-          <h3 className="text-lg font-semibold text-foreground mb-4">Withdrawal History</h3>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Withdrawal History</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -287,7 +287,7 @@ export default function WorkerEarningsPage() {
       {payments.length > 0 ? (
         <div className="stat-card overflow-hidden p-0 animate-fade-in" style={{ animationDelay: "500ms" }}>
           <div className="p-4 border-b border-border">
-            <h3 className="text-lg font-semibold text-foreground">Payment History</h3>
+            <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
           </div>
           <table className="w-full text-sm">
             <thead>

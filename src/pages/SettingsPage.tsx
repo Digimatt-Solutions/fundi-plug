@@ -194,7 +194,7 @@ export default function SettingsPage() {
           <TrafficAnalytics />
         ) : (
           <div className="stat-card animate-fade-in">
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-primary" /> Profile</h3>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-primary" /> Profile</h2>
             <div className="space-y-4">
               <div className="space-y-2"><Label>Display Name</Label><Input value={profileName} onChange={e => setProfileName(e.target.value)} className="bg-muted/50 max-w-sm" /></div>
               <div className="space-y-2"><Label>Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} className="bg-muted/50 max-w-sm" placeholder="+254 712 345 678" /></div>
@@ -207,9 +207,9 @@ export default function SettingsPage() {
         {user?.role === "worker" && (
           <>
             <div className="stat-card animate-fade-in" style={{ animationDelay: "60ms" }}>
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <Eye className="w-5 h-5 text-primary" /> Profile views
-              </h3>
+              </h2>
               <p className="text-sm text-muted-foreground mb-4">How many clients have checked out your profile.</p>
               <div className="grid grid-cols-3 gap-3">
                 <div className="rounded-lg bg-muted/50 p-4 text-center">
@@ -248,7 +248,7 @@ export default function SettingsPage() {
           <>
             {/* Platform Config */}
             <div className="stat-card animate-fade-in" style={{ animationDelay: "100ms" }}>
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Platform Configuration</h3>
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Platform Configuration</h2>
               <div className="space-y-4">
                 <div className="space-y-2"><Label>Platform Name</Label><Input value={platformName} onChange={e => setPlatformName(e.target.value)} className="bg-muted/50 max-w-sm" /></div>
                 <div className="space-y-2">
@@ -264,7 +264,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="stat-card animate-fade-in" style={{ animationDelay: "200ms" }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary" /> Commission Earned</h3>
+                  <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><DollarSign className="w-5 h-5 text-primary" /> Commission Earned</h2>
                   <p className="text-2xl font-bold text-primary">KSH {totalCommission.toLocaleString()}</p>
                 </div>
                 {commissionData.some(d => d.amount > 0) ? (
@@ -282,7 +282,7 @@ export default function SettingsPage() {
                 )}
               </div>
               <div className="stat-card animate-fade-in" style={{ animationDelay: "300ms" }}>
-                <h3 className="text-lg font-semibold text-foreground mb-4">Commission Breakdown</h3>
+                <h2 className="text-lg font-semibold text-foreground mb-4">Commission Breakdown</h2>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50"><span className="text-sm text-muted-foreground">Current Rate</span><span className="text-lg font-bold text-foreground">{commissionRate}%</span></div>
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50"><span className="text-sm text-muted-foreground">Total Earned</span><span className="text-lg font-bold text-primary">KSH {totalCommission.toLocaleString()}</span></div>
@@ -293,9 +293,9 @@ export default function SettingsPage() {
 
             {/* Module Management */}
             <div className="stat-card animate-fade-in" style={{ animationDelay: "350ms" }}>
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <ToggleRight className="w-5 h-5 text-primary" /> Module Management
-              </h3>
+              </h2>
               <p className="text-sm text-muted-foreground mb-4">Enable or disable modules for Fundi and Client accounts</p>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
@@ -325,7 +325,7 @@ export default function SettingsPage() {
 
             {/* Danger Zone */}
             <div className="stat-card animate-fade-in border-destructive/30" style={{ animationDelay: "400ms" }}>
-              <h3 className="text-lg font-semibold text-destructive mb-2 flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> Danger Zone</h3>
+              <h2 className="text-lg font-semibold text-destructive mb-2 flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> Danger Zone</h2>
               <p className="text-sm text-muted-foreground mb-4">These actions are irreversible. Please proceed with caution.</p>
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border">
@@ -343,9 +343,9 @@ export default function SettingsPage() {
 
         {/* Preferences */}
         <div className="stat-card animate-fade-in" style={{ animationDelay: "450ms" }}>
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             {soundOn ? <Volume2 className="w-5 h-5 text-primary" /> : <VolumeX className="w-5 h-5 text-primary" />} Preferences
-          </h3>
+          </h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
               <div>
@@ -368,7 +368,7 @@ export default function SettingsPage() {
 
         {/* Security */}
         <div className="stat-card animate-fade-in" style={{ animationDelay: "500ms" }}>
-          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Security</h3>
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Security</h2>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">Email: {user?.email}</p>
             <p className="text-sm text-muted-foreground">Role: <span className="font-medium text-foreground">{user?.role === "worker" ? "Fundi" : user?.role === "customer" ? "Client" : "Admin"}</span></p>
