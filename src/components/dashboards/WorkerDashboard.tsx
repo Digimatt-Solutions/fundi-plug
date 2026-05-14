@@ -242,7 +242,7 @@ export default function WorkerDashboard() {
             </button>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={earningsData} margin={{ left: 0, right: 0, top: 5, bottom: 5 }}>
+            <AreaChart data={earningsData} margin={{ left: -20, right: 0, top: 5, bottom: 5 }}>
               <defs>
                 <linearGradient id="earnGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
@@ -251,7 +251,13 @@ export default function WorkerDashboard() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--primary) / 0.2)" />
               <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} width={40} />
+              <YAxis
+                stroke="hsl(var(--muted-foreground))"
+                fontSize={11}
+                axisLine={{ stroke: "hsl(var(--primary))", strokeWidth: 2.5 }}
+                tickLine={false}
+                width={40}
+              />
               <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: 12 }} />
               <Area type="monotone" dataKey="amount" stroke="hsl(var(--primary))" fill="url(#earnGrad)" strokeWidth={2.5} />
             </AreaChart>
