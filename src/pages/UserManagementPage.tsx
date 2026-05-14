@@ -54,6 +54,11 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     loadUsers();
+    // Determine the super admin (first admin by earliest profile creation)
+    (async () => {
+      const { data } = await supabase.rpc("get_super_admin_id");
+      if (data) setSuperAdminId(data as unknown as string);
+    })();
     // Realtime subscription
     const channel = supabase.channel("user-mgmt")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadUsers())
