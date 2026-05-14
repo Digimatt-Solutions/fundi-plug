@@ -30,6 +30,7 @@ export default function SettingsPage() {
   const [flushPassword, setFlushPassword] = useState("");
   const [flushing, setFlushing] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   const [moduleSettings, setModuleSettings] = useState<any[]>([]);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [refreshing, setRefreshing] = useState(false);
