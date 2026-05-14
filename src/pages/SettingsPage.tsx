@@ -185,6 +185,26 @@ export default function SettingsPage() {
     }
   };
 
+  const handleRestore = async (file: File) => {
+    setRestoring(true);
+    try {
+      const text = await file.text();
+      const backup = JSON.parse(text);
+      if (!backup || typeof backup !== "object") throw new Error("Invalid backup file");
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("restore-backup", {
+        body: { backup },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error || (res.data as any)?.error) throw new Error((res.data as any)?.error || res.error?.message);
+      toast({ title: "Backup restored", description: "Data imported successfully." });
+    } catch (err: any) {
+      toast({ title: "Restore failed", description: friendlyError(err), variant: "destructive" });
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   const handleFlush = async () => {
     setFlushing(true);
     try {
