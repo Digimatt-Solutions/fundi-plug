@@ -178,7 +178,14 @@ export default function UserManagementPage() {
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-foreground">{u.name}</p>
+                        <p className="font-medium text-foreground flex items-center gap-1.5">
+                          {u.name}
+                          {u.id === superAdminId && (
+                            <span title="Super Admin" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                              <Crown className="w-3 h-3" /> Super
+                            </span>
+                          )}
+                        </p>
                         <p className="text-xs text-muted-foreground">{u.email}</p>
                       </div>
                     </div>
@@ -198,32 +205,41 @@ export default function UserManagementPage() {
                   </td>
                   <td className="p-4 text-muted-foreground">{new Date(u.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                   <td className="p-4">
-                    {u.id !== currentUser?.id && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="w-8 h-8">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { setRoleDialog(u); setNewRole(u.role); }}>
-                            <UserCog className="w-4 h-4 mr-2" /> Change Role
-                          </DropdownMenuItem>
-                          {u.role !== "admin" && (
-                            <DropdownMenuItem onClick={() => setPromoteDialog(u)}>
-                              <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
+                    {u.id !== currentUser?.id && (() => {
+                      const targetIsSuper = u.id === superAdminId;
+                      // Non-super admins cannot act on the super admin at all
+                      if (targetIsSuper && !isCallerSuper) {
+                        return (
+                          <span className="text-xs text-muted-foreground italic">Protected</span>
+                        );
+                      }
+                      return (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="w-8 h-8">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setRoleDialog(u); setNewRole(u.role); }}>
+                              <UserCog className="w-4 h-4 mr-2" /> Change Role
                             </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem onClick={() => handleToggleActive(u)}>
-                            <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => setDeleteDialog(u)} className="text-destructive focus:text-destructive">
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete Permanently
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+                            {u.role !== "admin" && (
+                              <DropdownMenuItem onClick={() => setPromoteDialog(u)}>
+                                <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => handleToggleActive(u)}>
+                              <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setDeleteDialog(u)} className="text-destructive focus:text-destructive">
+                              <Trash2 className="w-4 h-4 mr-2" /> Delete Permanently
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      );
+                    })()}
                   </td>
                 </tr>
                   ))
