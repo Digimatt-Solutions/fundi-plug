@@ -34,7 +34,6 @@ export default function SettingsPage() {
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [refreshing, setRefreshing] = useState(false);
   const [profileViews, setProfileViews] = useState({ total: 0, week: 0, month: 0 });
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
@@ -50,17 +49,10 @@ export default function SettingsPage() {
     }
     setChangingPassword(true);
     try {
-      // Verify current password
-      const { error: verifyErr } = await supabase.auth.signInWithPassword({ email: user!.email, password: currentPassword });
-      if (verifyErr) {
-        toast({ title: "Current password is incorrect", variant: "destructive" });
-        setChangingPassword(false);
-        return;
-      }
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       toast({ title: "Password updated successfully" });
-      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+      setNewPassword(""); setConfirmPassword("");
     } catch (err: any) {
       toast({ title: "Failed to update password", description: friendlyError(err), variant: "destructive" });
     } finally {
@@ -269,10 +261,9 @@ export default function SettingsPage() {
                 <Lock className="w-5 h-5 text-primary" /> Change Password
               </h2>
               <div className="space-y-4 max-w-sm">
-                <div className="space-y-2"><Label>Current Password</Label><Input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="bg-muted/50" /></div>
                 <div className="space-y-2"><Label>New Password</Label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="bg-muted/50" /></div>
                 <div className="space-y-2"><Label>Confirm New Password</Label><Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="bg-muted/50" /></div>
-                <Button size="sm" onClick={handleChangePassword} disabled={changingPassword || !currentPassword || !newPassword}>
+                <Button size="sm" onClick={handleChangePassword} disabled={changingPassword || !newPassword || !confirmPassword}>
                   {changingPassword ? "Updating..." : "Update Password"}
                 </Button>
               </div>
