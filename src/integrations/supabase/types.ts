@@ -1240,6 +1240,7 @@ export type Database = {
     }
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
+      get_super_admin_id: { Args: never; Returns: string }
       get_support_admin_id: { Args: never; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
@@ -1253,6 +1254,7 @@ export type Database = {
         Returns: boolean
       }
       is_pending_admin_promotion: { Args: { _email: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "customer" | "worker"
