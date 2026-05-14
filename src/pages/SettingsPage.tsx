@@ -34,7 +34,6 @@ export default function SettingsPage() {
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [refreshing, setRefreshing] = useState(false);
   const [profileViews, setProfileViews] = useState({ total: 0, week: 0, month: 0 });
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
@@ -50,17 +49,10 @@ export default function SettingsPage() {
     }
     setChangingPassword(true);
     try {
-      // Verify current password
-      const { error: verifyErr } = await supabase.auth.signInWithPassword({ email: user!.email, password: currentPassword });
-      if (verifyErr) {
-        toast({ title: "Current password is incorrect", variant: "destructive" });
-        setChangingPassword(false);
-        return;
-      }
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
       toast({ title: "Password updated successfully" });
-      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+      setNewPassword(""); setConfirmPassword("");
     } catch (err: any) {
       toast({ title: "Failed to update password", description: friendlyError(err), variant: "destructive" });
     } finally {
