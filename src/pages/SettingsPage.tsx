@@ -261,10 +261,9 @@ export default function SettingsPage() {
                 <Lock className="w-5 h-5 text-primary" /> Change Password
               </h2>
               <div className="space-y-4 max-w-sm">
-                <div className="space-y-2"><Label>Current Password</Label><Input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="bg-muted/50" /></div>
                 <div className="space-y-2"><Label>New Password</Label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="bg-muted/50" /></div>
                 <div className="space-y-2"><Label>Confirm New Password</Label><Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="bg-muted/50" /></div>
-                <Button size="sm" onClick={handleChangePassword} disabled={changingPassword || !currentPassword || !newPassword}>
+                <Button size="sm" onClick={handleChangePassword} disabled={changingPassword || !newPassword || !confirmPassword}>
                   {changingPassword ? "Updating..." : "Update Password"}
                 </Button>
               </div>
