@@ -27,6 +27,8 @@ export default function UserManagementPage() {
   const [deleteDialog, setDeleteDialog] = useState<any>(null);
   const [promoteDialog, setPromoteDialog] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [superAdminId, setSuperAdminId] = useState<string | null>(null);
+  const isCallerSuper = !!currentUser?.id && currentUser.id === superAdminId;
 
   async function loadUsers() {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
