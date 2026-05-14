@@ -456,7 +456,7 @@ const Auth = () => {
             </form>
 
             <div className="mt-6 text-center space-y-1">
-              <p className="text-xs text-muted-foreground">© Digimatt Solutions 2026</p>
+              <p className="text-xs text-muted-foreground"><a href="https://www.digimatt.co.ke" target="_blank" rel="noopener noreferrer">© Powered by Digimatt Solutions</a></p>
               <button className="text-xs text-primary hover:underline">Privacy Policy</button>
             </div>
           </div>
