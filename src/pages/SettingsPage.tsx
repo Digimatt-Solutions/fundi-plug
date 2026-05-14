@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon } from "lucide-react";
+import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
