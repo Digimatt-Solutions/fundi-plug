@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon } from "lucide-react";
+import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +34,39 @@ export default function SettingsPage() {
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [refreshing, setRefreshing] = useState(false);
   const [profileViews, setProfileViews] = useState({ total: 0, week: 0, month: 0 });
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      toast({ title: "Password too short", description: "Must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Passwords don't match", variant: "destructive" });
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      // Verify current password
+      const { error: verifyErr } = await supabase.auth.signInWithPassword({ email: user!.email, password: currentPassword });
+      if (verifyErr) {
+        toast({ title: "Current password is incorrect", variant: "destructive" });
+        setChangingPassword(false);
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast({ title: "Password updated successfully" });
+      setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+    } catch (err: any) {
+      toast({ title: "Failed to update password", description: friendlyError(err), variant: "destructive" });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
 
   const handleSoundToggle = (v: boolean) => {
     setSoundOn(v);
@@ -229,6 +262,20 @@ export default function SettingsPage() {
 
             <div className="animate-fade-in" style={{ animationDelay: "120ms" }}>
               <FingerprintEnroll showFundiPreview />
+            </div>
+
+            <div className="stat-card animate-fade-in" style={{ animationDelay: "150ms" }}>
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Lock className="w-5 h-5 text-primary" /> Change Password
+              </h2>
+              <div className="space-y-4 max-w-sm">
+                <div className="space-y-2"><Label>Current Password</Label><Input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="bg-muted/50" /></div>
+                <div className="space-y-2"><Label>New Password</Label><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="bg-muted/50" /></div>
+                <div className="space-y-2"><Label>Confirm New Password</Label><Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="bg-muted/50" /></div>
+                <Button size="sm" onClick={handleChangePassword} disabled={changingPassword || !currentPassword || !newPassword}>
+                  {changingPassword ? "Updating..." : "Update Password"}
+                </Button>
+              </div>
             </div>
 
             <div className="animate-fade-in" style={{ animationDelay: "180ms" }}>

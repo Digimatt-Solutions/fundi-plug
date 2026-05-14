@@ -149,7 +149,17 @@ export default function UserManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length > 0 ? filtered.map((u) => (
+              {filtered.length > 0 ? (["admin", "worker", "customer"] as const).flatMap((roleKey) => {
+                const group = filtered.filter(u => u.role === roleKey);
+                if (group.length === 0) return [];
+                const label = roleKey === "worker" ? "Fundis" : roleKey === "customer" ? "Clients" : "Admins";
+                return [
+                  <tr key={`hdr-${roleKey}`} className="bg-primary/5 border-b border-border">
+                    <td colSpan={5} className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-primary flex items-center gap-2">
+                      {roleIcon(roleKey)} {label} <span className="text-muted-foreground font-normal normal-case">({group.length})</span>
+                    </td>
+                  </tr>,
+                  ...group.map((u) => (
                 <tr key={u.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
@@ -209,7 +219,9 @@ export default function UserManagementPage() {
                     )}
                   </td>
                 </tr>
-              )) : (
+                  ))
+                ];
+              }) : (
                 <tr>
                   <td colSpan={5} className="p-8 text-center text-muted-foreground text-sm">No users found</td>
                 </tr>
