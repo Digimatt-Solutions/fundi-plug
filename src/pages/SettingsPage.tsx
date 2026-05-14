@@ -391,6 +391,23 @@ export default function SettingsPage() {
                   <div><p className="text-sm font-medium text-foreground">Backup All Data</p><p className="text-xs text-muted-foreground">Download a JSON export of all platform data</p></div>
                   <Button variant="outline" size="sm" className="gap-1.5" onClick={handleBackup} disabled={backingUp}><Download className="w-3.5 h-3.5" /> {backingUp ? "Exporting..." : "Download Backup"}</Button>
                 </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                  <div><p className="text-sm font-medium text-foreground">Import Backup</p><p className="text-xs text-muted-foreground">Restore data from a previously downloaded backup file (super admin only)</p></div>
+                  <label className={`inline-flex items-center gap-1.5 text-sm border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-3 h-9 cursor-pointer ${restoring ? "opacity-60 pointer-events-none" : ""}`}>
+                    <Upload className="w-3.5 h-3.5" /> {restoring ? "Importing..." : "Import Backup"}
+                    <input
+                      type="file"
+                      accept="application/json,.json"
+                      className="hidden"
+                      disabled={restoring}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleRestore(f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
                 <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/30 bg-destructive/5">
                   <div><p className="text-sm font-medium text-destructive">Flush All Data</p><p className="text-xs text-muted-foreground">Delete all records except admin accounts. Backup first!</p></div>
                   <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setFlushOpen(true)}><Trash2 className="w-3.5 h-3.5" /> Flush Data</Button>
