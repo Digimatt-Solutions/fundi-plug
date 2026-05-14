@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck } from "lucide-react";
+import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck, Crown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +27,8 @@ export default function UserManagementPage() {
   const [deleteDialog, setDeleteDialog] = useState<any>(null);
   const [promoteDialog, setPromoteDialog] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [superAdminId, setSuperAdminId] = useState<string | null>(null);
+  const isCallerSuper = !!currentUser?.id && currentUser.id === superAdminId;
 
   async function loadUsers() {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
@@ -52,6 +54,11 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     loadUsers();
+    // Determine the super admin (first admin by earliest profile creation)
+    (async () => {
+      const { data } = await supabase.rpc("get_super_admin_id");
+      if (data) setSuperAdminId(data as unknown as string);
+    })();
     // Realtime subscription
     const channel = supabase.channel("user-mgmt")
       .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadUsers())
@@ -171,7 +178,14 @@ export default function UserManagementPage() {
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-foreground">{u.name}</p>
+                        <p className="font-medium text-foreground flex items-center gap-1.5">
+                          {u.name}
+                          {u.id === superAdminId && (
+                            <span title="Super Admin" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                              <Crown className="w-3 h-3" /> Super
+                            </span>
+                          )}
+                        </p>
                         <p className="text-xs text-muted-foreground">{u.email}</p>
                       </div>
                     </div>
@@ -191,32 +205,41 @@ export default function UserManagementPage() {
                   </td>
                   <td className="p-4 text-muted-foreground">{new Date(u.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
                   <td className="p-4">
-                    {u.id !== currentUser?.id && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="w-8 h-8">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { setRoleDialog(u); setNewRole(u.role); }}>
-                            <UserCog className="w-4 h-4 mr-2" /> Change Role
-                          </DropdownMenuItem>
-                          {u.role !== "admin" && (
-                            <DropdownMenuItem onClick={() => setPromoteDialog(u)}>
-                              <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
+                    {u.id !== currentUser?.id && (() => {
+                      const targetIsSuper = u.id === superAdminId;
+                      // Non-super admins cannot act on the super admin at all
+                      if (targetIsSuper && !isCallerSuper) {
+                        return (
+                          <span className="text-xs text-muted-foreground italic">Protected</span>
+                        );
+                      }
+                      return (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="w-8 h-8">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setRoleDialog(u); setNewRole(u.role); }}>
+                              <UserCog className="w-4 h-4 mr-2" /> Change Role
                             </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem onClick={() => handleToggleActive(u)}>
-                            <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => setDeleteDialog(u)} className="text-destructive focus:text-destructive">
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete Permanently
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+                            {u.role !== "admin" && (
+                              <DropdownMenuItem onClick={() => setPromoteDialog(u)}>
+                                <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => handleToggleActive(u)}>
+                              <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => setDeleteDialog(u)} className="text-destructive focus:text-destructive">
+                              <Trash2 className="w-4 h-4 mr-2" /> Delete Permanently
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      );
+                    })()}
                   </td>
                 </tr>
                   ))

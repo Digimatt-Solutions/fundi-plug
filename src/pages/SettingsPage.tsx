@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings, Shield, DollarSign, AlertTriangle, Download, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon, Lock } from "lucide-react";
+import { Settings, Shield, DollarSign, AlertTriangle, Download, Upload, Trash2, ToggleRight, RefreshCw, Volume2, VolumeX, Eye, User as UserIcon, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,7 @@ export default function SettingsPage() {
   const [flushPassword, setFlushPassword] = useState("");
   const [flushing, setFlushing] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   const [moduleSettings, setModuleSettings] = useState<any[]>([]);
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [refreshing, setRefreshing] = useState(false);
@@ -181,6 +182,26 @@ export default function SettingsPage() {
       toast({ title: "Backup failed", description: friendlyError(err), variant: "destructive" });
     } finally {
       setBackingUp(false);
+    }
+  };
+
+  const handleRestore = async (file: File) => {
+    setRestoring(true);
+    try {
+      const text = await file.text();
+      const backup = JSON.parse(text);
+      if (!backup || typeof backup !== "object") throw new Error("Invalid backup file");
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("restore-backup", {
+        body: { backup },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error || (res.data as any)?.error) throw new Error((res.data as any)?.error || res.error?.message);
+      toast({ title: "Backup restored", description: "Data imported successfully." });
+    } catch (err: any) {
+      toast({ title: "Restore failed", description: friendlyError(err), variant: "destructive" });
+    } finally {
+      setRestoring(false);
     }
   };
 
@@ -369,6 +390,23 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between p-4 rounded-lg border border-border">
                   <div><p className="text-sm font-medium text-foreground">Backup All Data</p><p className="text-xs text-muted-foreground">Download a JSON export of all platform data</p></div>
                   <Button variant="outline" size="sm" className="gap-1.5" onClick={handleBackup} disabled={backingUp}><Download className="w-3.5 h-3.5" /> {backingUp ? "Exporting..." : "Download Backup"}</Button>
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+                  <div><p className="text-sm font-medium text-foreground">Import Backup</p><p className="text-xs text-muted-foreground">Restore data from a previously downloaded backup file (super admin only)</p></div>
+                  <label className={`inline-flex items-center gap-1.5 text-sm border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-3 h-9 cursor-pointer ${restoring ? "opacity-60 pointer-events-none" : ""}`}>
+                    <Upload className="w-3.5 h-3.5" /> {restoring ? "Importing..." : "Import Backup"}
+                    <input
+                      type="file"
+                      accept="application/json,.json"
+                      className="hidden"
+                      disabled={restoring}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleRestore(f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
                 </div>
                 <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/30 bg-destructive/5">
                   <div><p className="text-sm font-medium text-destructive">Flush All Data</p><p className="text-xs text-muted-foreground">Delete all records except admin accounts. Backup first!</p></div>

@@ -16,7 +16,6 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify the caller is an admin
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -29,6 +28,20 @@ Deno.serve(async (req) => {
     const { action, userId, newRole, isActive, paymentId } = await req.json();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
+    // Identify super admin (first admin by earliest profile creation date)
+    const { data: superAdminId } = await adminClient.rpc("get_super_admin_id");
+    const callerIsSuper = caller.id === superAdminId;
+    const targetIsSuper = userId && userId === superAdminId;
+
+    // Protect super admin from being modified by anyone other than themselves
+    const protectedActions = ["change_role", "toggle_active", "delete_user", "promote_to_admin"];
+    if (protectedActions.includes(action) && targetIsSuper && !callerIsSuper) {
+      return new Response(
+        JSON.stringify({ error: "The super admin account is protected. Only the super admin can modify it." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (action === "change_role") {
       await adminClient.from("user_roles").update({ role: newRole }).eq("user_id", userId);
       await adminClient.from("activity_logs").insert({
@@ -39,7 +52,6 @@ Deno.serve(async (req) => {
     }
 
     if (action === "promote_to_admin") {
-      // 1. Set role to admin
       const { data: existingRole } = await adminClient.from("user_roles").select("user_id").eq("user_id", userId).maybeSingle();
       if (existingRole) {
         await adminClient.from("user_roles").update({ role: "admin" }).eq("user_id", userId);
@@ -47,7 +59,6 @@ Deno.serve(async (req) => {
         await adminClient.from("user_roles").insert({ user_id: userId, role: "admin" });
       }
 
-      // 2. Auto-confirm the user's email so they have immediate admin access on next sign-in.
       const { data: userData } = await adminClient.auth.admin.getUserById(userId);
       const targetEmail = userData?.user?.email;
       if (!targetEmail) throw new Error("Target user email not found");
@@ -78,11 +89,8 @@ Deno.serve(async (req) => {
     }
 
     if (action === "delete_user") {
-      // Clean up availability (references auth.users directly)
       await adminClient.from("availability").delete().eq("worker_id", userId);
-      // Clean up withdrawals
       await adminClient.from("withdrawals").delete().eq("worker_id", userId);
-      // Delete from auth (cascades to profiles -> jobs, bookings, payments, reviews, complaints)
       const { error } = await adminClient.auth.admin.deleteUser(userId);
       if (error) throw error;
       await adminClient.from("activity_logs").insert({
@@ -94,7 +102,6 @@ Deno.serve(async (req) => {
 
     if (action === "reset_payment") {
       if (!paymentId) throw new Error("Missing paymentId");
-      // Delete the failed payment record so customer can retry
       await adminClient.from("payments").delete().eq("id", paymentId).eq("status", "failed");
       await adminClient.from("activity_logs").insert({
         user_id: caller.id, action: "Payment Reset",
