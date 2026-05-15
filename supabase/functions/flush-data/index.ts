@@ -12,22 +12,57 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing authorization" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Identify caller via JWT, NOT via a body parameter.
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user: caller } } = await userClient.auth.getUser();
+    if (!caller) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { admin_id } = await req.json();
-    if (!admin_id) throw new Error("Missing admin_id");
-
-    // Verify the user is an admin
+    // Caller must be an admin
     const { data: roleData } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", admin_id)
+      .eq("user_id", caller.id)
       .single();
 
     if (!roleData || roleData.role !== "admin") {
-      throw new Error("Unauthorized: admin access required");
+      return new Response(JSON.stringify({ error: "Admin access required" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Caller must be the super admin (the only person allowed to wipe data)
+    const { data: superAdminId } = await supabase.rpc("get_super_admin_id");
+    if (caller.id !== superAdminId) {
+      return new Response(JSON.stringify({ error: "Only the super admin can flush all data." }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Optional confirmation token re-auth: require explicit confirm
+    const body = await req.json().catch(() => ({}));
+    if (body?.confirm !== "FLUSH_ALL_DATA") {
+      return new Response(JSON.stringify({ error: "Confirmation token required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     // Get all admin user IDs to preserve
@@ -38,7 +73,9 @@ serve(async (req) => {
     const adminIds = (adminRoles || []).map((r: any) => r.user_id);
 
     // Delete in dependency order
-    await supabase.from("activity_logs").delete().not("user_id", "in", `(${adminIds.join(",")})`);
+    if (adminIds.length > 0) {
+      await supabase.from("activity_logs").delete().not("user_id", "in", `(${adminIds.join(",")})`);
+    }
     await supabase.from("certifications").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabase.from("availability").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabase.from("reviews").delete().neq("id", "00000000-0000-0000-0000-000000000000");
@@ -49,7 +86,6 @@ serve(async (req) => {
     await supabase.from("jobs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabase.from("worker_profiles").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
-    // Delete non-admin user roles and profiles
     const { data: nonAdminRoles } = await supabase
       .from("user_roles")
       .select("user_id")
@@ -59,18 +95,15 @@ serve(async (req) => {
     if (nonAdminIds.length > 0) {
       await supabase.from("user_roles").delete().in("user_id", nonAdminIds);
       await supabase.from("profiles").delete().in("id", nonAdminIds);
-
-      // Delete non-admin auth users
       for (const uid of nonAdminIds) {
         await supabase.auth.admin.deleteUser(uid);
       }
     }
 
-    // Log the flush action
     await supabase.from("activity_logs").insert({
-      user_id: admin_id,
+      user_id: caller.id,
       action: "Data Flush",
-      detail: "All platform data was flushed by admin",
+      detail: "All platform data was flushed by super admin",
       entity_type: "system",
     });
 
