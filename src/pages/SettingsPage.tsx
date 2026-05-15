@@ -210,7 +210,11 @@ export default function SettingsPage() {
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({ email: user!.email, password: flushPassword });
       if (authError) { toast({ title: "Invalid password", variant: "destructive" }); setFlushing(false); return; }
-      const { error } = await supabase.functions.invoke("flush-data", { body: { admin_id: user!.id } });
+      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase.functions.invoke("flush-data", {
+        body: { confirm: "FLUSH_ALL_DATA" },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
       if (error) throw error;
       toast({ title: "Data flushed", description: "All records have been cleared except admin accounts." });
       setFlushOpen(false);

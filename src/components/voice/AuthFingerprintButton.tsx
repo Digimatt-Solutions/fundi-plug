@@ -43,12 +43,11 @@ export default function AuthFingerprintButton({ compact = true }: { compact?: bo
     setBusy(true);
     try {
       const credId = await verifyFingerprint();
-      // Look up the credential -> email
-      const { data: cred } = await supabase
-        .from("webauthn_credentials")
-        .select("email, user_id")
-        .eq("credential_id", credId)
-        .maybeSingle();
+      // Look up the credential -> email via secure edge function (no public table read).
+      const { data: lookup } = await supabase.functions.invoke("webauthn-lookup", {
+        body: { credential_id: credId },
+      });
+      const cred = (lookup as any)?.found ? (lookup as any) : null;
 
       if (!cred) {
         const msg = "Fingerprint not registered. Please sign in once with email and password to register.";
