@@ -188,12 +188,11 @@ export default function CommunityPage() {
     setPosts(prev => prev.map(p =>
       p.id === postId ? { ...p, liked: !liked, likes_count: newCount } : p
     ));
+    // likes_count is maintained server-side by a trigger on community_likes.
     if (liked) {
       await supabase.from("community_likes").delete().eq("post_id", postId).eq("user_id", user.id);
-      await supabase.from("community_posts").update({ likes_count: newCount } as any).eq("id", postId);
     } else {
       await supabase.from("community_likes").insert({ post_id: postId, user_id: user.id } as any);
-      await supabase.from("community_posts").update({ likes_count: newCount } as any).eq("id", postId);
     }
   };
 

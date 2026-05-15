@@ -81,12 +81,12 @@ export default function LatestPostsWidget() {
     const liked = post.liked;
     const newCount = liked ? Math.max(0, post.likes_count - 1) : post.likes_count + 1;
     setPosts(prev => prev.map(p => p.id === post.id ? { ...p, liked: !liked, likes_count: newCount } : p));
+    // likes_count is maintained server-side by a trigger on community_likes.
     if (liked) {
       await supabase.from("community_likes").delete().eq("post_id", post.id).eq("user_id", user.id);
     } else {
       await supabase.from("community_likes").insert({ post_id: post.id, user_id: user.id } as any);
     }
-    await supabase.from("community_posts").update({ likes_count: newCount } as any).eq("id", post.id);
   };
 
   if (loading || posts.length === 0) return null;
