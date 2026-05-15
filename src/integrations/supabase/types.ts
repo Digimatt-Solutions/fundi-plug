@@ -50,6 +50,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       availability: {
@@ -119,6 +126,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bookings_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
@@ -130,6 +144,13 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -176,6 +197,13 @@ export type Database = {
             referencedRelation: "worker_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "certifications_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_blogs: {
@@ -217,6 +245,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "community_blogs_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_comments: {
@@ -247,6 +282,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -292,6 +334,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "community_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       community_posts: {
@@ -331,6 +380,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -378,10 +434,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "complaints_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "complaints_fundi_id_fkey"
             columns: ["fundi_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaints_fundi_id_fkey"
+            columns: ["fundi_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
           {
@@ -434,6 +504,13 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -506,10 +583,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "jobs_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "jobs_worker_id_fkey"
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -633,10 +724,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payments_payee_id_fkey"
+            columns: ["payee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "payments_payer_id_fkey"
             columns: ["payer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_payer_id_fkey"
+            columns: ["payer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -799,10 +904,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reviews_reviewee_id_fkey"
+            columns: ["reviewee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reviews_reviewer_id_fkey"
             columns: ["reviewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -931,6 +1050,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webauthn_credentials_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1193,6 +1319,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "worker_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       worker_work_history: {
@@ -1236,7 +1369,183 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          id: string | null
+          is_online: boolean | null
+          name: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_online?: boolean | null
+          name?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_online?: boolean | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      worker_profiles_public: {
+        Row: {
+          availability_days: number[] | null
+          availability_type: string | null
+          bio: string | null
+          constituency: string | null
+          country: string | null
+          county: string | null
+          created_at: string | null
+          daily_rate: number | null
+          experience_level: string | null
+          first_name: string | null
+          gender: string | null
+          hourly_rate: number | null
+          id: string | null
+          is_online: boolean | null
+          last_name: string | null
+          latitude: number | null
+          longitude: number | null
+          max_travel_km: number | null
+          portfolio_urls: string[] | null
+          profile_photo_url: string | null
+          service_area: string | null
+          service_radius_km: number | null
+          skills: string[] | null
+          sub_skills: string[] | null
+          updated_at: string | null
+          user_id: string | null
+          verification_status:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+          ward: string | null
+          willing_to_travel: boolean | null
+          years_experience: number | null
+        }
+        Insert: {
+          availability_days?: number[] | null
+          availability_type?: string | null
+          bio?: string | null
+          constituency?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          daily_rate?: number | null
+          experience_level?: string | null
+          first_name?: string | null
+          gender?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_online?: boolean | null
+          last_name?: string | null
+          latitude?: never
+          longitude?: never
+          max_travel_km?: number | null
+          portfolio_urls?: string[] | null
+          profile_photo_url?: string | null
+          service_area?: string | null
+          service_radius_km?: number | null
+          skills?: string[] | null
+          sub_skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+          ward?: string | null
+          willing_to_travel?: boolean | null
+          years_experience?: number | null
+        }
+        Update: {
+          availability_days?: number[] | null
+          availability_type?: string | null
+          bio?: string | null
+          constituency?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string | null
+          daily_rate?: number | null
+          experience_level?: string | null
+          first_name?: string | null
+          gender?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_online?: boolean | null
+          last_name?: string | null
+          latitude?: never
+          longitude?: never
+          max_travel_km?: number | null
+          portfolio_urls?: string[] | null
+          profile_photo_url?: string | null
+          service_area?: string | null
+          service_radius_km?: number | null
+          skills?: string[] | null
+          sub_skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?:
+            | Database["public"]["Enums"]["verification_status"]
+            | null
+          ward?: string | null
+          willing_to_travel?: boolean | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_work_history_public: {
+        Row: {
+          company: string | null
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string | null
+          role: string | null
+          start_date: string | null
+          worker_id: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string | null
+          role?: string | null
+          start_date?: string | null
+          worker_id?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string | null
+          role?: string | null
+          start_date?: string | null
+          worker_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
