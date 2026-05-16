@@ -217,14 +217,34 @@ const Auth = () => {
         <div className="w-full max-w-md animate-fade-in">
           <div className="border border-primary/60 rounded-2xl p-4 sm:p-6 bg-card/50 shadow-[0_0_0_4px_hsl(var(--primary)/0.08)]">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden mb-4">
-                <img loading="lazy" decoding="async" src={logo} alt="FundiPlug" className="w-full h-full object-cover" />
-              </div>
-              <img loading="lazy" decoding="async"
-                src={fundiplugLogo}
-                alt="FundiPlug"
-                className="mx-auto h-6 sm:h-6 w-auto object-contain mb-3 dark:invert"
-              />
+              <a
+                href="https://fundiplug.ke"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden mb-4">
+                  <img
+                    loading="lazy"
+                    decoding="async"
+                    src={logo}
+                    alt="FundiPlug"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </a>
+              <a
+                  href="https://fundiplug.ke"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    loading="lazy"
+                    decoding="async"
+                    src={fundiplugLogo}
+                    alt="FundiPlug"
+                    className="mx-auto h-6 sm:h-6 w-auto object-contain mb-3 dark:invert"
+                  />
+                </a>
               <p className="text-muted-foreground text-sm">Skilled Workers Marketplace</p>
             </div>
 
