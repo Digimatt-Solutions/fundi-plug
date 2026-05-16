@@ -456,6 +456,7 @@ const Auth = () => {
             </form>
 
             <div className="mt-6 text-center space-y-1">
+              <a href="http://fundiplug.ke/" className="text-xs text-primary hover:underline block">← Go to Home</a>
               <p className="text-xs text-muted-foreground"><a href="https://www.digimatt.co.ke" target="_blank" rel="noopener noreferrer">© Powered by Digimatt Solutions</a></p>
               <button className="text-xs text-primary hover:underline">Privacy Policy</button>
             </div>
