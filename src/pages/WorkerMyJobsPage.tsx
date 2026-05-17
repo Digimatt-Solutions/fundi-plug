@@ -276,14 +276,18 @@ export default function WorkerMyJobsPage() {
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
                       </div>
                       <div className="flex gap-2 w-full sm:w-auto">
-                        <Button size="sm" className="flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, true)}><Check className="w-4 h-4 mr-1" /> Accept</Button>
+                        <Button size="sm" className="flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, true)} disabled={!isVerified}><Check className="w-4 h-4 mr-1" /> Accept & Confirm Price</Button>
                         <Button size="sm" variant="outline" className="text-destructive flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, false)}><X className="w-4 h-4 mr-1" /> Reject</Button>
                       </div>
                     </div>
                     {job.description && <p className="text-sm text-muted-foreground break-words">{job.description}</p>}
+                    <div className="p-2 rounded-md bg-primary/10 border border-primary/20 text-sm text-foreground flex items-center gap-2 flex-wrap">
+                      <Lock className="w-3.5 h-3.5 text-primary" />
+                      <span>Client's final price: <strong>KSH {Number(job.final_price ?? job.budget ?? 0).toLocaleString()}</strong></span>
+                      <span className="text-xs text-muted-foreground">- Accepting locks this price.</span>
+                    </div>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       {job.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</span>}
-                      <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
                     </div>
                   </div>
