@@ -216,9 +216,10 @@ export default function CustomerBookingsPage() {
                           job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
                         }`}>💰 {job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
                       )}
+                      <PriceLockBadge job={job} />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Fundi: {job.workerName} - KSH {job.budget ? job.budget.toLocaleString() : "Open"} - {new Date(job.created_at).toLocaleString()}
+                      Fundi: {job.workerName} - KSH {(job.final_price ?? job.budget) ? Number(job.final_price ?? job.budget).toLocaleString() : "Open"} - {new Date(job.created_at).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex gap-2 flex-wrap">
