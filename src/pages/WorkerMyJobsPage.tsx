@@ -378,16 +378,17 @@ export default function WorkerMyJobsPage() {
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="min-w-0">
+                  <div className="min-w-0 space-y-1">
                     <p className="font-medium text-foreground break-words">{job.title}</p>
                     <p className="text-xs text-muted-foreground">KSH {job.budget ? job.budget.toLocaleString() : "No budget"} - {new Date(job.created_at).toLocaleString()}</p>
+                    <PriceLockBadge job={job} />
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                       job.status === "completed" ? "bg-green-500/10 text-green-600" :
                       job.status === "in_progress" ? "bg-primary/10 text-primary" : "bg-chart-4/10 text-chart-4"
                     }`}>{job.status === "completed" ? "Job Completed" : job.status === "in_progress" ? "In Progress" : job.status.replace("_", " ")}</span>
-                    {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")}>Start</Button>}
+                    {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")} disabled={!job.price_locked_at}>Start</Button>}
                     {job.status === "in_progress" && <Button size="sm" onClick={() => updateJobStatus(job.id, "completed")}>Complete</Button>}
                     {job.status === "completed" && job.paymentStatus && (
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -408,6 +409,15 @@ export default function WorkerMyJobsPage() {
                     )}
                   </div>
                 </div>
+                {job.customer_price_confirmed && !job.worker_price_confirmed && !job.price_locked_at && (
+                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/30 space-y-2">
+                    <p className="text-sm text-foreground flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> Client has set the final price at <strong>KSH {Number(job.final_price ?? job.budget ?? 0).toLocaleString()}</strong>. Confirm to lock.</p>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => confirmFinalPrice(job.id)}><Check className="w-4 h-4 mr-1" /> Confirm Price</Button>
+                      <Button size="sm" variant="outline" className="text-destructive" onClick={() => rejectFinalPrice(job.id)}><X className="w-4 h-4 mr-1" /> Reject - Ask Client to Adjust</Button>
+                    </div>
+                  </div>
+                )}
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <p className="text-xs font-medium text-foreground flex items-center gap-2 flex-wrap">Client: {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</p>
