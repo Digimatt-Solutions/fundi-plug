@@ -141,18 +141,56 @@ export default function WorkerMyJobsPage() {
 
   const respondToHireRequest = async (jobId: string, accept: boolean) => {
     if (accept) {
-      await supabase.from("jobs").update({ status: "accepted" }).eq("id", jobId);
+      if (!isVerified) {
+        toast({ title: "Account not approved", description: "You can only accept hire requests once your profile is approved.", variant: "destructive" });
+        return;
+      }
+      // Accept the job AND confirm the client's price in one step (price was set by client on hire)
+      const { error } = await supabase.from("jobs").update({
+        status: "accepted",
+        worker_price_confirmed: true,
+      }).eq("id", jobId);
+      if (error) {
+        toast({ title: "Failed to accept", description: friendlyError(error), variant: "destructive" });
+        return;
+      }
       await supabase.from("activity_logs").insert({
-        user_id: user!.id, action: "Hire Request Accepted", detail: `Worker accepted a direct hire request`, entity_type: "job", entity_id: jobId,
+        user_id: user!.id, action: "Hire Request Accepted", detail: `Worker accepted hire and confirmed final price`, entity_type: "job", entity_id: jobId,
       });
-      toast({ title: "Hire request accepted!" });
+      toast({ title: "Accepted - final price locked" });
     } else {
-      await supabase.from("jobs").update({ status: "cancelled", worker_id: null }).eq("id", jobId);
+      await supabase.from("jobs").update({ status: "cancelled", worker_id: null, customer_price_confirmed: false }).eq("id", jobId);
       await supabase.from("activity_logs").insert({
         user_id: user!.id, action: "Hire Request Rejected", detail: `Worker rejected a direct hire request`, entity_type: "job", entity_id: jobId,
       });
       toast({ title: "Hire request rejected" });
     }
+    loadData();
+  };
+
+  const confirmFinalPrice = async (jobId: string) => {
+    const { error } = await supabase.from("jobs").update({ worker_price_confirmed: true }).eq("id", jobId);
+    if (error) {
+      toast({ title: "Confirm failed", description: friendlyError(error), variant: "destructive" });
+      return;
+    }
+    await supabase.from("activity_logs").insert({
+      user_id: user!.id, action: "Final Price Confirmed", detail: `Worker confirmed final price - locked`, entity_type: "job", entity_id: jobId,
+    });
+    toast({ title: "Final price confirmed and locked" });
+    loadData();
+  };
+
+  const rejectFinalPrice = async (jobId: string) => {
+    const { error } = await supabase.from("jobs").update({
+      customer_price_confirmed: false,
+      worker_price_confirmed: false,
+    }).eq("id", jobId);
+    if (error) {
+      toast({ title: "Action failed", description: friendlyError(error), variant: "destructive" });
+      return;
+    }
+    toast({ title: "Sent back to client to adjust price" });
     loadData();
   };
 
