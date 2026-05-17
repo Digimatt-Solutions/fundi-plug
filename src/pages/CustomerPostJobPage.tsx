@@ -487,6 +487,56 @@ export default function CustomerPostJobPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Final Price Lock Dialog (when accepting an application) */}
+      <Dialog open={!!priceLockApp} onOpenChange={(open) => { if (!open) { setPriceLockApp(null); setPriceLockValue(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> Confirm Final Price</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Set the final agreed price for this job. The fundi will then need to confirm before it is locked.
+            </p>
+            {priceLockApp?.application?.proposed_rate && (
+              <p className="text-xs text-muted-foreground">Fundi proposed: <strong className="text-foreground">KSH {Number(priceLockApp.application.proposed_rate).toLocaleString()}</strong></p>
+            )}
+            <div className="space-y-2">
+              <Label>Final Price (KSH) *</Label>
+              <Input type="number" min="1" value={priceLockValue} onChange={(e) => setPriceLockValue(e.target.value)} className="bg-muted/50" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setPriceLockApp(null); setPriceLockValue(""); }}>Cancel</Button>
+            <Button onClick={confirmPriceAndHire} disabled={confirmingPrice || !priceLockValue}>
+              {confirmingPrice ? "Confirming..." : "Confirm & Hire"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Final Price Dialog */}
+      <Dialog open={!!editPriceJob} onOpenChange={(open) => { if (!open) { setEditPriceJob(null); setEditPriceValue(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Pencil className="w-4 h-4" /> Edit Final Price</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Updating the price will require the fundi to confirm again before it is locked.
+            </p>
+            <div className="space-y-2">
+              <Label>Final Price (KSH) *</Label>
+              <Input type="number" min="1" value={editPriceValue} onChange={(e) => setEditPriceValue(e.target.value)} className="bg-muted/50" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setEditPriceJob(null); setEditPriceValue(""); }}>Cancel</Button>
+            <Button onClick={saveEditedPrice} disabled={!editPriceValue}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
