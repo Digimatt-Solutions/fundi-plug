@@ -193,19 +193,76 @@ export default function CustomerPostJobPage() {
     setLoadingApps(false);
   };
 
-  const handleApplication = async (appId: string, status: "accepted" | "rejected", workerId: string, jobId: string) => {
-    await supabase.from("job_applications").update({ status }).eq("id", appId);
+  // Final Price Lock dialog state for accepting an application
+  const [priceLockApp, setPriceLockApp] = useState<any>(null);
+  const [priceLockValue, setPriceLockValue] = useState("");
+  const [confirmingPrice, setConfirmingPrice] = useState(false);
+
+  const handleApplication = async (appId: string, status: "accepted" | "rejected", workerId: string, jobId: string, app?: any) => {
     if (status === "accepted") {
-      await supabase.from("jobs").update({ worker_id: workerId, status: "accepted" }).eq("id", jobId);
-      await supabase.from("job_applications").update({ status: "rejected" }).eq("job_id", jobId).neq("id", appId);
-      await supabase.from("activity_logs").insert([
-        { user_id: user!.id, action: "Fundi Selected", detail: `Client selected a fundi for job`, entity_type: "job", entity_id: jobId },
-      ]);
-      toast({ title: "Fundi hired!" });
-    } else {
-      toast({ title: "Application rejected" });
+      // Open Final Price Lock dialog instead of assigning immediately
+      const parent = applications.find((a) => a.id === appId) || app;
+      const parentJob = myJobs.find((j) => j.id === jobId);
+      const defaultPrice = parent?.proposed_rate ?? parentJob?.budget ?? "";
+      setPriceLockApp({ appId, workerId, jobId, application: parent });
+      setPriceLockValue(defaultPrice ? String(defaultPrice) : "");
+      return;
     }
+    await supabase.from("job_applications").update({ status }).eq("id", appId);
+    toast({ title: "Application rejected" });
     viewApplications(jobId); loadData();
+  };
+
+  const confirmPriceAndHire = async () => {
+    if (!priceLockApp || !priceLockValue || Number(priceLockValue) <= 0) {
+      toast({ title: "Enter a valid final price", variant: "destructive" });
+      return;
+    }
+    setConfirmingPrice(true);
+    const { appId, workerId, jobId } = priceLockApp;
+    const finalPrice = Number(priceLockValue);
+
+    const { error: jobErr } = await supabase.from("jobs").update({
+      worker_id: workerId,
+      status: "accepted",
+      final_price: finalPrice,
+      customer_price_confirmed: true,
+      worker_price_confirmed: false,
+      price_locked_at: null,
+    }).eq("id", jobId);
+    if (jobErr) {
+      toast({ title: "Failed to confirm price", description: friendlyError(jobErr), variant: "destructive" });
+      setConfirmingPrice(false);
+      return;
+    }
+    await supabase.from("job_applications").update({ status: "accepted" }).eq("id", appId);
+    await supabase.from("job_applications").update({ status: "rejected" }).eq("job_id", jobId).neq("id", appId);
+    await supabase.from("activity_logs").insert([
+      { user_id: user!.id, action: "Final Price Set", detail: `Client confirmed final price KSH ${finalPrice.toLocaleString()} - awaiting fundi confirmation`, entity_type: "job", entity_id: jobId },
+    ]);
+    toast({ title: "Fundi hired - price awaiting fundi confirmation" });
+    setPriceLockApp(null);
+    setPriceLockValue("");
+    setConfirmingPrice(false);
+    viewApplications(jobId); loadData();
+  };
+
+  // Re-edit price after the fundi rejected or before they confirm
+  const [editPriceJob, setEditPriceJob] = useState<any>(null);
+  const [editPriceValue, setEditPriceValue] = useState("");
+  const saveEditedPrice = async () => {
+    if (!editPriceJob || !editPriceValue || Number(editPriceValue) <= 0) return;
+    const { error } = await supabase.from("jobs").update({
+      final_price: Number(editPriceValue),
+      customer_price_confirmed: true,
+      worker_price_confirmed: false,
+    }).eq("id", editPriceJob.id);
+    if (error) {
+      toast({ title: "Update failed", description: friendlyError(error), variant: "destructive" });
+      return;
+    }
+    toast({ title: "Updated - awaiting fundi confirmation" });
+    setEditPriceJob(null); setEditPriceValue(""); loadData();
   };
 
   if (loading) {
