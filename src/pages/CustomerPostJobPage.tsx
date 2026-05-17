@@ -325,6 +325,7 @@ export default function CustomerPostJobPage() {
                           job.status === "cancelled" ? "bg-destructive/10 text-destructive" :
                           "bg-chart-4/10 text-chart-4"
                         }`}>{job.status.replace("_", " ")}</span>
+                        <PriceLockBadge job={job} />
                       </div>
                       {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -334,7 +335,7 @@ export default function CustomerPostJobPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {canEditJob(job) && (
                       <Button size="sm" variant="outline" onClick={() => openEditJob(job)} className="active:scale-[0.97]">
                         <Pencil className="w-4 h-4 mr-1" /> Edit
@@ -343,6 +344,11 @@ export default function CustomerPostJobPage() {
                     {job.status === "pending" && (
                       <Button size="sm" variant="outline" onClick={() => viewApplications(job.id)} className="active:scale-[0.97]">
                         <Users className="w-4 h-4 mr-1" /> Applications
+                      </Button>
+                    )}
+                    {job.worker_id && job.customer_price_confirmed && !job.price_locked_at && (
+                      <Button size="sm" variant="outline" onClick={() => { setEditPriceJob(job); setEditPriceValue(String(job.final_price ?? job.budget ?? "")); }} className="active:scale-[0.97]">
+                        <Pencil className="w-4 h-4 mr-1" /> Edit Final Price
                       </Button>
                     )}
                     {canDeleteJob(job) && (
