@@ -16,6 +16,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
 import ChatButton from "@/components/chat/ChatButton";
+import PriceLockBadge from "@/components/PriceLockBadge";
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
