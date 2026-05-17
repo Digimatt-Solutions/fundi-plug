@@ -102,6 +102,7 @@ export default function FindWorkersPage() {
         supabase
           .from("worker_profiles")
           .select("*, profiles:user_id(name, email, phone, avatar_url)")
+          .eq("verification_status", "approved")
           .order("is_online", { ascending: false }),
         supabase.from("service_categories").select("*").order("name"),
       ]);
