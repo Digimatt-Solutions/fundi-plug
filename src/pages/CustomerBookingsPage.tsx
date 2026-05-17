@@ -106,14 +106,14 @@ export default function CustomerBookingsPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (method === "stripe") {
         const { data, error } = await supabase.functions.invoke("create-payment", {
-          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
+          body: { jobId: job.id, amount: job.final_price || job.budget || 50, workerId: job.worker_id },
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
         if (error || data?.error) throw new Error(data?.error || error?.message);
         if (data?.url) window.location.href = data.url;
       } else if (method === "paystack") {
         const { data, error } = await supabase.functions.invoke("paystack-initiate-payment", {
-          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id },
+          body: { jobId: job.id, amount: job.final_price || job.budget || 50, workerId: job.worker_id },
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
         if (error) throw new Error(error.message);
@@ -128,7 +128,7 @@ export default function CustomerBookingsPage() {
           return;
         }
         const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
-          body: { jobId: job.id, amount: job.budget || 50, workerId: job.worker_id, phoneNumber: mpesaPhone },
+          body: { jobId: job.id, amount: job.final_price || job.budget || 50, workerId: job.worker_id, phoneNumber: mpesaPhone },
           headers: { Authorization: `Bearer ${session?.access_token}` },
         });
         if (error || data?.error) throw new Error(data?.error || error?.message);
@@ -275,7 +275,7 @@ export default function CustomerBookingsPage() {
             </p>
             <div className="p-4 rounded-lg bg-muted/50 flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{t("Amount Due")}</span>
-              <span className="text-2xl font-bold text-foreground">KSH {payDialog?.budget || 50}</span>
+              <span className="text-2xl font-bold text-foreground">KSH {payDialog?.final_price || payDialog?.budget || 50}</span>
             </div>
 
             {!paymentMethod ? (
