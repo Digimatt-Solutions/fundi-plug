@@ -102,7 +102,6 @@ export default function FindWorkersPage() {
         supabase
           .from("worker_profiles")
           .select("*, profiles:user_id(name, email, phone, avatar_url)")
-          .eq("verification_status", "approved")
           .order("is_online", { ascending: false }),
         supabase.from("service_categories").select("*").order("name"),
       ]);
@@ -178,8 +177,6 @@ export default function FindWorkersPage() {
       title: hireTitle.trim(),
       description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
       budget: Number(hireBudget),
-      final_price: Number(hireBudget),
-      customer_price_confirmed: true,
       address: hireAddress.trim() || null,
       category_id: hireCategoryId || null,
       customer_id: user.id,

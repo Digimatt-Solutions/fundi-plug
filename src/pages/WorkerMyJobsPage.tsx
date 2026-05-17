@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, Star, Lock } from "lucide-react";
+import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, Star } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { maskEmail, maskPhone } from "@/lib/mask";
 import { friendlyError } from "@/lib/friendlyError";
 import ChatButton from "@/components/chat/ChatButton";
-import PriceLockBadge from "@/components/PriceLockBadge";
 
 export default function WorkerMyJobsPage() {
   const { user } = useAuth();
@@ -142,56 +141,18 @@ export default function WorkerMyJobsPage() {
 
   const respondToHireRequest = async (jobId: string, accept: boolean) => {
     if (accept) {
-      if (!isVerified) {
-        toast({ title: "Account not approved", description: "You can only accept hire requests once your profile is approved.", variant: "destructive" });
-        return;
-      }
-      // Accept the job AND confirm the client's price in one step (price was set by client on hire)
-      const { error } = await supabase.from("jobs").update({
-        status: "accepted",
-        worker_price_confirmed: true,
-      }).eq("id", jobId);
-      if (error) {
-        toast({ title: "Failed to accept", description: friendlyError(error), variant: "destructive" });
-        return;
-      }
+      await supabase.from("jobs").update({ status: "accepted" }).eq("id", jobId);
       await supabase.from("activity_logs").insert({
-        user_id: user!.id, action: "Hire Request Accepted", detail: `Worker accepted hire and confirmed final price`, entity_type: "job", entity_id: jobId,
+        user_id: user!.id, action: "Hire Request Accepted", detail: `Worker accepted a direct hire request`, entity_type: "job", entity_id: jobId,
       });
-      toast({ title: "Accepted - final price locked" });
+      toast({ title: "Hire request accepted!" });
     } else {
-      await supabase.from("jobs").update({ status: "cancelled", worker_id: null, customer_price_confirmed: false }).eq("id", jobId);
+      await supabase.from("jobs").update({ status: "cancelled", worker_id: null }).eq("id", jobId);
       await supabase.from("activity_logs").insert({
         user_id: user!.id, action: "Hire Request Rejected", detail: `Worker rejected a direct hire request`, entity_type: "job", entity_id: jobId,
       });
       toast({ title: "Hire request rejected" });
     }
-    loadData();
-  };
-
-  const confirmFinalPrice = async (jobId: string) => {
-    const { error } = await supabase.from("jobs").update({ worker_price_confirmed: true }).eq("id", jobId);
-    if (error) {
-      toast({ title: "Confirm failed", description: friendlyError(error), variant: "destructive" });
-      return;
-    }
-    await supabase.from("activity_logs").insert({
-      user_id: user!.id, action: "Final Price Confirmed", detail: `Worker confirmed final price - locked`, entity_type: "job", entity_id: jobId,
-    });
-    toast({ title: "Final price confirmed and locked" });
-    loadData();
-  };
-
-  const rejectFinalPrice = async (jobId: string) => {
-    const { error } = await supabase.from("jobs").update({
-      customer_price_confirmed: false,
-      worker_price_confirmed: false,
-    }).eq("id", jobId);
-    if (error) {
-      toast({ title: "Action failed", description: friendlyError(error), variant: "destructive" });
-      return;
-    }
-    toast({ title: "Sent back to client to adjust price" });
     loadData();
   };
 
@@ -276,18 +237,14 @@ export default function WorkerMyJobsPage() {
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
                       </div>
                       <div className="flex gap-2 w-full sm:w-auto">
-                        <Button size="sm" className="flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, true)} disabled={!isVerified}><Check className="w-4 h-4 mr-1" /> Accept & Confirm Price</Button>
+                        <Button size="sm" className="flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, true)}><Check className="w-4 h-4 mr-1" /> Accept</Button>
                         <Button size="sm" variant="outline" className="text-destructive flex-1 sm:flex-none" onClick={() => respondToHireRequest(job.id, false)}><X className="w-4 h-4 mr-1" /> Reject</Button>
                       </div>
                     </div>
                     {job.description && <p className="text-sm text-muted-foreground break-words">{job.description}</p>}
-                    <div className="p-2 rounded-md bg-primary/10 border border-primary/20 text-sm text-foreground flex items-center gap-2 flex-wrap">
-                      <Lock className="w-3.5 h-3.5 text-primary" />
-                      <span>Client's final price: <strong>KSH {Number(job.final_price ?? job.budget ?? 0).toLocaleString()}</strong></span>
-                      <span className="text-xs text-muted-foreground">- Accepting locks this price.</span>
-                    </div>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                       {job.address && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address}</span>}
+                      <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
                     </div>
                   </div>
@@ -378,17 +335,16 @@ export default function WorkerMyJobsPage() {
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="min-w-0 space-y-1">
+                  <div className="min-w-0">
                     <p className="font-medium text-foreground break-words">{job.title}</p>
                     <p className="text-xs text-muted-foreground">KSH {job.budget ? job.budget.toLocaleString() : "No budget"} - {new Date(job.created_at).toLocaleString()}</p>
-                    <PriceLockBadge job={job} />
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                       job.status === "completed" ? "bg-green-500/10 text-green-600" :
                       job.status === "in_progress" ? "bg-primary/10 text-primary" : "bg-chart-4/10 text-chart-4"
                     }`}>{job.status === "completed" ? "Job Completed" : job.status === "in_progress" ? "In Progress" : job.status.replace("_", " ")}</span>
-                    {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")} disabled={!job.price_locked_at}>Start</Button>}
+                    {job.status === "accepted" && <Button size="sm" variant="outline" onClick={() => updateJobStatus(job.id, "in_progress")}>Start</Button>}
                     {job.status === "in_progress" && <Button size="sm" onClick={() => updateJobStatus(job.id, "completed")}>Complete</Button>}
                     {job.status === "completed" && job.paymentStatus && (
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -409,15 +365,6 @@ export default function WorkerMyJobsPage() {
                     )}
                   </div>
                 </div>
-                {job.customer_price_confirmed && !job.worker_price_confirmed && !job.price_locked_at && (
-                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/30 space-y-2">
-                    <p className="text-sm text-foreground flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> Client has set the final price at <strong>KSH {Number(job.final_price ?? job.budget ?? 0).toLocaleString()}</strong>. Confirm to lock.</p>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => confirmFinalPrice(job.id)}><Check className="w-4 h-4 mr-1" /> Confirm Price</Button>
-                      <Button size="sm" variant="outline" className="text-destructive" onClick={() => rejectFinalPrice(job.id)}><X className="w-4 h-4 mr-1" /> Reject - Ask Client to Adjust</Button>
-                    </div>
-                  </div>
-                )}
                 <div className="p-3 rounded-lg bg-muted/50 space-y-1">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <p className="text-xs font-medium text-foreground flex items-center gap-2 flex-wrap">Client: {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</p>

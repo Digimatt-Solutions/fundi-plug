@@ -522,20 +522,16 @@ export type Database = {
           category_id: string | null
           created_at: string
           customer_id: string
-          customer_price_confirmed: boolean
           description: string | null
-          final_price: number | null
           id: string
           image_url: string | null
           is_instant: boolean
           latitude: number | null
           longitude: number | null
-          price_locked_at: string | null
           status: Database["public"]["Enums"]["job_status"]
           title: string
           updated_at: string
           worker_id: string | null
-          worker_price_confirmed: boolean
         }
         Insert: {
           address?: string | null
@@ -543,20 +539,16 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           customer_id: string
-          customer_price_confirmed?: boolean
           description?: string | null
-          final_price?: number | null
           id?: string
           image_url?: string | null
           is_instant?: boolean
           latitude?: number | null
           longitude?: number | null
-          price_locked_at?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           title: string
           updated_at?: string
           worker_id?: string | null
-          worker_price_confirmed?: boolean
         }
         Update: {
           address?: string | null
@@ -564,20 +556,16 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           customer_id?: string
-          customer_price_confirmed?: boolean
           description?: string | null
-          final_price?: number | null
           id?: string
           image_url?: string | null
           is_instant?: boolean
           latitude?: number | null
           longitude?: number | null
-          price_locked_at?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           title?: string
           updated_at?: string
           worker_id?: string | null
-          worker_price_confirmed?: boolean
         }
         Relationships: [
           {
