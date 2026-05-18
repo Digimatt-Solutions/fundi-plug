@@ -39,6 +39,8 @@ export default function WorkerDashboard() {
   const [recentJobs, setRecentJobs] = useState<any[]>([]);
   const [upcomingJobs, setUpcomingJobs] = useState<any[]>([]);
   const [earningsData, setEarningsData] = useState<any[]>([]);
+  const [allPayments, setAllPayments] = useState<any[]>([]);
+  const [range, setRange] = useState<EarningsRange>("30d");
   const [jobsData, setJobsData] = useState<any[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [loading, setLoading] = useState(true);
