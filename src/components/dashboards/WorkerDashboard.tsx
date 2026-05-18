@@ -92,20 +92,12 @@ export default function WorkerDashboard() {
       setRecentJobs(jobs || []);
 
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      const dayCounts: Record<string, number> = {};
       const orderedDays: string[] = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(d.getDate() - (6 - i));
-        const k = days[d.getDay()];
-        dayCounts[k] = 0;
-        orderedDays.push(k);
+        orderedDays.push(days[d.getDay()]);
       }
-      (weekRes.data || []).forEach((p: any) => {
-        const day = days[new Date(p.created_at).getDay()];
-        dayCounts[day] = (dayCounts[day] || 0) + Number(p.amount);
-      });
-      setEarningsData(orderedDays.map(day => ({ day, amount: dayCounts[day] })));
 
       const { data: weekJobs } = await supabase.from("jobs").select("created_at").eq("worker_id", user!.id).gte("created_at", sevenDaysAgo.toISOString());
       const jobDayCounts: Record<string, number> = {};
