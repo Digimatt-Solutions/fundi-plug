@@ -10,7 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { friendlyError } from "@/lib/friendlyError";
+
+type EarningsRange = "7d" | "30d" | "90d" | "12m" | "all";
 
 export default function WorkerEarningsPage() {
   const { user } = useAuth();
@@ -23,6 +28,7 @@ export default function WorkerEarningsPage() {
   const [totalWithdrawn, setTotalWithdrawn] = useState(0);
   const [balance, setBalance] = useState(0);
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
+  const [range, setRange] = useState<EarningsRange>("all");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -62,22 +68,95 @@ export default function WorkerEarningsPage() {
     setTotalWithdrawn(withdrawn);
     setBalance(earned - withdrawn - pendingWithdrawals);
 
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const dayCounts: Record<string, number> = {};
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(); d.setDate(d.getDate() - (6 - i));
-      dayCounts[days[d.getDay()]] = 0;
-    }
-    const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-    all.filter(p => p.status === "completed" && new Date(p.created_at) >= sevenDaysAgo).forEach(p => {
-      const day = days[new Date(p.created_at).getDay()];
-      dayCounts[day] = (dayCounts[day] || 0) + Number(p.amount);
-    });
-    setWeeklyData(Object.entries(dayCounts).map(([day, amount]) => ({ day, amount })));
     setLoading(false);
   };
 
   useEffect(() => { load(); }, [user]);
+
+  useEffect(() => {
+    const completed = payments.filter((p) => p.status === "completed");
+    const now = new Date();
+    const buckets: { label: string; amount: number }[] = [];
+
+    const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const fmtMonth = (d: Date) => d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+
+    if (range === "7d" || range === "30d") {
+      const days = range === "7d" ? 7 : 30;
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        map[key] = 0; order.push(key);
+      }
+      completed.forEach((p) => {
+        const d = new Date(p.created_at); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        if (key in map) map[key] += Number(p.amount);
+      });
+      order.forEach((k) => buckets.push({ label: fmtDay(new Date(k)), amount: map[k] }));
+    } else if (range === "90d") {
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = 12; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i * 7); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        map[key] = 0; order.push(key);
+      }
+      const startKeys = order.map((k) => new Date(k).getTime());
+      completed.forEach((p) => {
+        const t = new Date(p.created_at).getTime();
+        for (let i = startKeys.length - 1; i >= 0; i--) {
+          if (t >= startKeys[i]) { map[order[i]] += Number(p.amount); break; }
+        }
+      });
+      order.forEach((k) => buckets.push({ label: fmtDay(new Date(k)), amount: map[k] }));
+    } else if (range === "12m") {
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        map[key] = 0; order.push(key);
+      }
+      completed.forEach((p) => {
+        const d = new Date(p.created_at);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        if (key in map) map[key] += Number(p.amount);
+      });
+      order.forEach((k) => {
+        const [y, m] = k.split("-").map(Number);
+        buckets.push({ label: fmtMonth(new Date(y, m, 1)), amount: map[k] });
+      });
+    } else {
+      if (completed.length === 0) {
+        buckets.push({ label: fmtMonth(now), amount: 0 });
+      } else {
+        const sorted = [...completed].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        const first = new Date(sorted[0].created_at);
+        const map: Record<string, number> = {};
+        const order: string[] = [];
+        const cur = new Date(first.getFullYear(), first.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth(), 1);
+        while (cur <= end) {
+          const key = `${cur.getFullYear()}-${cur.getMonth()}`;
+          map[key] = 0; order.push(key);
+          cur.setMonth(cur.getMonth() + 1);
+        }
+        completed.forEach((p) => {
+          const d = new Date(p.created_at);
+          const key = `${d.getFullYear()}-${d.getMonth()}`;
+          if (key in map) map[key] += Number(p.amount);
+        });
+        order.forEach((k) => {
+          const [y, m] = k.split("-").map(Number);
+          buckets.push({ label: fmtMonth(new Date(y, m, 1)), amount: map[k] });
+        });
+      }
+    }
+    setWeeklyData(buckets);
+  }, [payments, range]);
 
   const handleWithdraw = async () => {
     const amount = Number(withdrawAmount);
@@ -218,7 +297,19 @@ export default function WorkerEarningsPage() {
       </div>
 
       <div className="stat-card animate-fade-in" style={{ animationDelay: "300ms" }}>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Weekly Earnings</h2>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h2 className="text-lg font-semibold text-foreground">Earnings Over Time</h2>
+          <Select value={range} onValueChange={(v) => setRange(v as EarningsRange)}>
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="12m">Last 12 months</SelectItem>
+              <SelectItem value="all">All time</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={weeklyData}>
             <defs>
@@ -228,7 +319,7 @@ export default function WorkerEarningsPage() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+            <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} />
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
             <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", color: "hsl(var(--foreground))" }} />
             <Area type="monotone" dataKey="amount" stroke="hsl(22, 93%, 49%)" fill="url(#earnGrad2)" strokeWidth={2} />
