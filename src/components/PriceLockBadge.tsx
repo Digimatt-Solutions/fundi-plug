@@ -7,12 +7,18 @@ interface Props {
     customer_price_confirmed?: boolean;
     worker_price_confirmed?: boolean;
     price_locked_at?: string | null;
+    status?: string | null;
+    payment_status?: string | null;
   };
   className?: string;
 }
 
 export default function PriceLockBadge({ job, className = "" }: Props) {
   const amount = job.final_price ?? job.budget;
+  // Hide pre-lock states once the job is no longer active (completed/cancelled/paid)
+  const terminal = ["completed", "cancelled", "paid"].includes((job.status || "").toLowerCase())
+    || (job.payment_status || "").toLowerCase() === "paid";
+  if (terminal && !job.price_locked_at) return null;
   if (job.price_locked_at) {
     return (
       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-600 ${className}`}>
