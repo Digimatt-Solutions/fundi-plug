@@ -25,6 +25,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LatestPostsWidget from "@/components/community/LatestPostsWidget";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type EarningsRange = "7d" | "30d" | "90d" | "12m" | "all";
 
 export default function WorkerDashboard() {
   const { user } = useAuth();
@@ -36,6 +39,8 @@ export default function WorkerDashboard() {
   const [recentJobs, setRecentJobs] = useState<any[]>([]);
   const [upcomingJobs, setUpcomingJobs] = useState<any[]>([]);
   const [earningsData, setEarningsData] = useState<any[]>([]);
+  const [allPayments, setAllPayments] = useState<any[]>([]);
+  const [range, setRange] = useState<EarningsRange>("30d");
   const [jobsData, setJobsData] = useState<any[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -49,18 +54,21 @@ export default function WorkerDashboard() {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
-      const [completedRes, pendingRes, paymentsRes, reviewsRes, weekRes, msgRes, upcomingRes] = await Promise.all([
+      const [completedRes, pendingRes, paymentsRes, reviewsRes, allCompletedRes, msgRes, upcomingRes] = await Promise.all([
         supabase.from("jobs").select("id", { count: "exact", head: true }).eq("worker_id", user!.id).eq("status", "completed"),
         supabase.from("jobs").select("id", { count: "exact", head: true }).eq("worker_id", user!.id).eq("status", "pending"),
         supabase.from("payments").select("amount").eq("payee_id", user!.id).eq("status", "completed"),
         supabase.from("reviews").select("rating").eq("reviewee_id", user!.id),
-        supabase.from("payments").select("amount").eq("payee_id", user!.id).eq("status", "completed").gte("created_at", sevenDaysAgo.toISOString()),
+        supabase.from("payments").select("amount, created_at").eq("payee_id", user!.id).eq("status", "completed").order("created_at", { ascending: true }),
         supabase.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", user!.id).is("read_at", null),
         supabase.from("jobs").select("*, profiles!jobs_customer_id_fkey(name)").eq("worker_id", user!.id).in("status", ["pending", "in_progress"]).order("created_at", { ascending: false }).limit(3),
       ]);
 
       const totalEarnings = (paymentsRes.data || []).reduce((s, p) => s + Number(p.amount), 0);
-      const weekEarnings = (weekRes.data || []).reduce((s, p) => s + Number(p.amount), 0);
+      const weekEarnings = (allCompletedRes.data || [])
+        .filter((p: any) => new Date(p.created_at) >= sevenDaysAgo)
+        .reduce((s: number, p: any) => s + Number(p.amount), 0);
+      setAllPayments(allCompletedRes.data || []);
       const ratings = reviewsRes.data || [];
       const avgRating = ratings.length > 0 ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : 0;
 
@@ -84,20 +92,12 @@ export default function WorkerDashboard() {
       setRecentJobs(jobs || []);
 
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      const dayCounts: Record<string, number> = {};
       const orderedDays: string[] = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(d.getDate() - (6 - i));
-        const k = days[d.getDay()];
-        dayCounts[k] = 0;
-        orderedDays.push(k);
+        orderedDays.push(days[d.getDay()]);
       }
-      (weekRes.data || []).forEach((p: any) => {
-        const day = days[new Date(p.created_at).getDay()];
-        dayCounts[day] = (dayCounts[day] || 0) + Number(p.amount);
-      });
-      setEarningsData(orderedDays.map(day => ({ day, amount: dayCounts[day] })));
 
       const { data: weekJobs } = await supabase.from("jobs").select("created_at").eq("worker_id", user!.id).gte("created_at", sevenDaysAgo.toISOString());
       const jobDayCounts: Record<string, number> = {};
@@ -141,6 +141,90 @@ export default function WorkerDashboard() {
       ]);
     }
   };
+
+  // Bucket earnings data based on selected range
+  useEffect(() => {
+    const now = new Date();
+    const buckets: { label: string; amount: number }[] = [];
+    const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const fmtMonth = (d: Date) => d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+
+    if (range === "7d" || range === "30d") {
+      const days = range === "7d" ? 7 : 30;
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        map[key] = 0; order.push(key);
+      }
+      allPayments.forEach((p: any) => {
+        const d = new Date(p.created_at); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        if (key in map) map[key] += Number(p.amount);
+      });
+      order.forEach((k) => buckets.push({ label: fmtDay(new Date(k)), amount: map[k] }));
+    } else if (range === "90d") {
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = 12; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i * 7); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        map[key] = 0; order.push(key);
+      }
+      const startKeys = order.map((k) => new Date(k).getTime());
+      allPayments.forEach((p: any) => {
+        const t = new Date(p.created_at).getTime();
+        for (let i = startKeys.length - 1; i >= 0; i--) {
+          if (t >= startKeys[i]) { map[order[i]] += Number(p.amount); break; }
+        }
+      });
+      order.forEach((k) => buckets.push({ label: fmtDay(new Date(k)), amount: map[k] }));
+    } else if (range === "12m") {
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        map[key] = 0; order.push(key);
+      }
+      allPayments.forEach((p: any) => {
+        const d = new Date(p.created_at);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        if (key in map) map[key] += Number(p.amount);
+      });
+      order.forEach((k) => {
+        const [y, m] = k.split("-").map(Number);
+        buckets.push({ label: fmtMonth(new Date(y, m, 1)), amount: map[k] });
+      });
+    } else {
+      if (allPayments.length === 0) {
+        buckets.push({ label: fmtMonth(now), amount: 0 });
+      } else {
+        const sorted = [...allPayments].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        const first = new Date(sorted[0].created_at);
+        const map: Record<string, number> = {};
+        const order: string[] = [];
+        const cur = new Date(first.getFullYear(), first.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth(), 1);
+        while (cur <= end) {
+          const key = `${cur.getFullYear()}-${cur.getMonth()}`;
+          map[key] = 0; order.push(key);
+          cur.setMonth(cur.getMonth() + 1);
+        }
+        allPayments.forEach((p: any) => {
+          const d = new Date(p.created_at);
+          const key = `${d.getFullYear()}-${d.getMonth()}`;
+          if (key in map) map[key] += Number(p.amount);
+        });
+        order.forEach((k) => {
+          const [y, m] = k.split("-").map(Number);
+          buckets.push({ label: fmtMonth(new Date(y, m, 1)), amount: map[k] });
+        });
+      }
+    }
+    setEarningsData(buckets);
+  }, [allPayments, range]);
 
   // Realtime: keep local toggle in sync if profile updates elsewhere
   useEffect(() => {
@@ -232,14 +316,26 @@ export default function WorkerDashboard() {
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-2xl border bg-card p-5 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <div>
-              <h2 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Earnings")}</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-foreground">{t("Earnings Over Time")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">KSH {stats.weekEarnings.toLocaleString()} {t("this week")}</p>
             </div>
-            <button onClick={() => navigate("/dashboard/earnings")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-              {t("View all")} <ArrowUpRight className="w-3 h-3" />
-            </button>
+            <div className="flex items-center gap-2">
+              <Select value={range} onValueChange={(v) => setRange(v as EarningsRange)}>
+                <SelectTrigger className="w-[150px] h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="90d">Last 90 days</SelectItem>
+                  <SelectItem value="12m">Last 12 months</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
+                </SelectContent>
+              </Select>
+              <button onClick={() => navigate("/dashboard/earnings")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                {t("View all")} <ArrowUpRight className="w-3 h-3" />
+              </button>
+            </div>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={earningsData} margin={{ left: -20, right: 0, top: 5, bottom: 5 }}>
@@ -250,7 +346,7 @@ export default function WorkerDashboard() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--primary) / 0.2)" />
-              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
+              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
               <YAxis
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={11}
