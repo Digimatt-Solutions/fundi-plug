@@ -316,14 +316,26 @@ export default function WorkerDashboard() {
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-2xl border bg-card p-5 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <div>
-              <h2 className="text-base sm:text-lg font-semibold text-foreground">{t("Weekly Earnings")}</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-foreground">{t("Earnings Over Time")}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">KSH {stats.weekEarnings.toLocaleString()} {t("this week")}</p>
             </div>
-            <button onClick={() => navigate("/dashboard/earnings")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-              {t("View all")} <ArrowUpRight className="w-3 h-3" />
-            </button>
+            <div className="flex items-center gap-2">
+              <Select value={range} onValueChange={(v) => setRange(v as EarningsRange)}>
+                <SelectTrigger className="w-[150px] h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="90d">Last 90 days</SelectItem>
+                  <SelectItem value="12m">Last 12 months</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
+                </SelectContent>
+              </Select>
+              <button onClick={() => navigate("/dashboard/earnings")} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                {t("View all")} <ArrowUpRight className="w-3 h-3" />
+              </button>
+            </div>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={earningsData} margin={{ left: -20, right: 0, top: 5, bottom: 5 }}>
