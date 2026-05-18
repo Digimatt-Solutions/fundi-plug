@@ -10,7 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { friendlyError } from "@/lib/friendlyError";
+
+type EarningsRange = "7d" | "30d" | "90d" | "12m" | "all";
 
 export default function WorkerEarningsPage() {
   const { user } = useAuth();
