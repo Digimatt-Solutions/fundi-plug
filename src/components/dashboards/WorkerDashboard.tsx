@@ -25,6 +25,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LatestPostsWidget from "@/components/community/LatestPostsWidget";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type EarningsRange = "7d" | "30d" | "90d" | "12m" | "all";
 
 export default function WorkerDashboard() {
   const { user } = useAuth();
