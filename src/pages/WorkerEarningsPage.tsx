@@ -297,7 +297,19 @@ export default function WorkerEarningsPage() {
       </div>
 
       <div className="stat-card animate-fade-in" style={{ animationDelay: "300ms" }}>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Weekly Earnings</h2>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h2 className="text-lg font-semibold text-foreground">Earnings Over Time</h2>
+          <Select value={range} onValueChange={(v) => setRange(v as EarningsRange)}>
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="12m">Last 12 months</SelectItem>
+              <SelectItem value="all">All time</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={weeklyData}>
             <defs>
@@ -307,7 +319,7 @@ export default function WorkerEarningsPage() {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+            <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={12} />
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
             <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px", color: "hsl(var(--foreground))" }} />
             <Area type="monotone" dataKey="amount" stroke="hsl(22, 93%, 49%)" fill="url(#earnGrad2)" strokeWidth={2} />
