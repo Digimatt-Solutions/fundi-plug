@@ -54,18 +54,21 @@ export default function WorkerDashboard() {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
-      const [completedRes, pendingRes, paymentsRes, reviewsRes, weekRes, msgRes, upcomingRes] = await Promise.all([
+      const [completedRes, pendingRes, paymentsRes, reviewsRes, allCompletedRes, msgRes, upcomingRes] = await Promise.all([
         supabase.from("jobs").select("id", { count: "exact", head: true }).eq("worker_id", user!.id).eq("status", "completed"),
         supabase.from("jobs").select("id", { count: "exact", head: true }).eq("worker_id", user!.id).eq("status", "pending"),
         supabase.from("payments").select("amount").eq("payee_id", user!.id).eq("status", "completed"),
         supabase.from("reviews").select("rating").eq("reviewee_id", user!.id),
-        supabase.from("payments").select("amount").eq("payee_id", user!.id).eq("status", "completed").gte("created_at", sevenDaysAgo.toISOString()),
+        supabase.from("payments").select("amount, created_at").eq("payee_id", user!.id).eq("status", "completed").order("created_at", { ascending: true }),
         supabase.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", user!.id).is("read_at", null),
         supabase.from("jobs").select("*, profiles!jobs_customer_id_fkey(name)").eq("worker_id", user!.id).in("status", ["pending", "in_progress"]).order("created_at", { ascending: false }).limit(3),
       ]);
 
       const totalEarnings = (paymentsRes.data || []).reduce((s, p) => s + Number(p.amount), 0);
-      const weekEarnings = (weekRes.data || []).reduce((s, p) => s + Number(p.amount), 0);
+      const weekEarnings = (allCompletedRes.data || [])
+        .filter((p: any) => new Date(p.created_at) >= sevenDaysAgo)
+        .reduce((s: number, p: any) => s + Number(p.amount), 0);
+      setAllPayments(allCompletedRes.data || []);
       const ratings = reviewsRes.data || [];
       const avgRating = ratings.length > 0 ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : 0;
 
