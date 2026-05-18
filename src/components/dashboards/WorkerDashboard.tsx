@@ -346,7 +346,7 @@ export default function WorkerDashboard() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--primary) / 0.2)" />
-              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
+              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} axisLine={false} tickLine={false} />
               <YAxis
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={11}
