@@ -142,6 +142,90 @@ export default function WorkerDashboard() {
     }
   };
 
+  // Bucket earnings data based on selected range
+  useEffect(() => {
+    const now = new Date();
+    const buckets: { label: string; amount: number }[] = [];
+    const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const fmtMonth = (d: Date) => d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+
+    if (range === "7d" || range === "30d") {
+      const days = range === "7d" ? 7 : 30;
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        map[key] = 0; order.push(key);
+      }
+      allPayments.forEach((p: any) => {
+        const d = new Date(p.created_at); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        if (key in map) map[key] += Number(p.amount);
+      });
+      order.forEach((k) => buckets.push({ label: fmtDay(new Date(k)), amount: map[k] }));
+    } else if (range === "90d") {
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = 12; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i * 7); d.setHours(0, 0, 0, 0);
+        const key = d.toISOString().slice(0, 10);
+        map[key] = 0; order.push(key);
+      }
+      const startKeys = order.map((k) => new Date(k).getTime());
+      allPayments.forEach((p: any) => {
+        const t = new Date(p.created_at).getTime();
+        for (let i = startKeys.length - 1; i >= 0; i--) {
+          if (t >= startKeys[i]) { map[order[i]] += Number(p.amount); break; }
+        }
+      });
+      order.forEach((k) => buckets.push({ label: fmtDay(new Date(k)), amount: map[k] }));
+    } else if (range === "12m") {
+      const map: Record<string, number> = {};
+      const order: string[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        map[key] = 0; order.push(key);
+      }
+      allPayments.forEach((p: any) => {
+        const d = new Date(p.created_at);
+        const key = `${d.getFullYear()}-${d.getMonth()}`;
+        if (key in map) map[key] += Number(p.amount);
+      });
+      order.forEach((k) => {
+        const [y, m] = k.split("-").map(Number);
+        buckets.push({ label: fmtMonth(new Date(y, m, 1)), amount: map[k] });
+      });
+    } else {
+      if (allPayments.length === 0) {
+        buckets.push({ label: fmtMonth(now), amount: 0 });
+      } else {
+        const sorted = [...allPayments].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        const first = new Date(sorted[0].created_at);
+        const map: Record<string, number> = {};
+        const order: string[] = [];
+        const cur = new Date(first.getFullYear(), first.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth(), 1);
+        while (cur <= end) {
+          const key = `${cur.getFullYear()}-${cur.getMonth()}`;
+          map[key] = 0; order.push(key);
+          cur.setMonth(cur.getMonth() + 1);
+        }
+        allPayments.forEach((p: any) => {
+          const d = new Date(p.created_at);
+          const key = `${d.getFullYear()}-${d.getMonth()}`;
+          if (key in map) map[key] += Number(p.amount);
+        });
+        order.forEach((k) => {
+          const [y, m] = k.split("-").map(Number);
+          buckets.push({ label: fmtMonth(new Date(y, m, 1)), amount: map[k] });
+        });
+      }
+    }
+    setEarningsData(buckets);
+  }, [allPayments, range]);
+
   // Realtime: keep local toggle in sync if profile updates elsewhere
   useEffect(() => {
     if (!user) return;
