@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
 import PriceLockBadge from "@/components/PriceLockBadge";
+import ChatButton from "@/components/chat/ChatButton";
 import { Lock } from "lucide-react";
 
 export default function CustomerPostJobPage() {
