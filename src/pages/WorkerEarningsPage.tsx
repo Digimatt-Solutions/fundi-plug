@@ -28,7 +28,7 @@ export default function WorkerEarningsPage() {
   const [totalWithdrawn, setTotalWithdrawn] = useState(0);
   const [balance, setBalance] = useState(0);
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
-  const [range, setRange] = useState<EarningsRange>("all");
+  const [range, setRange] = useState<EarningsRange>("30d");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
