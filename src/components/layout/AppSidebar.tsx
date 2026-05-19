@@ -62,6 +62,15 @@ const customerNav = [
   { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
+const supplierNav = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
+  { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
+  { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
+  { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
+  { title: "Profile", url: "/dashboard/account", icon: UserCog, key: "account" },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
+];
+
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
@@ -74,7 +83,7 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (!user || user.role === "admin") return;
-    const role = user.role === "worker" ? "worker" : "customer";
+    const role = user.role === "worker" ? "worker" : user.role === "supplier" ? "supplier" : "customer";
     supabase.from("module_settings").select("module_key, enabled").eq("role", role).then(({ data }) => {
       const disabled = new Set<string>();
       (data || []).forEach((m: any) => { if (!m.enabled) disabled.add(m.module_key); });
@@ -100,7 +109,7 @@ export function AppSidebar() {
     return () => { supabase.removeChannel(ch); };
   }, [user]);
 
-  const allNav = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
+  const allNav = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : user?.role === "supplier" ? supplierNav : customerNav;
   const navItems = user?.role === "admin" ? allNav : allNav.filter(item => !disabledModules.has(item.key));
 
   return (

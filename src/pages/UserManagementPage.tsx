@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck, Crown } from "lucide-react";
+import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck, Crown, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const roleIcon = (role: string) => {
   if (role === "admin") return <Shield className="w-3.5 h-3.5" />;
   if (role === "worker") return <Wrench className="w-3.5 h-3.5" />;
+  if (role === "supplier") return <Package className="w-3.5 h-3.5" />;
   return <User className="w-3.5 h-3.5" />;
 };
 
@@ -156,10 +157,10 @@ export default function UserManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length > 0 ? (["admin", "worker", "customer"] as const).flatMap((roleKey) => {
+              {filtered.length > 0 ? (["admin", "worker", "supplier", "customer"] as const).flatMap((roleKey) => {
                 const group = filtered.filter(u => u.role === roleKey);
                 if (group.length === 0) return [];
-                const label = roleKey === "worker" ? "Fundis" : roleKey === "customer" ? "Clients" : "Admins";
+                const label = roleKey === "worker" ? "Fundis" : roleKey === "customer" ? "Clients" : roleKey === "supplier" ? "Suppliers" : "Admins";
                 return [
                   <tr key={`hdr-${roleKey}`} className="bg-primary/5 border-b border-border">
                     <td colSpan={5} className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-primary flex items-center gap-2">
@@ -192,7 +193,7 @@ export default function UserManagementPage() {
                   </td>
                   <td className="p-4">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-muted">
-                      {roleIcon(u.role)} {u.role === "worker" ? "Fundi" : u.role === "customer" ? "Client" : "Admin"}
+                      {roleIcon(u.role)} {u.role === "worker" ? "Fundi" : u.role === "customer" ? "Client" : u.role === "supplier" ? "Supplier" : "Admin"}
                     </span>
                   </td>
                   <td className="p-4">
@@ -264,6 +265,7 @@ export default function UserManagementPage() {
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="worker">Fundi</SelectItem>
               <SelectItem value="customer">Client</SelectItem>
+              <SelectItem value="supplier">Supplier</SelectItem>
             </SelectContent>
           </Select>
           <DialogFooter>
