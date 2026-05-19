@@ -176,7 +176,7 @@ export function TopNavbar() {
                   <div className="hidden sm:block text-left">
                     <p className="text-sm font-medium text-foreground leading-none">{user?.name}</p>
                     <p className="text-xs text-muted-foreground capitalize">
-                      {user?.role === "worker" ? "Fundi" : user?.role === "customer" ? "Client" : user?.role}
+                      {user?.role === "worker" ? "Fundi" : user?.role === "customer" ? "Client" : user?.role === "supplier" ? "Supplier" : user?.role}
                     </p>
                   </div>
                 </button>
