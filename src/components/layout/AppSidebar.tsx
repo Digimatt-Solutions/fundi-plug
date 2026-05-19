@@ -83,7 +83,7 @@ export function AppSidebar() {
 
   useEffect(() => {
     if (!user || user.role === "admin") return;
-    const role = user.role === "worker" ? "worker" : "customer";
+    const role = user.role === "worker" ? "worker" : user.role === "supplier" ? "supplier" : "customer";
     supabase.from("module_settings").select("module_key, enabled").eq("role", role).then(({ data }) => {
       const disabled = new Set<string>();
       (data || []).forEach((m: any) => { if (!m.enabled) disabled.add(m.module_key); });
