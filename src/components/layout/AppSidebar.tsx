@@ -62,6 +62,15 @@ const customerNav = [
   { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
 ];
 
+const supplierNav = [
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
+  { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
+  { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
+  { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
+  { title: "Profile", url: "/dashboard/account", icon: UserCog, key: "account" },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings, key: "settings" },
+];
+
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === "collapsed";
