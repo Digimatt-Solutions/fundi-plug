@@ -431,14 +431,14 @@ const Auth = () => {
               {mode === "signup" && (
                 <div className="space-y-2 animate-fade-in">
                   <Label className="text-foreground font-medium">I am a</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["customer", "worker"] as UserRole[]).map((r) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["customer", "worker", "supplier"] as UserRole[]).map((r) => (
                       <button key={r} type="button" onClick={() => setRole(r)}
                         className={`py-2.5 px-3 rounded-lg text-sm font-medium border transition-all duration-200 ${
                           role === r ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
                         }`}
                       >
-                        {r === "worker" ? "Fundi" : "Client"}
+                        {r === "worker" ? "Fundi" : r === "supplier" ? "Supplier" : "Client"}
                       </button>
                     ))}
                   </div>
