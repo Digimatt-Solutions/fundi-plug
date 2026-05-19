@@ -157,10 +157,10 @@ export default function UserManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length > 0 ? (["admin", "worker", "customer"] as const).flatMap((roleKey) => {
+              {filtered.length > 0 ? (["admin", "worker", "supplier", "customer"] as const).flatMap((roleKey) => {
                 const group = filtered.filter(u => u.role === roleKey);
                 if (group.length === 0) return [];
-                const label = roleKey === "worker" ? "Fundis" : roleKey === "customer" ? "Clients" : "Admins";
+                const label = roleKey === "worker" ? "Fundis" : roleKey === "customer" ? "Clients" : roleKey === "supplier" ? "Suppliers" : "Admins";
                 return [
                   <tr key={`hdr-${roleKey}`} className="bg-primary/5 border-b border-border">
                     <td colSpan={5} className="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-primary flex items-center gap-2">
