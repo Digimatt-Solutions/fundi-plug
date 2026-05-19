@@ -265,6 +265,7 @@ export default function UserManagementPage() {
               <SelectItem value="admin">Admin</SelectItem>
               <SelectItem value="worker">Fundi</SelectItem>
               <SelectItem value="customer">Client</SelectItem>
+              <SelectItem value="supplier">Supplier</SelectItem>
             </SelectContent>
           </Select>
           <DialogFooter>
