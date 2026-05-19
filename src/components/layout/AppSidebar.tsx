@@ -109,7 +109,7 @@ export function AppSidebar() {
     return () => { supabase.removeChannel(ch); };
   }, [user]);
 
-  const allNav = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
+  const allNav = user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : user?.role === "supplier" ? supplierNav : customerNav;
   const navItems = user?.role === "admin" ? allNav : allNav.filter(item => !disabledModules.has(item.key));
 
   return (
