@@ -14,7 +14,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    const [profilesRes, workersRes, jobsRes, paymentsRes, pendingRes, activeJobsRes, categoriesRes, commRes] = await Promise.all([
+    const [profilesRes, workersRes, jobsRes, paymentsRes, pendingRes, activeJobsRes, categoriesRes, commRes, suppliersRes, clientsRes] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }),
       supabase.from("worker_profiles").select("id", { count: "exact", head: true }).eq("verification_status", "approved"),
       supabase.from("jobs").select("id", { count: "exact", head: true }).eq("status", "completed"),
@@ -23,12 +23,16 @@ export default function AdminDashboard() {
       supabase.from("jobs").select("id", { count: "exact", head: true }).in("status", ["pending", "accepted", "in_progress"]),
       supabase.from("service_categories").select("id, name"),
       supabase.from("payments").select("commission").eq("status", "completed"),
+      supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "supplier"),
+      supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "customer"),
     ]);
     const revenue = (paymentsRes.data || []).reduce((sum, p) => sum + Number(p.amount), 0);
     const commission = (commRes.data || []).reduce((sum, p) => sum + Number(p.commission || 0), 0);
     setStats([
       { label: "Total Users", value: profilesRes.count ?? 0, icon: Users, color: "text-chart-3", bg: "bg-chart-3/10" },
+      { label: "Clients", value: clientsRes.count ?? 0, icon: Users, color: "text-chart-1", bg: "bg-chart-1/10" },
       { label: "Active Fundis", value: workersRes.count ?? 0, icon: Wrench, color: "text-chart-2", bg: "bg-chart-2/10" },
+      { label: "Suppliers", value: suppliersRes.count ?? 0, icon: Package, color: "text-chart-5", bg: "bg-chart-5/10" },
       { label: "Jobs Completed", value: jobsRes.count ?? 0, icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
       { label: "Revenue", value: `KSH ${revenue.toLocaleString()}`, icon: CreditCard, color: "text-chart-4", bg: "bg-chart-4/10" },
       { label: "Commission", value: `KSH ${commission.toLocaleString()}`, icon: Coins, color: "text-green-500", bg: "bg-green-500/10" },
