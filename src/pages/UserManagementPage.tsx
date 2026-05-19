@@ -193,7 +193,7 @@ export default function UserManagementPage() {
                   </td>
                   <td className="p-4">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-muted">
-                      {roleIcon(u.role)} {u.role === "worker" ? "Fundi" : u.role === "customer" ? "Client" : "Admin"}
+                      {roleIcon(u.role)} {u.role === "worker" ? "Fundi" : u.role === "customer" ? "Client" : u.role === "supplier" ? "Supplier" : "Admin"}
                     </span>
                   </td>
                   <td className="p-4">
