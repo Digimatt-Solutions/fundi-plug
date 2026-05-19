@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Briefcase, CreditCard, Wrench, TrendingUp, CheckCircle, Coins } from "lucide-react";
+import { Users, Briefcase, CreditCard, Wrench, TrendingUp, CheckCircle, Coins, Package } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import LatestPostsWidget from "@/components/community/LatestPostsWidget";
