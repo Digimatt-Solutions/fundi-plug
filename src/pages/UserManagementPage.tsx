@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck, Crown } from "lucide-react";
+import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck, Crown, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const roleIcon = (role: string) => {
   if (role === "admin") return <Shield className="w-3.5 h-3.5" />;
   if (role === "worker") return <Wrench className="w-3.5 h-3.5" />;
+  if (role === "supplier") return <Package className="w-3.5 h-3.5" />;
   return <User className="w-3.5 h-3.5" />;
 };
 
