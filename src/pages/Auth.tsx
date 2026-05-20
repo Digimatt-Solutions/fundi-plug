@@ -511,20 +511,6 @@ const Auth = () => {
                 <a href="/legal/fundiplug-privacy-policy.pdf" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
               </div>
             </div>
-
-              {signupDisabled && (
-                <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
-              )}
-              {isForgot && !otpVerified && (
-                <p className="text-xs text-muted-foreground text-center">Verify your phone number to reset your password</p>
-              )}
-            </form>
-
-            <div className="mt-6 text-center space-y-1">
-              <a href="http://fundiplug.ke/" className="text-xs text-primary hover:underline block">← Go to Home</a>
-              <p className="text-xs text-muted-foreground"><a href="https://www.digimatt.co.ke" target="_blank" rel="noopener noreferrer">© Powered by Digimatt Solutions</a></p>
-              <button className="text-xs text-primary hover:underline">Privacy Policy</button>
-            </div>
           </div>
         </div>
       </div>
