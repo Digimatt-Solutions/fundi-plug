@@ -446,10 +446,33 @@ const Auth = () => {
                 </div>
               )}
 
+              {mode === "signup" && (
+                <div className="flex items-start gap-2 p-3 rounded-lg border border-primary/30 bg-primary/5 animate-fade-in">
+                  <input
+                    id="agree"
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="mt-1 w-4 h-4 accent-primary cursor-pointer"
+                  />
+                  <label htmlFor="agree" className="text-xs text-foreground leading-relaxed cursor-pointer">
+                    I have read and agree to the{" "}
+                    <a href="/legal/fundiplug-terms-of-use.pdf" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold hover:underline">
+                      Terms of Use
+                    </a>{" "}
+                    and consent to the{" "}
+                    <a href="/legal/fundiplug-privacy-policy.pdf" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold hover:underline">
+                      Privacy Policy
+                    </a>
+                    .
+                  </label>
+                </div>
+              )}
+
               <div className="flex items-stretch gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || resetting || signupDisabled || resetDisabled}
+                  disabled={loading || resetting || signupDisabled || resetDisabled || (mode === "signup" && !agreedToTerms)}
                   className="flex-1 h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
                 >
                   {isForgot
@@ -467,6 +490,27 @@ const Auth = () => {
                   </>
                 )}
               </div>
+
+              {mode === "signup" && !agreedToTerms && (
+                <p className="text-xs text-muted-foreground text-center">Agree to the Terms and Privacy Policy to continue</p>
+              )}
+              {signupDisabled && (
+                <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
+              )}
+              {isForgot && !otpVerified && (
+                <p className="text-xs text-muted-foreground text-center">Verify your phone number to reset your password</p>
+              )}
+            </form>
+
+            <div className="mt-6 text-center space-y-1">
+              <a href="http://fundiplug.ke/" className="text-xs text-primary hover:underline block">← Go to Home</a>
+              <p className="text-xs text-muted-foreground"><a href="https://www.digimatt.co.ke" target="_blank" rel="noopener noreferrer">© Powered by Digimatt Solutions</a></p>
+              <div className="flex items-center justify-center gap-3 text-xs">
+                <a href="/legal/fundiplug-terms-of-use.pdf" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Terms of Use</a>
+                <span className="text-muted-foreground">·</span>
+                <a href="/legal/fundiplug-privacy-policy.pdf" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Privacy Policy</a>
+              </div>
+            </div>
 
               {signupDisabled && (
                 <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
