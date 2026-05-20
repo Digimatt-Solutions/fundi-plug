@@ -29,6 +29,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showVoiceRow, setShowVoiceRow] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   
   const { login, signup, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
