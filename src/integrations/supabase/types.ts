@@ -155,6 +155,93 @@ export type Database = {
           },
         ]
       }
+      business_profiles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          banner_url: string | null
+          business_email: string | null
+          business_name: string
+          business_phone: string | null
+          category: string | null
+          category_other: string | null
+          county: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kra_pin: string | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          physical_address: string | null
+          registration_number: string | null
+          rejection_reason: string | null
+          submitted_at: string | null
+          town: string | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["business_verification_status"]
+          website: string | null
+          years_in_operation: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          banner_url?: string | null
+          business_email?: string | null
+          business_name?: string
+          business_phone?: string | null
+          category?: string | null
+          category_other?: string | null
+          county?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kra_pin?: string | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          physical_address?: string | null
+          registration_number?: string | null
+          rejection_reason?: string | null
+          submitted_at?: string | null
+          town?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: Database["public"]["Enums"]["business_verification_status"]
+          website?: string | null
+          years_in_operation?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          banner_url?: string | null
+          business_email?: string | null
+          business_name?: string
+          business_phone?: string | null
+          category?: string | null
+          category_other?: string | null
+          county?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kra_pin?: string | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          physical_address?: string | null
+          registration_number?: string | null
+          rejection_reason?: string | null
+          submitted_at?: string | null
+          town?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: Database["public"]["Enums"]["business_verification_status"]
+          website?: string | null
+          years_in_operation?: number | null
+        }
+        Relationships: []
+      }
       certifications: {
         Row: {
           cert_number: string | null
@@ -1007,6 +1094,63 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_products: {
+        Row: {
+          business_id: string
+          category: string | null
+          created_at: string
+          delivery_areas: string[]
+          description: string | null
+          id: string
+          images: string[]
+          is_active: boolean
+          is_featured: boolean
+          min_order_qty: number
+          name: string
+          price: number
+          stock_status: string
+          supplier_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          category?: string | null
+          created_at?: string
+          delivery_areas?: string[]
+          description?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_featured?: boolean
+          min_order_qty?: number
+          name: string
+          price?: number
+          stock_status?: string
+          supplier_id: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          category?: string | null
+          created_at?: string
+          delivery_areas?: string[]
+          description?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          is_featured?: boolean
+          min_order_qty?: number
+          name?: string
+          price?: number
+          stock_status?: string
+          supplier_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -1585,6 +1729,11 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      business_verification_status:
+        | "draft"
+        | "pending"
+        | "approved"
+        | "rejected"
       job_status:
         | "pending"
         | "accepted"
@@ -1728,6 +1877,12 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+      ],
+      business_verification_status: [
+        "draft",
+        "pending",
+        "approved",
+        "rejected",
       ],
       job_status: [
         "pending",
