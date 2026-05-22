@@ -296,17 +296,26 @@ const Auth = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {mode === "signup" && (
-                <div className="space-y-2 animate-fade-in">
-                  <Label htmlFor="name" className="text-foreground font-medium">Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" className="pl-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
+              {mode === "signup" && !isForgot && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-foreground font-medium">Full Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="John Doe" className="pl-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {!isForgot && (
+              {isSignIn && !isForgot && (
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
                   <div className="relative">

@@ -36,6 +36,11 @@ import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
 import CommunityPage from "@/pages/CommunityPage";
 import ChatPage from "@/pages/ChatPage";
+import SupplierBusinessProfilePage from "@/pages/SupplierBusinessProfilePage";
+import SupplierProductsPage from "@/pages/SupplierProductsPage";
+import MarketplacePage from "@/pages/MarketplacePage";
+import MarketplaceProductPage from "@/pages/MarketplaceProductPage";
+import AdminBusinessVerificationsPage from "@/pages/AdminBusinessVerificationsPage";
 import NotFound from "@/pages/NotFound";
 import VisitTracker from "@/components/VisitTracker";
 
@@ -106,6 +111,13 @@ const App = () => (
                 <Route path="chat" element={<ChatPage />} />
                 <Route path="payments" element={<PaymentsPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                {/* Supplier */}
+                <Route path="business-profile" element={<SupplierBusinessProfilePage />} />
+                <Route path="products" element={<SupplierProductsPage />} />
+                <Route path="business-verifications" element={<AdminBusinessVerificationsPage />} />
+                {/* Marketplace (everyone) */}
+                <Route path="marketplace" element={<MarketplacePage />} />
+                <Route path="marketplace/:id" element={<MarketplaceProductPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
