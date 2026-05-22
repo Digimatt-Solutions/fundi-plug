@@ -111,6 +111,13 @@ const App = () => (
                 <Route path="chat" element={<ChatPage />} />
                 <Route path="payments" element={<PaymentsPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                {/* Supplier */}
+                <Route path="business-profile" element={<SupplierBusinessProfilePage />} />
+                <Route path="products" element={<SupplierProductsPage />} />
+                <Route path="business-verifications" element={<AdminBusinessVerificationsPage />} />
+                {/* Marketplace (everyone) */}
+                <Route path="marketplace" element={<MarketplacePage />} />
+                <Route path="marketplace/:id" element={<MarketplaceProductPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
