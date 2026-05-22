@@ -36,6 +36,11 @@ import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
 import CommunityPage from "@/pages/CommunityPage";
 import ChatPage from "@/pages/ChatPage";
+import SupplierBusinessProfilePage from "@/pages/SupplierBusinessProfilePage";
+import SupplierProductsPage from "@/pages/SupplierProductsPage";
+import MarketplacePage from "@/pages/MarketplacePage";
+import MarketplaceProductPage from "@/pages/MarketplaceProductPage";
+import AdminBusinessVerificationsPage from "@/pages/AdminBusinessVerificationsPage";
 import NotFound from "@/pages/NotFound";
 import VisitTracker from "@/components/VisitTracker";
 
