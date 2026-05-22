@@ -45,7 +45,7 @@ export default function DocumentsStep({ data, setData, userId }: Props) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>NCA Number (optional)</Label>
+          <Label>NCA Number</Label>
           <Input
             placeholder="e.g. NCA/12345"
             value={data.nca_number || ""}
@@ -54,7 +54,7 @@ export default function DocumentsStep({ data, setData, userId }: Props) {
           <p className="text-xs text-muted-foreground">National Construction Authority registration, if applicable.</p>
         </div>
         <div className="space-y-2">
-          <Label>KRA PIN (optional)</Label>
+          <Label>KRA PIN</Label>
           <Input
             placeholder="e.g. A012345678X"
             value={data.kra_pin || ""}
