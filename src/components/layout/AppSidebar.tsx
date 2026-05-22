@@ -25,7 +25,9 @@ const CommunityIcon = ({ className }: { className?: string }) => (
 const adminNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { title: "Verification", url: "/dashboard/verification", icon: Shield, key: "verification" },
+  { title: "Business Verifications", url: "/dashboard/business-verifications", icon: BadgeCheck, key: "business_verifications" },
   { title: "Jobs", url: "/dashboard/jobs", icon: Briefcase, key: "jobs" },
+  { title: "Marketplace", url: "/dashboard/marketplace", icon: Store, key: "marketplace" },
   { title: "Categories", url: "/dashboard/categories", icon: ClipboardList, key: "categories" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
   { title: "Disbursements", url: "/dashboard/disbursements", icon: ArrowDownCircle, key: "disbursements" },
@@ -41,6 +43,7 @@ const adminNav = [
 const workerNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase, key: "my-jobs" },
+  { title: "Marketplace", url: "/dashboard/marketplace", icon: Store, key: "marketplace" },
   { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Profile", url: "/dashboard/profile", icon: UserCog, key: "profile" },
   { title: "Earnings", url: "/dashboard/earnings", icon: CreditCard, key: "earnings" },
@@ -54,6 +57,7 @@ const customerNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { title: "Post a Job", url: "/dashboard/post-job", icon: Briefcase, key: "post-job" },
   { title: "Find Fundis", url: "/dashboard/find-workers", icon: Search, key: "find-workers" },
+  { title: "Marketplace", url: "/dashboard/marketplace", icon: Store, key: "marketplace" },
   { title: "My Bookings", url: "/dashboard/bookings", icon: CalendarDays, key: "bookings" },
   { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
@@ -64,6 +68,9 @@ const customerNav = [
 
 const supplierNav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
+  { title: "Business Profile", url: "/dashboard/business-profile", icon: Building2, key: "business_profile" },
+  { title: "Products", url: "/dashboard/products", icon: Package, key: "products" },
+  { title: "Marketplace", url: "/dashboard/marketplace", icon: Store, key: "marketplace" },
   { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Payments", url: "/dashboard/payments", icon: CreditCard, key: "payments" },
