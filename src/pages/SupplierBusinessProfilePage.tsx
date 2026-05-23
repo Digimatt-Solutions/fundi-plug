@@ -201,6 +201,15 @@ export default function SupplierBusinessProfilePage() {
             />
             <p className="text-xs text-muted-foreground">Search above or use your current location - we'll capture coordinates and auto-fill town/county.</p>
           </div>
+          <div className="space-y-1.5">
+            <Label>Business Email</Label>
+            <Input type="email" value={form.business_email || ""} disabled={locked} onChange={e => set("business_email", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Business WhatsApp Number</Label>
+            <Input value={form.business_phone || ""} disabled={locked} onChange={e => set("business_phone", e.target.value)} placeholder="2547XXXXXXXX" />
+            <p className="text-[11px] text-muted-foreground">Used for marketplace WhatsApp orders. Use international format starting with 254.</p>
+          </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label>Website</Label>
             <Input value={form.website || ""} disabled={locked} onChange={e => set("website", e.target.value)} placeholder="https://" />
