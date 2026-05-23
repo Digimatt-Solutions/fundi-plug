@@ -58,6 +58,7 @@ function validateLocation(d: any): string | null {
 function validateDocuments(d: any): string | null {
   if (!d.id_front_url) return "Upload the front side of your ID";
   if (!d.id_back_url) return "Upload the back side of your ID";
+  if (!d.good_conduct_url) return "Upload your Certificate of Good Conduct (required)";
   return null;
 }
 function validatePayment(d: any): string | null {
@@ -151,6 +152,8 @@ export default function FundiOnboardingPage() {
           longitude: data.longitude,
           nca_number: data.nca_number,
           kra_pin: data.kra_pin,
+          good_conduct_url: data.good_conduct_url,
+          other_licenses: data.other_licenses || [],
           mpesa_number: data.mpesa_number,
           mpesa_name: data.mpesa_name,
           bank_name: data.bank_name,

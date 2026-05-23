@@ -1310,6 +1310,7 @@ export type Database = {
           experience_level: string | null
           first_name: string | null
           gender: string | null
+          good_conduct_url: string | null
           hourly_rate: number | null
           id: string
           id_back_url: string | null
@@ -1331,6 +1332,7 @@ export type Database = {
           next_of_kin_relationship: string | null
           onboarding_completed_at: string | null
           onboarding_step: number
+          other_licenses: Json
           other_skill: string | null
           portfolio_urls: string[] | null
           profile_photo_url: string | null
@@ -1369,6 +1371,7 @@ export type Database = {
           experience_level?: string | null
           first_name?: string | null
           gender?: string | null
+          good_conduct_url?: string | null
           hourly_rate?: number | null
           id?: string
           id_back_url?: string | null
@@ -1390,6 +1393,7 @@ export type Database = {
           next_of_kin_relationship?: string | null
           onboarding_completed_at?: string | null
           onboarding_step?: number
+          other_licenses?: Json
           other_skill?: string | null
           portfolio_urls?: string[] | null
           profile_photo_url?: string | null
@@ -1428,6 +1432,7 @@ export type Database = {
           experience_level?: string | null
           first_name?: string | null
           gender?: string | null
+          good_conduct_url?: string | null
           hourly_rate?: number | null
           id?: string
           id_back_url?: string | null
@@ -1449,6 +1454,7 @@ export type Database = {
           next_of_kin_relationship?: string | null
           onboarding_completed_at?: string | null
           onboarding_step?: number
+          other_licenses?: Json
           other_skill?: string | null
           portfolio_urls?: string[] | null
           profile_photo_url?: string | null

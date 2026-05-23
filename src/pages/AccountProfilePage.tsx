@@ -98,7 +98,7 @@ export default function AccountProfilePage() {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ name: form.name.trim(), phone: form.phone.trim() || null })
+        .update({ name: form.name.trim() })
         .eq("id", user.id);
       if (error) throw error;
       await refreshProfile();
@@ -202,8 +202,9 @@ export default function AccountProfilePage() {
               <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("Jane Doe")} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="phone" className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> Phone</Label>
-              <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t("+254 712 345 678")} />
+              <Label htmlFor="phone" className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> Phone (verified)</Label>
+              <Input id="phone" value={form.phone} disabled className="bg-muted/50" />
+              <p className="text-xs text-muted-foreground">{t("This is your verified contact number. It is used as the default contact across FundiPlug (jobs, applications, marketplace).")}</p>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="email" className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> Email</Label>
