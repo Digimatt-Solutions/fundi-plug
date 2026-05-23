@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ShieldCheck, Clock, XCircle, FileEdit } from "lucide-react";
+import LocationPicker from "@/components/LocationPicker";
 
 const CATEGORIES = [
   "Building Materials", "Hardware & Tools", "Electrical Supplies", "Plumbing Supplies",
@@ -181,23 +182,24 @@ export default function SupplierBusinessProfilePage() {
             <Label>Town</Label>
             <Input value={form.town || ""} disabled={locked} onChange={e => set("town", e.target.value)} />
           </div>
-          <div className="space-y-1.5">
-            <Label>Latitude (Google Maps)</Label>
-            <Input type="number" step="any" value={form.latitude ?? ""} disabled={locked}
-              onChange={e => set("latitude", e.target.value ? Number(e.target.value) : null)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Longitude (Google Maps)</Label>
-            <Input type="number" step="any" value={form.longitude ?? ""} disabled={locked}
-              onChange={e => set("longitude", e.target.value ? Number(e.target.value) : null)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Business Email</Label>
-            <Input type="email" value={form.business_email || ""} disabled={locked} onChange={e => set("business_email", e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Business Phone</Label>
-            <Input value={form.business_phone || ""} disabled={locked} onChange={e => set("business_phone", e.target.value)} placeholder="2547XXXXXXXX" />
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label>Pin Business Location on Map</Label>
+            <LocationPicker
+              latitude={form.latitude}
+              longitude={form.longitude}
+              disabled={locked}
+              onChange={({ latitude, longitude, town, county, address }) => {
+                setForm((f: any) => ({
+                  ...f,
+                  latitude,
+                  longitude,
+                  town: f.town || town || "",
+                  county: f.county || county || "",
+                  physical_address: f.physical_address || address || "",
+                }));
+              }}
+            />
+            <p className="text-xs text-muted-foreground">Search above or use your current location - we'll capture coordinates and auto-fill town/county.</p>
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label>Website</Label>
