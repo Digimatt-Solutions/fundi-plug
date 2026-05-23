@@ -69,16 +69,49 @@ export default function TrafficAnalytics() {
   const [range, setRange] = useState<RangeKey>("30d");
 
   useEffect(() => {
-    (async () => {
-      // Pull a generous window once; client-side filter for instant range switching.
-      const { data } = await supabase
-        .from("site_visits")
-        .select("id, path, device, browser, os, country, city, referrer, created_at")
-        .order("created_at", { ascending: false })
-        .limit(20000);
-      setAllVisits((data as Visit[]) || []);
-      setLoading(false);
-    })();
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      // Paginate to bypass Supabase's 1000-row PostgREST cap and fetch all recent visits.
+      const PAGE = 1000;
+      const MAX = 100000; // safety cap
+      let from = 0;
+      const all: Visit[] = [];
+      while (from < MAX) {
+        const { data, error } = await supabase
+          .from("site_visits")
+          .select("id, path, device, browser, os, country, city, referrer, created_at")
+          .order("created_at", { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        all.push(...(data as Visit[]));
+        if (data.length < PAGE) break;
+        from += PAGE;
+        if (cancelled) return;
+      }
+      if (!cancelled) {
+        setAllVisits(all);
+        setLoading(false);
+      }
+    };
+    load();
+
+    // Realtime: prepend new visits as they arrive.
+    const channel = supabase
+      .channel("site-visits-live")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "site_visits" },
+        (payload: any) => {
+          setAllVisits((prev) => [payload.new as Visit, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const visits = useMemo(() => {
