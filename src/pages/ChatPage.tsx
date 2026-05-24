@@ -20,10 +20,12 @@ interface ConvRow {
 
 export default function ChatPage() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [convs, setConvs] = useState<ConvRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [active, setActive] = useState<ChatPeer | null>(null);
+  const [initialDraft, setInitialDraft] = useState<string>("");
   const [supportSending, setSupportSending] = useState(false);
   const [supportMsg, setSupportMsg] = useState("");
 
