@@ -18,6 +18,7 @@ interface ChatPopupProps {
   peer: ChatPeer;
   onClose: () => void;
   embedded?: boolean;
+  initialDraft?: string;
 }
 
 interface Message {
