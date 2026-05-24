@@ -23,10 +23,30 @@ export default function MarketplaceProductPage() {
       if (p) {
         const { data: b } = await supabase.from("business_profiles").select("*").eq("id", p.business_id).maybeSingle();
         setProduct(p); setBusiness(b);
+        if (user) {
+          supabase.from("activity_logs").insert({
+            user_id: user.id,
+            action: "Marketplace Product Viewed",
+            detail: `Viewed product "${p.name}"${b?.business_name ? ` from ${b.business_name}` : ""}`,
+            entity_type: "supplier_product",
+            entity_id: p.id,
+          }).then(() => {});
+        }
       }
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, user]);
+
+  const logMarketplaceAction = (action: string, detail: string) => {
+    if (!user || !product) return;
+    supabase.from("activity_logs").insert({
+      user_id: user.id,
+      action,
+      detail,
+      entity_type: "supplier_product",
+      entity_id: product.id,
+    }).then(() => {});
+  };
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   if (!product) return <div className="text-center py-20 text-muted-foreground">Product not found.</div>;
