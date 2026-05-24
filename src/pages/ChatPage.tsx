@@ -247,7 +247,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {active && <ChatPopup peer={active} onClose={() => { setActive(null); load(); }} />}
+      {active && <ChatPopup peer={active} initialDraft={initialDraft} onClose={() => { setActive(null); setInitialDraft(""); load(); }} />}
     </div>
   );
 }
