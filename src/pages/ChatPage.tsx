@@ -83,6 +83,29 @@ export default function ChatPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Auto-open a chat when arriving with ?to=<userId>&draft=<text>
+  useEffect(() => {
+    const to = searchParams.get("to");
+    const draft = searchParams.get("draft") || "";
+    if (!to || !user || to === user.id) return;
+    (async () => {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("id,name,avatar_url")
+        .eq("id", to)
+        .maybeSingle();
+      if (!prof) { toast.error("Could not start chat"); return; }
+      setInitialDraft(draft);
+      setActive({ id: prof.id, name: prof.name || "User", avatar_url: prof.avatar_url });
+      // Clear params so reopen doesn't keep re-triggering
+      const next = new URLSearchParams(searchParams);
+      next.delete("to"); next.delete("draft");
+      setSearchParams(next, { replace: true });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user]);
+
+
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return convs;
