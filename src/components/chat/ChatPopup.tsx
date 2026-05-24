@@ -18,6 +18,7 @@ interface ChatPopupProps {
   peer: ChatPeer;
   onClose: () => void;
   embedded?: boolean;
+  initialDraft?: string;
 }
 
 interface Message {
@@ -35,10 +36,10 @@ interface Message {
 
 const SELECT_COLS = "id, sender_id, recipient_id, content, created_at, delivered_at, read_at, attachment_url, attachment_type, attachment_name";
 
-export default function ChatPopup({ peer, onClose, embedded = false }: ChatPopupProps) {
+export default function ChatPopup({ peer, onClose, embedded = false, initialDraft }: ChatPopupProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialDraft ?? "");
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [minimized, setMinimized] = useState(false);

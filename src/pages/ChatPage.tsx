@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send } from "lucide-react";
@@ -19,10 +20,12 @@ interface ConvRow {
 
 export default function ChatPage() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [convs, setConvs] = useState<ConvRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [active, setActive] = useState<ChatPeer | null>(null);
+  const [initialDraft, setInitialDraft] = useState<string>("");
   const [supportSending, setSupportSending] = useState(false);
   const [supportMsg, setSupportMsg] = useState("");
 
@@ -79,6 +82,29 @@ export default function ChatPage() {
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  // Auto-open a chat when arriving with ?to=<userId>&draft=<text>
+  useEffect(() => {
+    const to = searchParams.get("to");
+    const draft = searchParams.get("draft") || "";
+    if (!to || !user || to === user.id) return;
+    (async () => {
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("id,name,avatar_url")
+        .eq("id", to)
+        .maybeSingle();
+      if (!prof) { toast.error("Could not start chat"); return; }
+      setInitialDraft(draft);
+      setActive({ id: prof.id, name: prof.name || "User", avatar_url: prof.avatar_url });
+      // Clear params so reopen doesn't keep re-triggering
+      const next = new URLSearchParams(searchParams);
+      next.delete("to"); next.delete("draft");
+      setSearchParams(next, { replace: true });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user]);
+
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -221,7 +247,7 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {active && <ChatPopup peer={active} onClose={() => { setActive(null); load(); }} />}
+      {active && <ChatPopup peer={active} initialDraft={initialDraft} onClose={() => { setActive(null); setInitialDraft(""); load(); }} />}
     </div>
   );
 }

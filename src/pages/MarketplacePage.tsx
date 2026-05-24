@@ -86,7 +86,7 @@ export default function MarketplacePage() {
                 </div>
                 <div className="p-3 space-y-1.5">
                   <h3 className="font-semibold text-foreground line-clamp-1">{p.name}</h3>
-                  <p className="text-primary font-bold">KSH {Number(p.price).toLocaleString()}<span className="text-xs text-muted-foreground font-normal">/{p.unit}</span></p>
+                  <p className="text-primary font-bold">KSH {Number(p.price).toLocaleString()}</p>
                   <div className="flex items-center gap-1.5 pt-1 border-t border-border">
                     {biz?.logo_url ? <img src={biz.logo_url} alt="" className="w-5 h-5 rounded-full object-cover" /> : <div className="w-5 h-5 rounded-full bg-muted" />}
                     <span className="text-xs text-muted-foreground line-clamp-1 flex-1">{biz?.business_name}</span>
