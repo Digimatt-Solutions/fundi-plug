@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AssetImage } from "@/components/AssetImage";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",
@@ -93,7 +94,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
               >
                 {img ? (
                   <div className="w-full h-20 overflow-hidden">
-                    <img loading="lazy" decoding="async" src={img} alt={cat.name} className="w-full h-full object-cover" />
+                    <AssetImage loading="lazy" decoding="async" src={img} bucket="category-images" alt={cat.name} className="w-full h-full object-cover" />
                   </div>
                 ) : (
                   <div className="w-full h-20 flex items-center justify-center bg-muted">

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ShieldCheck, MapPin, Phone, Mail, Globe, ArrowLeft, MessageCircle, Star } from "lucide-react";
 import waLogo from "@/assets/logo.png";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function MarketplaceProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -60,13 +61,13 @@ export default function MarketplaceProductPage() {
       <div className="grid lg:grid-cols-2 gap-8">
         <div className="space-y-3">
           <div className="aspect-square rounded-2xl bg-muted overflow-hidden border border-border">
-            {product.images?.[activeImg] ? <img src={product.images[activeImg]} alt={product.name} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-muted-foreground">No image</div>}
+            {product.images?.[activeImg] ? <AssetImage src={product.images[activeImg]} bucket="product-images" alt={product.name} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-muted-foreground">No image</div>}
           </div>
           {product.images?.length > 1 && (
             <div className="flex gap-2 overflow-x-auto">
               {product.images.map((url: string, i: number) => (
                 <button key={i} onClick={() => setActiveImg(i)} className={`w-20 h-20 rounded-lg overflow-hidden border-2 shrink-0 ${i === activeImg ? "border-primary" : "border-border"}`}>
-                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <AssetImage src={url} bucket="product-images" alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -96,7 +97,7 @@ export default function MarketplaceProductPage() {
           {business && (
             <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
               <div className="flex items-center gap-3">
-                {business.logo_url ? <img src={business.logo_url} alt="" className="w-12 h-12 rounded-lg object-cover" /> : <div className="w-12 h-12 rounded-lg bg-muted" />}
+                {business.logo_url ? <AssetImage src={business.logo_url} bucket="business-assets" alt="" className="w-12 h-12 rounded-lg object-cover" /> : <div className="w-12 h-12 rounded-lg bg-muted" />}
                 <div className="flex-1 min-w-0">
                   {business.website ? (
                     <a

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, ShieldCheck, Clock, XCircle, FileEdit } from "lucide-react";
 import LocationPicker from "@/components/LocationPicker";
+import { AssetImage } from "@/components/AssetImage";
 
 const CATEGORIES = [
   "Building Materials", "Hardware & Tools", "Electrical Supplies", "Plumbing Supplies",
@@ -120,13 +121,13 @@ export default function SupplierBusinessProfilePage() {
       )}
 
       {form.banner_url && (
-        <img src={form.banner_url} alt="Banner" className="w-full h-40 object-cover rounded-xl border border-border" />
+        <AssetImage src={form.banner_url} bucket="business-assets" alt="Banner" className="w-full h-40 object-cover rounded-xl border border-border" />
       )}
 
       <div className="grid gap-4 rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center gap-4">
           {form.logo_url ? (
-            <img src={form.logo_url} alt="Logo" className="w-20 h-20 rounded-xl object-cover border border-border" />
+            <AssetImage src={form.logo_url} bucket="business-assets" alt="Logo" className="w-20 h-20 rounded-xl object-cover border border-border" />
           ) : (
             <div className="w-20 h-20 rounded-xl bg-muted flex items-center justify-center text-muted-foreground text-xs">No logo</div>
           )}
