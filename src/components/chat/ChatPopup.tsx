@@ -37,6 +37,20 @@ interface Message {
 
 const SELECT_COLS = "id, sender_id, recipient_id, content, created_at, delivered_at, read_at, attachment_url, attachment_type, attachment_name";
 
+function Attachment({ url, name, isImage, mine }: { url: string; name?: string | null; isImage: boolean; mine: boolean }) {
+  const signed = useSignedUrl(url, "chat-attachments") ?? url;
+  return isImage ? (
+    <a href={signed} target="_blank" rel="noreferrer">
+      <img src={signed} alt={name || "image"} className="rounded-lg max-h-60 object-cover mb-1" />
+    </a>
+  ) : (
+    <a href={signed} target="_blank" rel="noreferrer" className={`flex items-center gap-2 px-2 py-1.5 rounded-lg mb-1 ${mine ? "bg-white/15" : "bg-muted"}`}>
+      <FileText className="w-4 h-4 shrink-0" />
+      <span className="truncate text-xs">{name || "Document"}</span>
+    </a>
+  );
+}
+
 export default function ChatPopup({ peer, onClose, embedded = false, initialDraft }: ChatPopupProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
