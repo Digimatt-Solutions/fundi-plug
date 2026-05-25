@@ -14,6 +14,7 @@ import { Camera, Mail, Phone, MapPin, ShieldCheck, User as UserIcon, KeyRound, L
 import { useLanguage } from "@/contexts/LanguageContext";
 import FingerprintEnroll from "@/components/FingerprintEnroll";
 import { friendlyError } from "@/lib/friendlyError";
+import { AssetAvatarImage } from "@/components/AssetImage";
 
 export default function AccountProfilePage() {
   const { user, refreshProfile } = useAuth();
@@ -154,7 +155,7 @@ export default function AccountProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-end gap-4">
             <div className="relative">
               <Avatar className="w-24 h-24 ring-4 ring-background shadow-md">
-                <AvatarImage src={form.avatar_url} alt={form.name} />
+                <AssetAvatarImage src={form.avatar_url} alt={form.name} bucket="avatars" />
                 <AvatarFallback className="text-xl bg-primary/10 text-primary">{initials}</AvatarFallback>
               </Avatar>
               <button

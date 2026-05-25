@@ -16,6 +16,7 @@ import { friendlyError } from "@/lib/friendlyError";
 import PriceLockBadge from "@/components/PriceLockBadge";
 import ChatButton from "@/components/chat/ChatButton";
 import { Lock } from "lucide-react";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function CustomerPostJobPage() {
   const { user } = useAuth();
@@ -316,7 +317,7 @@ export default function CustomerPostJobPage() {
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="flex gap-3">
                     {job.image_url && (
-                      <img loading="lazy" decoding="async" src={job.image_url} alt={job.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                      <AssetImage loading="lazy" decoding="async" src={job.image_url} bucket="job-images" alt={job.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                     )}
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">

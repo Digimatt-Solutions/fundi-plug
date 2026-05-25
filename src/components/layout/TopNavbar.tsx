@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { AssetImage } from "@/components/AssetImage";
 
 export function TopNavbar() {
   const { user, logout } = useAuth();
@@ -163,7 +164,7 @@ export function TopNavbar() {
                 <button aria-label={t("Account")} className="flex items-center gap-3 ml-2 pl-3 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
                   <div className="relative">
                     {avatarUrl ? (
-                      <img loading="lazy" decoding="async" src={avatarUrl} alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
+                      <AssetImage loading="lazy" decoding="async" src={avatarUrl} bucket="avatars" alt={user?.name} className="w-9 h-9 rounded-full object-cover" />
                     ) : (
                       <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
                         {initials}

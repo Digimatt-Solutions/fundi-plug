@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileText, Trash2, CheckCircle, Clock, XCircle, Camera, AlertTriangle } from "lucide-react";
 import FingerprintEnroll from "@/components/FingerprintEnroll";
+import { AssetImage } from "@/components/AssetImage";
 
 const REQUIRED_DOCS = [
   { key: "national_id", label: "National ID", description: "Upload a copy of your National ID (front)" },
@@ -251,7 +252,7 @@ export default function WorkerProfilePage() {
       <div className="stat-card animate-fade-in flex items-center gap-6">
         <div className="relative">
           {avatarUrl ? (
-            <img loading="lazy" decoding="async" src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
+            <AssetImage loading="lazy" decoding="async" src={avatarUrl} bucket="avatars" alt="Profile" className="w-20 h-20 rounded-full object-cover" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">{initials}</div>
           )}

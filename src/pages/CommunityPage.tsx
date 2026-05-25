@@ -17,6 +17,7 @@ import {
 import logo from "@/assets/logo.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
+import { AssetImage, AssetAvatarImage } from "@/components/AssetImage";
 
 interface Post {
   id: string;
@@ -284,7 +285,7 @@ export default function CommunityPage() {
           <div className="stat-card space-y-3 animate-fade-in">
             <div className="flex items-start gap-3">
               <Avatar className="w-10 h-10 shrink-0">
-                <AvatarImage src={user?.avatar_url} />
+                <AssetAvatarImage src={user?.avatar_url} bucket="avatars" />
                 <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">{user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-3">
@@ -335,7 +336,7 @@ export default function CommunityPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="w-9 h-9">
-                      <AvatarImage src={post.author?.avatar_url || undefined} />
+                      <AssetAvatarImage src={post.author?.avatar_url || undefined} bucket="avatars" />
                       <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{post.author?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -369,7 +370,7 @@ export default function CommunityPage() {
 
                 <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{post.content}</p>
                 {post.image_url && (
-                  <img loading="lazy" decoding="async" src={post.image_url} alt="Post" className="w-full rounded-xl max-h-96 object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                  <AssetImage loading="lazy" decoding="async" src={post.image_url} bucket="community-images" alt="Post" className="w-full rounded-xl max-h-96 object-cover cursor-pointer hover:opacity-95 transition-opacity"
                     onClick={() => setPreviewImage(post.image_url)} />
                 )}
 
