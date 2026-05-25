@@ -14,6 +14,7 @@ import { Camera, Mail, Phone, MapPin, ShieldCheck, User as UserIcon, KeyRound, L
 import { useLanguage } from "@/contexts/LanguageContext";
 import FingerprintEnroll from "@/components/FingerprintEnroll";
 import { friendlyError } from "@/lib/friendlyError";
+import { AssetAvatarImage } from "@/components/AssetImage";
 
 export default function AccountProfilePage() {
   const { user, refreshProfile } = useAuth();
@@ -75,8 +76,8 @@ export default function AccountProfilePage() {
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
       if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-      const url = pub.publicUrl;
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const url = signed?.signedUrl || path;
       await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
       setForm((f) => ({ ...f, avatar_url: url }));
       await refreshProfile();
@@ -154,7 +155,7 @@ export default function AccountProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-end gap-4">
             <div className="relative">
               <Avatar className="w-24 h-24 ring-4 ring-background shadow-md">
-                <AvatarImage src={form.avatar_url} alt={form.name} />
+                <AssetAvatarImage src={form.avatar_url} alt={form.name} bucket="avatars" />
                 <AvatarFallback className="text-xl bg-primary/10 text-primary">{initials}</AvatarFallback>
               </Avatar>
               <button

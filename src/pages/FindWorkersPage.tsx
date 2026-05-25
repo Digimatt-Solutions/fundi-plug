@@ -17,6 +17,7 @@ import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import { MessageCircle } from "lucide-react";
+import { AssetImage } from "@/components/AssetImage";
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -170,8 +171,8 @@ export default function FindWorkersPage() {
       const path = `${user.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("job-images").upload(path, hireImage);
       if (!upErr) {
-        const { data } = supabase.storage.from("job-images").getPublicUrl(path);
-        imageUrl = data.publicUrl;
+        const { data } = await supabase.storage.from("job-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+        imageUrl = data?.signedUrl || path;
       }
     }
     const { data: job, error } = await supabase.from("jobs").insert({
@@ -278,7 +279,7 @@ export default function FindWorkersPage() {
       <div key={w.id} className="stat-card space-y-3 cursor-pointer hover:border-primary/40 transition-colors animate-fade-in" style={{ animationDelay: `${i * 40}ms` }} onClick={() => openWorkerProfile(w)}>
         <div className="flex items-center gap-3">
           {w.avatar_url ? (
-            <img loading="lazy" decoding="async" src={w.avatar_url} alt={w.name} className="w-16 h-16 sm:w-12 sm:h-12 rounded-full object-cover" />
+            <AssetImage loading="lazy" decoding="async" src={w.avatar_url} bucket="avatars" alt={w.name} className="w-16 h-16 sm:w-12 sm:h-12 rounded-full object-cover" />
           ) : (
             <div className="w-16 h-16 sm:w-12 sm:h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-base sm:text-sm">
               {w.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}

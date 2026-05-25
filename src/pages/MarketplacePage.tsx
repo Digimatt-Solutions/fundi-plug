@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, ShieldCheck, Loader2, Package, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function MarketplacePage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -81,14 +82,14 @@ export default function MarketplacePage() {
             return (
               <Link key={p.id} to={`/dashboard/marketplace/${p.id}`} className="rounded-xl border border-border bg-card overflow-hidden hover:shadow-lg hover:border-primary/40 transition">
                 <div className="aspect-square bg-muted relative">
-                  {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-muted-foreground text-xs">No image</div>}
+                  {p.images?.[0] ? <AssetImage src={p.images[0]} bucket="product-images" alt={p.name} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-muted-foreground text-xs">No image</div>}
                   {p.is_featured && <Badge className="absolute top-2 left-2 bg-primary"><Star className="w-3 h-3" /> Featured</Badge>}
                 </div>
                 <div className="p-3 space-y-1.5">
                   <h3 className="font-semibold text-foreground line-clamp-1">{p.name}</h3>
                   <p className="text-primary font-bold">KSH {Number(p.price).toLocaleString()}</p>
                   <div className="flex items-center gap-1.5 pt-1 border-t border-border">
-                    {biz?.logo_url ? <img src={biz.logo_url} alt="" className="w-5 h-5 rounded-full object-cover" /> : <div className="w-5 h-5 rounded-full bg-muted" />}
+                    {biz?.logo_url ? <AssetImage src={biz.logo_url} bucket="business-assets" alt="" className="w-5 h-5 rounded-full object-cover" /> : <div className="w-5 h-5 rounded-full bg-muted" />}
                     <span className="text-xs text-muted-foreground line-clamp-1 flex-1">{biz?.business_name}</span>
                     <ShieldCheck className="w-3.5 h-3.5 text-green-600 shrink-0" />
                   </div>

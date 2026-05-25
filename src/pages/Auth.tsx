@@ -14,6 +14,7 @@ import logo from "@/assets/logo.png";
 import AuthVoiceButton from "@/components/voice/AuthVoiceButton";
 import AuthFingerprintButton from "@/components/voice/AuthFingerprintButton";
 import { friendlyError } from "@/lib/friendlyError";
+import PasswordStrength, { scorePassword } from "@/components/auth/PasswordStrength";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -195,7 +196,8 @@ const Auth = () => {
     }
   };
 
-  const signupDisabled = !isSignIn && !isForgot && !otpVerified;
+  const signupDisabled =
+    !isSignIn && !isForgot && (!otpVerified || password.length < 12 || scorePassword(password) < 3);
   const resetDisabled = isForgot && (!otpVerified || newPassword.length < 6);
 
   return (
@@ -346,6 +348,7 @@ const Auth = () => {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  {mode === "signup" && <PasswordStrength password={password} />}
                 </div>
               )}
 

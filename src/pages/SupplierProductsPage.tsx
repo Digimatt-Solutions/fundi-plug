@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Pencil, Trash2, Upload, Lock, X, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AssetImage } from "@/components/AssetImage";
 
 const UNITS = ["piece", "kg", "box", "bag", "litre", "metre", "pack", "set", "carton"];
 const STOCK = [{ v: "in_stock", l: "In Stock" }, { v: "low", l: "Low Stock" }, { v: "out_of_stock", l: "Out of Stock" }];
@@ -55,8 +56,8 @@ export default function SupplierProductsPage() {
     const path = `${user.id}/${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("product-images").upload(path, file);
     if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return; }
-    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-    setEditing((e: any) => ({ ...e, images: [...(e.images || []), data.publicUrl] }));
+    const { data } = await supabase.storage.from("product-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+    setEditing((e: any) => ({ ...e, images: [...(e.images || []), data?.signedUrl || path] }));
   };
 
   const removeImage = (url: string) => setEditing((e: any) => ({ ...e, images: e.images.filter((u: string) => u !== url) }));
@@ -139,7 +140,7 @@ export default function SupplierProductsPage() {
           {products.map(p => (
             <div key={p.id} className="rounded-xl border border-border bg-card overflow-hidden flex flex-col">
               <div className="aspect-video bg-muted relative">
-                {p.images?.[0] ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-muted-foreground text-xs">No image</div>}
+                {p.images?.[0] ? <AssetImage src={p.images[0]} bucket="product-images" alt={p.name} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-muted-foreground text-xs">No image</div>}
                 {p.is_featured && <Badge className="absolute top-2 left-2 bg-primary"><Star className="w-3 h-3" /> Featured</Badge>}
                 {!p.is_active && <Badge className="absolute top-2 right-2" variant="secondary">Inactive</Badge>}
               </div>
@@ -192,7 +193,7 @@ export default function SupplierProductsPage() {
                 <div className="grid grid-cols-4 gap-2 mt-2">
                   {(editing.images || []).map((url: string) => (
                     <div key={url} className="relative aspect-square rounded-lg overflow-hidden border border-border">
-                      <img src={url} alt="" className="w-full h-full object-cover" />
+                      <AssetImage src={url} bucket="product-images" alt="" className="w-full h-full object-cover" />
                       <button onClick={() => removeImage(url)} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5"><X className="w-3 h-3" /></button>
                     </div>
                   ))}

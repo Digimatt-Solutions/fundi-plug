@@ -24,6 +24,7 @@ import ChatButton from "@/components/chat/ChatButton";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import LatestPostsWidget from "@/components/community/LatestPostsWidget";
 import { MessageCircle } from "lucide-react";
+import { AssetImage } from "@/components/AssetImage";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",
@@ -165,8 +166,8 @@ export default function CustomerDashboard() {
       const path = `${user.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("job-images").upload(path, hireImage);
       if (!upErr) {
-        const { data } = supabase.storage.from("job-images").getPublicUrl(path);
-        imageUrl = data.publicUrl;
+        const { data } = await supabase.storage.from("job-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+        imageUrl = data?.signedUrl || path;
       }
     }
     const { data: job, error } = await supabase.from("jobs").insert({
@@ -545,7 +546,7 @@ export default function CustomerDashboard() {
                 <div className="flex -space-x-1.5">
                   {nearbyWorkers.slice(0, 3).map((w, i) => (
                     <div key={w.id} className="w-5 h-5 rounded-full ring-2 ring-card overflow-hidden bg-muted" style={{ zIndex: 10 - i }}>
-                      {w.avatar_url ? <img src={w.avatar_url} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/30" />}
+                      {w.avatar_url ? <AssetImage src={w.avatar_url} bucket="avatars" alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary/30" />}
                     </div>
                   ))}
                 </div>
@@ -650,7 +651,7 @@ export default function CustomerDashboard() {
                         <div className="flex items-start gap-3">
                           <div className="relative shrink-0">
                             {worker.avatar_url ? (
-                              <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-background" />
+                              <AssetImage loading="lazy" decoding="async" src={worker.avatar_url} bucket="avatars" alt={worker.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-background" />
                             ) : (
                               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center font-semibold">
                                 {worker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}

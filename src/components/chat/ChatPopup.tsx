@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useSignedUrl } from "@/lib/storageUrl";
 
 export interface ChatPeer {
   id: string;
@@ -35,6 +36,20 @@ interface Message {
 }
 
 const SELECT_COLS = "id, sender_id, recipient_id, content, created_at, delivered_at, read_at, attachment_url, attachment_type, attachment_name";
+
+function Attachment({ url, name, isImage, mine }: { url: string; name?: string | null; isImage: boolean; mine: boolean }) {
+  const signed = useSignedUrl(url, "chat-attachments") ?? url;
+  return isImage ? (
+    <a href={signed} target="_blank" rel="noreferrer">
+      <img src={signed} alt={name || "image"} className="rounded-lg max-h-60 object-cover mb-1" />
+    </a>
+  ) : (
+    <a href={signed} target="_blank" rel="noreferrer" className={`flex items-center gap-2 px-2 py-1.5 rounded-lg mb-1 ${mine ? "bg-white/15" : "bg-muted"}`}>
+      <FileText className="w-4 h-4 shrink-0" />
+      <span className="truncate text-xs">{name || "Document"}</span>
+    </a>
+  );
+}
 
 export default function ChatPopup({ peer, onClose, embedded = false, initialDraft }: ChatPopupProps) {
   const { user } = useAuth();
@@ -159,9 +174,11 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
     const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error: upErr } = await supabase.storage.from("chat-attachments").upload(path, file, { contentType: file.type });
     if (upErr) { toast.error("Upload failed"); setUploading(false); return; }
-    const { data: pub } = supabase.storage.from("chat-attachments").getPublicUrl(path);
+    // chat-attachments is private — store a long-TTL signed URL so the
+    // recipient can render the file. <AttachmentLink/> re-signs at render too.
+    const { data: signed } = await supabase.storage.from("chat-attachments").createSignedUrl(path, 60 * 60 * 24 * 365);
     await sendMessage({
-      attachment_url: pub.publicUrl,
+      attachment_url: signed?.signedUrl || path,
       attachment_type: file.type,
       attachment_name: file.name,
     });
@@ -204,16 +221,7 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
                   <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[78%] px-3 py-2 rounded-2xl text-[12.5px] sm:text-sm break-words leading-snug ${mine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-background border border-border text-foreground rounded-bl-sm"}`}>
                       {m.attachment_url && (
-                        isImage ? (
-                          <a href={m.attachment_url} target="_blank" rel="noreferrer">
-                            <img src={m.attachment_url} alt={m.attachment_name || "image"} className="rounded-lg max-h-60 object-cover mb-1" />
-                          </a>
-                        ) : (
-                          <a href={m.attachment_url} target="_blank" rel="noreferrer" className={`flex items-center gap-2 px-2 py-1.5 rounded-lg mb-1 ${mine ? "bg-white/15" : "bg-muted"}`}>
-                            <FileText className="w-4 h-4 shrink-0" />
-                            <span className="truncate text-xs">{m.attachment_name || "Document"}</span>
-                          </a>
-                        )
+                        <Attachment url={m.attachment_url} name={m.attachment_name} isImage={isImage} mine={mine} />
                       )}
                       {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
                       <div className={`flex items-center justify-end gap-1 mt-0.5 text-[10px] ${mine ? "opacity-90" : "text-muted-foreground"}`}>
