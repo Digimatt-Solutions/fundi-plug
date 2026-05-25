@@ -1,65 +1,53 @@
-## Scope
+## Goal
+1. Make all storage buckets private — readable only by authenticated users — like `certifications` and `verification-docs`.
+2. Add a password strength indicator to the signup form.
 
-1. **Auth signup form**: Put Full Name + Email on the same row (two-column grid).
-2. **Suppliers in Community/Chat**: Already enabled via `module_settings`. Verify the community page (posts/likes/comments) and chat are not role-gated so suppliers can post, comment, like, and chat. Add small fixes if any role checks block them.
-3. **Business Profile module (suppliers)**
-4. **Admin Business Verification**
-5. **Products & Services module (suppliers, gated on approved business)**
-6. **Universal Marketplace (all users)**
+## Important consideration before we start
 
-## Database changes
+Today, 9 buckets are **public** and the app stores their `getPublicUrl(...)` results directly in the database (avatars on profiles, image_url on category-images / community-images / job-images / product-images, business logo, chat attachments, certifications, portfolio). A public URL looks like `…/object/public/<bucket>/<path>`.
 
-Two new tables in a single migration:
+If we just flip the buckets to private, **every stored URL stops working** (broken avatars, broken product photos, broken job photos, broken chat images, broken category tiles, etc.). Private buckets require **signed URLs** that expire (max ~1 week, typically minutes/hours).
 
-**`business_profiles`** (one per supplier)
-- `user_id` (uuid, unique, supplier)
-- `business_name`, `description`
-- `logo_url`, `banner_url`
-- `category`, `category_other`
-- `physical_address`, `county`, `town`
-- `latitude`, `longitude` (Google Maps pick)
-- `business_email`, `business_phone`, `website`
-- `kra_pin`, `registration_number`, `years_in_operation`
-- `verification_status`: enum `business_verification_status` = `draft | pending | approved | rejected`
-- `rejection_reason`, `submitted_at`, `approved_at`, `approved_by`
-- RLS: owner can CRUD their own; everyone authenticated can SELECT (catalog); admins can manage all.
+So "make all buckets private" is a real refactor, not a one-line toggle. Here is how I will do it safely:
 
-**`supplier_products`**
-- `business_id` (uuid → business_profiles)
-- `supplier_id` (uuid → profiles, denormalized for fast queries)
-- `name`, `category`, `description`
-- `images` (text[])
-- `price` (numeric), `unit` (text), `stock_status` (text: `in_stock|low|out_of_stock`)
-- `min_order_qty` (int)
-- `delivery_areas` (text[])
-- `is_featured` (bool), `is_active` (bool)
-- RLS: supplier owns own; everyone authenticated can SELECT active products where business is approved; admins manage all.
-- Trigger: reject inserts/updates if business not `approved`.
+## Plan
 
-Storage buckets: reuse existing `avatars` for logos / `community-images` for product images, or add a `business-assets` public bucket and `product-images` public bucket — cleaner separation.
+### 1. Database migration
+- Set these buckets `public = false`: `avatars`, `category-images`, `job-images`, `community-images`, `portfolio`, `chat-attachments`, `business-assets`, `product-images`, `certifications`.
+- Keep `verification-docs` private (already is).
+- Add `storage.objects` RLS:
+  - SELECT: any **authenticated** user can read objects in the above buckets.
+  - INSERT / UPDATE / DELETE: only the owner (path prefix `auth.uid()`), with admin override. For `category-images` and `community-images` (blogs) writes restricted to admins.
+- Keep the existing per-bucket policies that already exist; merge where needed without dropping legitimate access.
 
-Add `module_settings` rows for supplier:
-- `business_profile`
-- `products`
-- `marketplace` (all roles)
+### 2. Code refactor — switch to signed URLs
 
-## Pages / Components
+Instead of refreshing every stored URL in the DB, I will:
 
-- `src/pages/SupplierBusinessProfilePage.tsx` — form + status banner + submit-for-verification.
-- `src/pages/SupplierProductsPage.tsx` — list + create/edit dialog; locked screen if business not approved.
-- `src/pages/MarketplacePage.tsx` — public catalog with search + category filter + product cards.
-- `src/pages/MarketplaceProductPage.tsx` — product detail with verified supplier card.
-- `src/pages/AdminBusinessVerificationsPage.tsx` — admin queue (pending, approved, rejected tabs) + approve/reject.
-- Update `SupplierDashboard` to surface business verification status + product count + quick links.
-- Update `AppSidebar` to add Business Profile, Products (locked until approved), Marketplace entries. Marketplace also visible to clients/fundis/admins.
-- Update `AdminDashboard` to show pending businesses count card.
-- Update `App.tsx` routes.
+- **Store only the storage path** (e.g. `userId/file.jpg`) going forward for new uploads, OR detect the path from existing stored URLs and re-sign on render.
+- Add a tiny helper `src/lib/storageUrl.ts` exporting `useSignedUrl(bucket, pathOrUrl)` and `signedUrl(bucket, pathOrUrl, ttl)` that:
+  - If input is a `…/object/public/<bucket>/<path>` legacy URL → extract `<path>` and re-sign.
+  - If input is already a path → sign directly.
+  - Caches signed URLs in memory for their TTL to avoid re-signing on every render.
+- Update upload sites in 11 files to call `createSignedUrl` (1 year TTL where the URL is stored long-term, e.g. avatars), or store just the path and sign on display.
+- Update display sites (cards, lists, detail pages) for product images, category tiles, community posts, job photos, chat attachments, avatars, business logos, certifications and portfolio to render via the helper.
 
-## Auth form
+Files touched:
+- `src/lib/storageUrl.ts` (new)
+- Upload: `AccountProfilePage`, `AdminCategoriesPage`, `CommunityPage`, `CustomerDashboard`, `CustomerPostJobPage`, `FindWorkersPage`, `SupplierBusinessProfilePage`, `SupplierProductsPage`, `WorkerProfilePage`, `chat/ChatPopup`, `onboarding/FileUploader`, `CameraCapture`.
+- Display: `MarketplacePage`, `MarketplaceProductPage`, `CategoriesScroller`, `CommunityPage`, `CustomerDashboard`, `WorkerProfilePage`, `AccountProfilePage`, `TopNavbar` (avatar), wherever images render.
 
-Update `src/pages/Auth.tsx` signup section: wrap Full Name + Email in a `grid grid-cols-1 sm:grid-cols-2 gap-3` row.
+### 3. Password strength indicator (signup)
+- New component `src/components/auth/PasswordStrength.tsx`:
+  - Score 0–4 based on length, mix of cases, digits, symbols, and a small common-password blocklist check.
+  - Renders 4 colored bars + label ("Too weak", "Weak", "Fair", "Strong", "Excellent") + checklist (≥12 chars, upper, lower, number, symbol).
+- Mount it under the Password field in `Auth.tsx` only when `mode === "signup"`.
+- Enforce **min length 12** + score ≥ 3 to enable Create Account (matches the auth hardening we agreed on).
 
-## Out of scope
+## Risk / rollback
+- The refactor is large but mechanical. Each file edit is independent.
+- If any image fails to render after deploy, the helper falls back to the original stored string so we never crash.
+- All migration changes are reversible (`UPDATE storage.buckets SET public = true`).
 
-- Cart / checkout / payments on marketplace (catalog only this round; can be added later).
-- Editing existing community/chat code beyond verifying suppliers aren't blocked.
+## Approval needed
+Because step 2 touches ~15 files and changes how every image in the app loads, I want your explicit go-ahead before I start. Reply **"go"** to proceed, or tell me to skip making display-asset buckets private and only lock down the sensitive ones (`certifications`, `portfolio`, `chat-attachments`, `business-assets`).
