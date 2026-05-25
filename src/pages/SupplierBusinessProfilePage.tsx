@@ -56,8 +56,8 @@ export default function SupplierBusinessProfilePage() {
     const path = `${user.id}/${kind}-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("business-assets").upload(path, file, { upsert: true });
     if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return; }
-    const { data } = supabase.storage.from("business-assets").getPublicUrl(path);
-    set(kind === "logo" ? "logo_url" : "banner_url", data.publicUrl);
+    const { data } = await supabase.storage.from("business-assets").createSignedUrl(path, 60 * 60 * 24 * 365);
+    set(kind === "logo" ? "logo_url" : "banner_url", data?.signedUrl || path);
   };
 
   const save = async (submit = false) => {
