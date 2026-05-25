@@ -207,16 +207,7 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
                   <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[78%] px-3 py-2 rounded-2xl text-[12.5px] sm:text-sm break-words leading-snug ${mine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-background border border-border text-foreground rounded-bl-sm"}`}>
                       {m.attachment_url && (
-                        isImage ? (
-                          <a href={m.attachment_url} target="_blank" rel="noreferrer">
-                            <img src={m.attachment_url} alt={m.attachment_name || "image"} className="rounded-lg max-h-60 object-cover mb-1" />
-                          </a>
-                        ) : (
-                          <a href={m.attachment_url} target="_blank" rel="noreferrer" className={`flex items-center gap-2 px-2 py-1.5 rounded-lg mb-1 ${mine ? "bg-white/15" : "bg-muted"}`}>
-                            <FileText className="w-4 h-4 shrink-0" />
-                            <span className="truncate text-xs">{m.attachment_name || "Document"}</span>
-                          </a>
-                        )
+                        <Attachment url={m.attachment_url} name={m.attachment_name} isImage={isImage} mine={mine} />
                       )}
                       {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
                       <div className={`flex items-center justify-end gap-1 mt-0.5 text-[10px] ${mine ? "opacity-90" : "text-muted-foreground"}`}>
