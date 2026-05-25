@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useSignedUrl } from "@/lib/storageUrl";
 
 export interface ChatPeer {
   id: string;
@@ -159,9 +160,11 @@ export default function ChatPopup({ peer, onClose, embedded = false, initialDraf
     const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error: upErr } = await supabase.storage.from("chat-attachments").upload(path, file, { contentType: file.type });
     if (upErr) { toast.error("Upload failed"); setUploading(false); return; }
-    const { data: pub } = supabase.storage.from("chat-attachments").getPublicUrl(path);
+    // chat-attachments is private — store a long-TTL signed URL so the
+    // recipient can render the file. <AttachmentLink/> re-signs at render too.
+    const { data: signed } = await supabase.storage.from("chat-attachments").createSignedUrl(path, 60 * 60 * 24 * 365);
     await sendMessage({
-      attachment_url: pub.publicUrl,
+      attachment_url: signed?.signedUrl || path,
       attachment_type: file.type,
       attachment_name: file.name,
     });
