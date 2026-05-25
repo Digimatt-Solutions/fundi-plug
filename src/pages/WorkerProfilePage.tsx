@@ -115,9 +115,10 @@ export default function WorkerProfilePage() {
     const path = `${user.id}/avatar_${Date.now()}.${file.name.split('.').pop()}`;
     const { error: uploadError } = await supabase.storage.from("certifications").upload(path, file);
     if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); setUploadingAvatar(false); return; }
-    const { data: urlData } = supabase.storage.from("certifications").getPublicUrl(path);
-    await supabase.from("profiles").update({ avatar_url: urlData.publicUrl }).eq("id", user.id);
-    setAvatarUrl(urlData.publicUrl);
+    const { data: urlData } = await supabase.storage.from("certifications").createSignedUrl(path, 60 * 60 * 24 * 365);
+    const signedUrl = urlData?.signedUrl || path;
+    await supabase.from("profiles").update({ avatar_url: signedUrl }).eq("id", user.id);
+    setAvatarUrl(signedUrl);
     await refreshProfile();
     toast({ title: "Profile photo updated" });
     setUploadingAvatar(false);
@@ -158,8 +159,8 @@ export default function WorkerProfilePage() {
     const path = `${user!.id}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage.from("certifications").upload(path, file);
     if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); setUploading(null); return; }
-    const { data: urlData } = supabase.storage.from("certifications").getPublicUrl(path);
-    await supabase.from("certifications").insert({ worker_id: profile.id, name: docLabel, file_url: urlData.publicUrl });
+    const { data: urlData } = await supabase.storage.from("certifications").createSignedUrl(path, 60 * 60 * 24 * 365);
+    await supabase.from("certifications").insert({ worker_id: profile.id, name: docLabel, file_url: urlData?.signedUrl || path });
     const { data: updated } = await supabase.from("certifications").select("*").eq("worker_id", profile.id).order("created_at", { ascending: false });
     setCerts(updated || []);
     toast({ title: `${docLabel} uploaded` });
@@ -173,8 +174,8 @@ export default function WorkerProfilePage() {
     const path = `${user!.id}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage.from("certifications").upload(path, file);
     if (uploadError) { toast({ title: "Upload failed", description: uploadError.message, variant: "destructive" }); setUploading(null); return; }
-    const { data: urlData } = supabase.storage.from("certifications").getPublicUrl(path);
-    await supabase.from("certifications").insert({ worker_id: profile.id, name: certName.trim(), file_url: urlData.publicUrl });
+    const { data: urlData } = await supabase.storage.from("certifications").createSignedUrl(path, 60 * 60 * 24 * 365);
+    await supabase.from("certifications").insert({ worker_id: profile.id, name: certName.trim(), file_url: urlData?.signedUrl || path });
     const { data: updated } = await supabase.from("certifications").select("*").eq("worker_id", profile.id).order("created_at", { ascending: false });
     setCerts(updated || []);
     setCertName("");

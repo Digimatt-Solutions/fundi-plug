@@ -166,8 +166,8 @@ export default function CustomerDashboard() {
       const path = `${user.id}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("job-images").upload(path, hireImage);
       if (!upErr) {
-        const { data } = supabase.storage.from("job-images").getPublicUrl(path);
-        imageUrl = data.publicUrl;
+        const { data } = await supabase.storage.from("job-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+        imageUrl = data?.signedUrl || path;
       }
     }
     const { data: job, error } = await supabase.from("jobs").insert({

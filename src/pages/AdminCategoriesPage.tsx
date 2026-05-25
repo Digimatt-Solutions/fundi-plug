@@ -55,8 +55,8 @@ export default function AdminCategoriesPage() {
     const path = `${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("category-images").upload(path, file);
     if (error) { toast({ title: "Upload failed", description: friendlyError(error), variant: "destructive" }); setUploading(false); return; }
-    const { data: { publicUrl } } = supabase.storage.from("category-images").getPublicUrl(path);
-    setImageUrl(publicUrl);
+    const { data } = await supabase.storage.from("category-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+    setImageUrl(data?.signedUrl || path);
     setUploading(false);
   };
 

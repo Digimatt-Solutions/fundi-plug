@@ -89,8 +89,8 @@ export default function CustomerPostJobPage() {
     const path = `${user!.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("job-images").upload(path, file);
     if (error) { toast({ title: "Image upload failed", description: friendlyError(error), variant: "destructive" }); return null; }
-    const { data } = supabase.storage.from("job-images").getPublicUrl(path);
-    return data.publicUrl;
+    const { data } = await supabase.storage.from("job-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+    return data?.signedUrl || path;
   };
 
   const createJob = async () => {

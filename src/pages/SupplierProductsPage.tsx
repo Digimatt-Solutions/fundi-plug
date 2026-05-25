@@ -56,8 +56,8 @@ export default function SupplierProductsPage() {
     const path = `${user.id}/${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("product-images").upload(path, file);
     if (error) { toast({ title: "Upload failed", description: error.message, variant: "destructive" }); return; }
-    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-    setEditing((e: any) => ({ ...e, images: [...(e.images || []), data.publicUrl] }));
+    const { data } = await supabase.storage.from("product-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+    setEditing((e: any) => ({ ...e, images: [...(e.images || []), data?.signedUrl || path] }));
   };
 
   const removeImage = (url: string) => setEditing((e: any) => ({ ...e, images: e.images.filter((u: string) => u !== url) }));

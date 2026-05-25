@@ -168,8 +168,8 @@ export default function CommunityPage() {
       const path = `${user.id}/${Date.now()}.${ext}`;
       const { error: uploadErr } = await supabase.storage.from("community-images").upload(path, newImage);
       if (uploadErr) { toast({ title: "Image upload failed", description: uploadErr.message, variant: "destructive" }); setPosting(false); return; }
-      const { data: urlData } = supabase.storage.from("community-images").getPublicUrl(path);
-      imageUrl = urlData.publicUrl;
+      const { data: urlData } = await supabase.storage.from("community-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+      imageUrl = urlData?.signedUrl || path;
     }
     const { error } = await supabase.from("community_posts").insert({
       author_id: user.id, content: newContent.trim(), image_url: imageUrl,
@@ -233,8 +233,8 @@ export default function CommunityPage() {
       const path = `blogs/${user.id}/${Date.now()}.${ext}`;
       const { error: uploadErr } = await supabase.storage.from("community-images").upload(path, blogImage);
       if (uploadErr) { toast({ title: "Image upload failed", variant: "destructive" }); setPostingBlog(false); return; }
-      const { data: urlData } = supabase.storage.from("community-images").getPublicUrl(path);
-      imageUrl = urlData.publicUrl;
+      const { data: urlData } = await supabase.storage.from("community-images").createSignedUrl(path, 60 * 60 * 24 * 365);
+      imageUrl = urlData?.signedUrl || path;
     }
     await supabase.from("community_blogs").insert({ author_id: user.id, title: blogTitle.trim(), content: blogContent.trim() || null, image_url: imageUrl, blog_type: blogType } as any);
     setBlogTitle(""); setBlogContent(""); setBlogImage(null); setBlogImagePreview(null); setShowBlogForm(false);

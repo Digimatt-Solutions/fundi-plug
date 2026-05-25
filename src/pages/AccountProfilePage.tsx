@@ -76,8 +76,8 @@ export default function AccountProfilePage() {
       const path = `${user.id}/avatar-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
       if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-      const url = pub.publicUrl;
+      const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 60 * 60 * 24 * 365);
+      const url = signed?.signedUrl || path;
       await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
       setForm((f) => ({ ...f, avatar_url: url }));
       await refreshProfile();
