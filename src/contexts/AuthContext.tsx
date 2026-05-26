@@ -112,17 +112,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [loadUser]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    // Route login through secure-login edge function which enforces
+    // 6-hour account lockout after 3 consecutive failed attempts.
+    const { data: result, error: fnError } = await supabase.functions.invoke("secure-login", {
+      body: { email, password },
+    });
+
+    if (fnError || result?.error) {
+      const message = result?.error || fnError?.message || "Login failed";
+      throw new Error(message);
+    }
+    if (!result?.access_token || !result?.refresh_token) {
+      throw new Error("Login failed");
+    }
+
+    const { data, error } = await supabase.auth.setSession({
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+    });
     if (error) throw error;
 
     if (data.user) {
-      // Fetch role to set online
       const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).single();
       const role = roleData?.role || "customer";
-      
-      // Set worker online with location on login
       await setWorkerOnline(data.user.id, role, true);
-
       supabase.from("activity_logs").insert({
         user_id: data.user.id, action: "User Login",
         detail: "User signed in", entity_type: "user", entity_id: data.user.id,
