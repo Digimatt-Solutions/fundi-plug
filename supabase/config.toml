@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.mpesa-callback]
 verify_jwt = false
+
+[functions.secure-login]
+verify_jwt = false
