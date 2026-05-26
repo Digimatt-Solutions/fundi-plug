@@ -704,6 +704,30 @@ export type Database = {
           },
         ]
       }
+      login_attempts: {
+        Row: {
+          email: string
+          failed_count: number
+          last_attempt_at: string
+          locked_until: string | null
+          updated_at: string
+        }
+        Insert: {
+          email: string
+          failed_count?: number
+          last_attempt_at?: string
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Update: {
+          email?: string
+          failed_count?: number
+          last_attempt_at?: string
+          locked_until?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           attachment_name: string | null
