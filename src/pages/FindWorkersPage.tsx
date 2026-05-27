@@ -18,7 +18,6 @@ import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import { MessageCircle } from "lucide-react";
-import { AssetImage } from "@/components/AssetImage";
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
