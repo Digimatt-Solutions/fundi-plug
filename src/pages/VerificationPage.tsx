@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { AssetImage } from "@/components/AssetImage";
 
 const Field = ({ label, value }: { label: string; value: any }) => (
   <div className="p-2.5 rounded-lg bg-muted/40">
@@ -23,7 +24,7 @@ const ImgPreview = ({ url, label }: { url?: string; label: string }) => (
     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
     {url ? (
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <img loading="lazy" decoding="async" src={url} alt={label} className="w-full h-36 object-cover rounded-lg border hover:opacity-90 transition" />
+        <AssetImage src={url} bucket="verification-docs" alt={label} className="w-full h-36 object-cover rounded-lg border hover:opacity-90 transition" />
       </a>
     ) : (
       <div className="w-full h-36 rounded-lg border-2 border-dashed border-destructive/30 bg-destructive/5 flex items-center justify-center text-xs text-destructive">
@@ -146,7 +147,7 @@ export default function VerificationPage() {
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm overflow-hidden">
             {w.profile_photo_url || w.profiles?.avatar_url
-              ? <img loading="lazy" decoding="async" src={w.profile_photo_url || w.profiles.avatar_url} className="w-full h-full object-cover rounded-full" />
+              ? <AssetImage src={w.profile_photo_url || w.profiles.avatar_url} bucket="avatars" className="w-full h-full object-cover rounded-full" />
               : (w.profiles?.name || "F").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
           </div>
           <div>
@@ -296,7 +297,7 @@ export default function VerificationPage() {
                     <div className="grid grid-cols-4 gap-2">
                       {viewWorker.portfolio_urls.map((url: string, i: number) => (
                         <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                          <img loading="lazy" decoding="async" src={url} alt="" className="w-full h-20 object-cover rounded border hover:opacity-90 transition" />
+                          <AssetImage src={url} bucket="portfolio" alt="" className="w-full h-20 object-cover rounded border hover:opacity-90 transition" />
                         </a>
                       ))}
                     </div>

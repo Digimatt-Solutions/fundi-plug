@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { maskEmail, maskPhone } from "@/lib/mask";
 import { MapPreview } from "@/components/MapPreview";
+import { AssetImage } from "@/components/AssetImage";
 import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
@@ -401,7 +402,7 @@ export default function FindWorkersPage() {
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-3">
                     {selectedWorker.avatar_url ? (
-                      <img loading="lazy" decoding="async" src={selectedWorker.avatar_url} alt={selectedWorker.name} className="w-14 h-14 rounded-full object-cover" />
+                      <AssetImage src={selectedWorker.avatar_url} bucket="avatars" alt={selectedWorker.name} className="w-14 h-14 rounded-full object-cover" />
                     ) : (
                       <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-lg">
                         {selectedWorker.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}

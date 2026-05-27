@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import logo from "@/assets/logo.png";
 import cover from "@/assets/fundiplug-cover.jpg";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function PublicReviewsPage() {
   const { workerId } = useParams();
@@ -122,7 +123,7 @@ export default function PublicReviewsPage() {
       <main className="max-w-3xl mx-auto p-4 sm:p-6 space-y-5">
         <section className="stat-card flex items-center gap-4">
           {worker?.avatar_url ? (
-            <img loading="lazy" decoding="async" src={worker.avatar_url} alt={worker.name} className="w-16 h-16 rounded-full object-cover" />
+            <AssetImage src={worker.avatar_url} bucket="avatars" alt={worker.name} className="w-16 h-16 rounded-full object-cover" />
           ) : (
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
               {(worker?.name || "F").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -149,7 +150,7 @@ export default function PublicReviewsPage() {
               <article key={r.id} className="stat-card">
                 <div className="flex items-start gap-3">
                   {r.reviewerAvatar ? (
-                    <img loading="lazy" decoding="async" src={r.reviewerAvatar} alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                    <AssetImage src={r.reviewerAvatar} bucket="avatars" alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-semibold shrink-0">
                       {r.reviewerName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
