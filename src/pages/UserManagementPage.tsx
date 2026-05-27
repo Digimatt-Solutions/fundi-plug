@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { AssetImage } from "@/components/AssetImage";
 
 const roleIcon = (role: string) => {
   if (role === "admin") return <Shield className="w-3.5 h-3.5" />;
@@ -172,7 +173,7 @@ export default function UserManagementPage() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       {u.avatar_url ? (
-                        <img loading="lazy" decoding="async" src={u.avatar_url} alt={u.name} className="w-9 h-9 rounded-full object-cover ring-1 ring-border" />
+                        <AssetImage src={u.avatar_url} bucket="avatars" alt={u.name} className="w-9 h-9 rounded-full object-cover ring-1 ring-border" />
                       ) : (
                         <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
                           {u.name?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShieldCheck, XCircle, MapPin, Mail, Phone, Globe } from "lucide-react";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function AdminBusinessVerificationsPage() {
   const { user } = useAuth();

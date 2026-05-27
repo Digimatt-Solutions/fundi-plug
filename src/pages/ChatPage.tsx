@@ -6,6 +6,7 @@ import { MessageCircle, Search, LifeBuoy, ShieldCheck, Clock3, Send } from "luci
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
+import { AssetImage } from "@/components/AssetImage";
 import { toast } from "sonner";
 
 interface ConvRow {
@@ -163,7 +164,7 @@ export default function ChatPage() {
                   <button key={c.peer_id} onClick={() => setActive({ id: c.peer_id, name: c.peer_name, avatar_url: c.peer_avatar })}
                     className="w-full flex items-center gap-3 px-3 sm:px-4 py-3 hover:bg-muted/40 transition text-left">
                     {c.peer_avatar ? (
-                      <img src={c.peer_avatar} alt={c.peer_name} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                      <AssetImage src={c.peer_avatar} bucket="avatars" alt={c.peer_name} className="w-12 h-12 rounded-full object-cover shrink-0" />
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold shrink-0">{initials}</div>
                     )}
