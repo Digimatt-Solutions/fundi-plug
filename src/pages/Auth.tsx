@@ -330,11 +330,21 @@ const Auth = () => {
               </div>
             )}
 
-            {error && (
+            {lockedUntil && lockMsLeft > 0 ? (
+              <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-sm">
+                <p className="font-semibold mb-1">Account temporarily locked</p>
+                <p className="text-xs opacity-90">Too many failed attempts. Try again in <span className="font-mono font-semibold">{formatRemaining(lockMsLeft)}</span>.</p>
+              </div>
+            ) : error ? (
               <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                 {error}
+                {typeof attemptsRemaining === "number" && attemptsRemaining > 0 && (
+                  <span className="block text-xs mt-1 opacity-80">
+                    {attemptsRemaining} attempt{attemptsRemaining === 1 ? "" : "s"} remaining before your account is locked for 6 hours.
+                  </span>
+                )}
               </div>
-            )}
+            ) : null}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {mode === "signup" && !isForgot && (
