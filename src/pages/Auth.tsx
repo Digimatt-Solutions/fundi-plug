@@ -192,10 +192,7 @@ const Auth = () => {
         });
       }
     } catch (err: any) {
-      // For sign-in, surface the raw server message verbatim so users see
-      // exact lockout/attempts-remaining feedback from secure-login.
-      const rawMsg = err?.message || String(err);
-      const msg = isSignIn ? rawMsg : friendlyError(err);
+      const msg = friendlyError(err);
       setError(msg);
       if (err?.locked && err?.locked_until) {
         setLockedUntil(err.locked_until);
@@ -206,7 +203,7 @@ const Auth = () => {
         setLockedUntil(null);
         toast({ title: "Wrong password", description: msg, variant: "destructive" });
       } else {
-        toast({ title: isSignIn ? "Sign in failed" : "Sign up problem", description: msg, variant: "destructive" });
+        toast({ title: "Sign in problem", description: msg, variant: "destructive" });
       }
       setLoading(false);
     }
