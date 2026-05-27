@@ -118,9 +118,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       body: { email, password },
     });
 
-    if (fnError || result?.error) {
-      const message = result?.error || fnError?.message || "Login failed";
-      throw new Error(message);
+    // The edge function returns rich error payloads (locked, attempts left, etc.)
+    // even on non-2xx. Surface the server message verbatim and attach metadata
+    // on the thrown Error so the UI can render a lockout countdown.
+    if (result?.error || fnError) {
+      const msg = result?.error || fnError?.message || "Login failed";
+      const err = new Error(msg) as Error & { locked?: boolean; locked_until?: string; attempts_remaining?: number };
+      if (result?.locked) err.locked = true;
+      if (result?.locked_until) err.locked_until = result.locked_until;
+      if (typeof result?.attempts_remaining === "number") err.attempts_remaining = result.attempts_remaining;
+      throw err;
     }
     if (!result?.access_token || !result?.refresh_token) {
       throw new Error("Login failed");
@@ -159,6 +166,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user) {
       await setWorkerOnline(user.id, user.role, false);
     }
+    // Revoke tokens server-side (adds hashes to token_blacklist + global signOut).
+    try {
+      const { data: { session: sess } } = await supabase.auth.getSession();
+      if (sess?.access_token) {
+        await supabase.functions.invoke("revoke-token", {
+          body: { access_token: sess.access_token, refresh_token: sess.refresh_token },
+        });
+      }
+    } catch { /* best effort */ }
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
