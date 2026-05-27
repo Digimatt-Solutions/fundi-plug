@@ -29,6 +29,9 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [lockedUntil, setLockedUntil] = useState<string | null>(null);
+  const [lockNow, setLockNow] = useState<number>(Date.now());
+  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
   const [showVoiceRow, setShowVoiceRow] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   
@@ -191,10 +194,46 @@ const Auth = () => {
     } catch (err: any) {
       const msg = friendlyError(err);
       setError(msg);
-      toast({ title: "Sign in problem", description: msg, variant: "destructive" });
+      if (err?.locked && err?.locked_until) {
+        setLockedUntil(err.locked_until);
+        setAttemptsRemaining(null);
+        toast({ title: "Account locked", description: msg, variant: "destructive" });
+      } else if (typeof err?.attempts_remaining === "number") {
+        setAttemptsRemaining(err.attempts_remaining);
+        setLockedUntil(null);
+        toast({ title: "Wrong password", description: msg, variant: "destructive" });
+      } else {
+        toast({ title: "Sign in problem", description: msg, variant: "destructive" });
+      }
       setLoading(false);
     }
   };
+
+  // Tick every second to update lockout countdown.
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const id = setInterval(() => setLockNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [lockedUntil]);
+
+  const lockMsLeft = lockedUntil ? new Date(lockedUntil).getTime() - lockNow : 0;
+  useEffect(() => {
+    if (lockedUntil && lockMsLeft <= 0) {
+      setLockedUntil(null);
+      setError("");
+    }
+  }, [lockMsLeft, lockedUntil]);
+
+  function formatRemaining(ms: number): string {
+    if (ms <= 0) return "0s";
+    const total = Math.ceil(ms / 1000);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
 
   const signupDisabled =
     !isSignIn && !isForgot && (!otpVerified || password.length < 12 || scorePassword(password) < 3);
@@ -291,11 +330,21 @@ const Auth = () => {
               </div>
             )}
 
-            {error && (
+            {lockedUntil && lockMsLeft > 0 ? (
+              <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-sm">
+                <p className="font-semibold mb-1">Account temporarily locked</p>
+                <p className="text-xs opacity-90">Too many failed attempts. Try again in <span className="font-mono font-semibold">{formatRemaining(lockMsLeft)}</span>.</p>
+              </div>
+            ) : error ? (
               <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
                 {error}
+                {typeof attemptsRemaining === "number" && attemptsRemaining > 0 && (
+                  <span className="block text-xs mt-1 opacity-80">
+                    {attemptsRemaining} attempt{attemptsRemaining === 1 ? "" : "s"} remaining before your account is locked for 6 hours.
+                  </span>
+                )}
               </div>
-            )}
+            ) : null}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               {mode === "signup" && !isForgot && (
@@ -484,7 +533,7 @@ const Auth = () => {
               <div className="flex items-stretch gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || resetting || signupDisabled || resetDisabled || (mode === "signup" && !agreedToTerms)}
+                  disabled={loading || resetting || signupDisabled || resetDisabled || (mode === "signup" && !agreedToTerms) || (isSignIn && !!lockedUntil && lockMsLeft > 0)}
                   className="flex-1 h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
                 >
                   {isForgot

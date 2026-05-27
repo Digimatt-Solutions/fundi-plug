@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star, Share2, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function WorkerReviewsPage() {
   const { user } = useAuth();
@@ -103,7 +104,7 @@ export default function WorkerReviewsPage() {
             <div key={r.id} className="stat-card animate-fade-in p-4 sm:p-6" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex items-start gap-3">
                 {r.reviewerAvatar ? (
-                  <img loading="lazy" decoding="async" src={r.reviewerAvatar} alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                  <AssetImage src={r.reviewerAvatar} bucket="avatars" alt={r.reviewerName} className="w-10 h-10 rounded-full object-cover shrink-0" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center text-xs font-semibold shrink-0">
                     {r.reviewerName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}

@@ -493,7 +493,7 @@ export default function CommunityPage() {
                       </button>
                     )}
                     {b.image_url && (
-                      <img loading="lazy" decoding="async" src={b.image_url} alt={b.title}
+                      <AssetImage src={b.image_url} bucket="community-images" alt={b.title}
                         className="w-full h-28 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => setPreviewImage(b.image_url)} />
                     )}

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { assertTokenNotRevoked } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,10 +19,14 @@ serve(async (req) => {
   );
 
   try {
+    const revoked = await assertTokenNotRevoked(req, supabaseClient);
+    if (revoked) return revoked;
+
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data: { user } } = await supabaseClient.auth.getUser(token);
     if (!user?.email) throw new Error("Not authenticated");
+
 
     const { jobId, amount, workerId } = await req.json();
     if (!jobId || !amount || !workerId) throw new Error("Missing jobId, amount, or workerId");

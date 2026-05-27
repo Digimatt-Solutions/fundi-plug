@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ShieldCheck, XCircle, MapPin, Mail, Phone, Globe } from "lucide-react";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function AdminBusinessVerificationsPage() {
   const { user } = useAuth();
@@ -83,7 +84,7 @@ export default function AdminBusinessVerificationsPage() {
                 const p = profiles[b.user_id];
                 return (
                   <div key={b.id} className="rounded-xl border border-border bg-card p-4 flex items-center gap-4 flex-wrap">
-                    {b.logo_url ? <img src={b.logo_url} alt="" className="w-14 h-14 rounded-lg object-cover" /> : <div className="w-14 h-14 rounded-lg bg-muted" />}
+                    {b.logo_url ? <AssetImage src={b.logo_url} bucket="business-assets" alt="" className="w-14 h-14 rounded-lg object-cover" /> : <div className="w-14 h-14 rounded-lg bg-muted" />}
                     <div className="flex-1 min-w-[200px]">
                       <p className="font-semibold text-foreground">{b.business_name || "(unnamed)"}</p>
                       <p className="text-xs text-muted-foreground">{p?.name} - {p?.email}</p>
@@ -103,9 +104,9 @@ export default function AdminBusinessVerificationsPage() {
           <DialogHeader><DialogTitle>{viewing?.business_name}</DialogTitle></DialogHeader>
           {viewing && (
             <div className="space-y-4">
-              {viewing.banner_url && <img src={viewing.banner_url} alt="" className="w-full h-32 object-cover rounded-lg" />}
+              {viewing.banner_url && <AssetImage src={viewing.banner_url} bucket="business-assets" alt="" className="w-full h-32 object-cover rounded-lg" />}
               <div className="flex items-center gap-3">
-                {viewing.logo_url && <img src={viewing.logo_url} alt="" className="w-16 h-16 rounded-lg object-cover" />}
+                {viewing.logo_url && <AssetImage src={viewing.logo_url} bucket="business-assets" alt="" className="w-16 h-16 rounded-lg object-cover" />}
                 <div>
                   <p className="font-semibold">{viewing.business_name}</p>
                   <Badge variant="outline">{viewing.category}{viewing.category_other ? `: ${viewing.category_other}` : ""}</Badge>

@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.secure-login]
 verify_jwt = false
+
+[functions.revoke-token]
+verify_jwt = false

@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useSearchParams } from "react-router-dom";
 import TransactionReceipt, { getPaymentMethod } from "@/components/TransactionReceipt";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { AssetImage } from "@/components/AssetImage";
 import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
 import ChatButton from "@/components/chat/ChatButton";
@@ -188,11 +189,10 @@ export default function CustomerBookingsPage() {
                 {/* Job image thumbnail */}
                 <div className="shrink-0">
                   {job.image_url ? (
-                    <img
+                    <AssetImage
                       src={job.image_url}
+                      bucket="job-images"
                       alt={job.title}
-                      loading="lazy"
-                      decoding="async"
                       className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-border"
                     />
                   ) : (

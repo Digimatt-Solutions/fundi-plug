@@ -12,6 +12,7 @@ import { maskEmail, maskPhone } from "@/lib/mask";
 import { friendlyError } from "@/lib/friendlyError";
 import ChatButton from "@/components/chat/ChatButton";
 import PriceLockBadge from "@/components/PriceLockBadge";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function WorkerMyJobsPage() {
   const { user } = useAuth();
@@ -266,7 +267,7 @@ export default function WorkerMyJobsPage() {
               <div className="space-y-2">
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                   {job.image_url && (
-                    <img loading="lazy" decoding="async" src={job.image_url} alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
+                    <AssetImage src={job.image_url} bucket="job-images" alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
                   )}
                   <div className="flex-1 min-w-0 space-y-2 w-full">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
@@ -316,7 +317,7 @@ export default function WorkerMyJobsPage() {
             <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                 {job.image_url && (
-                  <img loading="lazy" decoding="async" src={job.image_url} alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
+                  <AssetImage src={job.image_url} bucket="job-images" alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
                 )}
                 <div className="flex-1 min-w-0 space-y-2 w-full">
                   <div className="flex items-start justify-between gap-2 flex-wrap">

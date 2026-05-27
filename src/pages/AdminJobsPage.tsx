@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Briefcase, ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { AssetImage } from "@/components/AssetImage";
 
 export default function AdminJobsPage() {
   const { toast } = useToast();
@@ -94,7 +95,7 @@ export default function AdminJobsPage() {
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       {job.image_url && (
-                        <img loading="lazy" decoding="async" src={job.image_url} alt="" className="w-8 h-8 rounded object-cover cursor-pointer hover:opacity-80" onClick={() => setImagePreview(job.image_url)} />
+                        <AssetImage src={job.image_url} bucket="job-images" alt="" className="w-8 h-8 rounded object-cover cursor-pointer hover:opacity-80" onClick={() => setImagePreview(job.image_url)} />
                       )}
                       <span className="font-medium text-foreground">{job.title}</span>
                     </div>
@@ -128,7 +129,7 @@ export default function AdminJobsPage() {
 
       <Dialog open={!!imagePreview} onOpenChange={(o) => !o && setImagePreview(null)}>
         <DialogContent className="sm:max-w-lg p-2">
-          {imagePreview && <img loading="lazy" decoding="async" src={imagePreview} alt="Job" className="w-full rounded-lg" />}
+          {imagePreview && <AssetImage src={imagePreview} bucket="job-images" alt="Job" className="w-full rounded-lg" />}
         </DialogContent>
       </Dialog>
     </div>

@@ -1175,6 +1175,27 @@ export type Database = {
         }
         Relationships: []
       }
+      token_blacklist: {
+        Row: {
+          expires_at: string
+          revoked_at: string
+          token_hash: string
+          user_id: string | null
+        }
+        Insert: {
+          expires_at: string
+          revoked_at?: string
+          token_hash: string
+          user_id?: string | null
+        }
+        Update: {
+          expires_at?: string
+          revoked_at?: string
+          token_hash?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
