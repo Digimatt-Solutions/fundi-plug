@@ -29,6 +29,9 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [lockedUntil, setLockedUntil] = useState<string | null>(null);
+  const [lockNow, setLockNow] = useState<number>(Date.now());
+  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
   const [showVoiceRow, setShowVoiceRow] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   
@@ -191,10 +194,46 @@ const Auth = () => {
     } catch (err: any) {
       const msg = friendlyError(err);
       setError(msg);
-      toast({ title: "Sign in problem", description: msg, variant: "destructive" });
+      if (err?.locked && err?.locked_until) {
+        setLockedUntil(err.locked_until);
+        setAttemptsRemaining(null);
+        toast({ title: "Account locked", description: msg, variant: "destructive" });
+      } else if (typeof err?.attempts_remaining === "number") {
+        setAttemptsRemaining(err.attempts_remaining);
+        setLockedUntil(null);
+        toast({ title: "Wrong password", description: msg, variant: "destructive" });
+      } else {
+        toast({ title: "Sign in problem", description: msg, variant: "destructive" });
+      }
       setLoading(false);
     }
   };
+
+  // Tick every second to update lockout countdown.
+  useEffect(() => {
+    if (!lockedUntil) return;
+    const id = setInterval(() => setLockNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [lockedUntil]);
+
+  const lockMsLeft = lockedUntil ? new Date(lockedUntil).getTime() - lockNow : 0;
+  useEffect(() => {
+    if (lockedUntil && lockMsLeft <= 0) {
+      setLockedUntil(null);
+      setError("");
+    }
+  }, [lockMsLeft, lockedUntil]);
+
+  function formatRemaining(ms: number): string {
+    if (ms <= 0) return "0s";
+    const total = Math.ceil(ms / 1000);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
 
   const signupDisabled =
     !isSignIn && !isForgot && (!otpVerified || password.length < 12 || scorePassword(password) < 3);

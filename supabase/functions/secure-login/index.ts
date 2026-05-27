@@ -31,13 +31,14 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existing?.locked_until && new Date(existing.locked_until) > new Date()) {
-      const minsLeft = Math.ceil(
-        (new Date(existing.locked_until).getTime() - Date.now()) / 60000
-      );
+      const msLeft = new Date(existing.locked_until).getTime() - Date.now();
+      const minsLeft = Math.ceil(msLeft / 60000);
+      const human = minsLeft >= 60 ? `${Math.ceil(minsLeft / 60)} hour(s)` : `${minsLeft} minute(s)`;
       return json(
         {
-          error: `Account temporarily locked due to too many failed login attempts. Try again in ${minsLeft >= 60 ? Math.ceil(minsLeft / 60) + " hour(s)" : minsLeft + " minute(s)"}.`,
+          error: `Account temporarily locked due to too many failed login attempts. Try again in ${human}.`,
           locked: true,
+          locked_until: existing.locked_until,
         },
         423
       );
@@ -74,6 +75,7 @@ Deno.serve(async (req) => {
           {
             error: `Account locked for ${LOCK_HOURS} hours due to ${MAX_FAILED} failed login attempts.`,
             locked: true,
+            locked_until: lockedUntil,
           },
           423
         );
@@ -83,6 +85,7 @@ Deno.serve(async (req) => {
       return json(
         {
           error: `Invalid email or password. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining before lockout.`,
+          attempts_remaining: remaining,
         },
         401
       );
