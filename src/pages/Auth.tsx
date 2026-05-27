@@ -533,7 +533,7 @@ const Auth = () => {
               <div className="flex items-stretch gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || resetting || signupDisabled || resetDisabled || (mode === "signup" && !agreedToTerms)}
+                  disabled={loading || resetting || signupDisabled || resetDisabled || (mode === "signup" && !agreedToTerms) || (isSignIn && !!lockedUntil && lockMsLeft > 0)}
                   className="flex-1 h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
                 >
                   {isForgot
