@@ -1,0 +1,1 @@
+UPDATE public.login_attempts SET failed_count = 0, locked_until = NULL, updated_at = now() WHERE email = 'customer2@gmail.com';
