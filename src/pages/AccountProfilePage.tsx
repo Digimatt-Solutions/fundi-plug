@@ -122,11 +122,19 @@ export default function AccountProfilePage() {
     }
     setPwSaving(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      toast({ title: "Password updated" });
+      const { data, error } = await supabase.functions.invoke("change-password", {
+        body: { new_password: newPassword },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || "Update failed");
+      toast({
+        title: "Password updated",
+        description: "For your security, all sessions have been signed out. Please sign in again.",
+      });
       setNewPassword("");
       setConfirmPassword("");
+      // Global sign-out already happened server-side; clear local session and redirect.
+      await supabase.auth.signOut();
+      window.location.href = "/auth";
     } catch (e: any) {
       toast({ title: "Update failed", description: e.message, variant: "destructive" });
     } finally {
