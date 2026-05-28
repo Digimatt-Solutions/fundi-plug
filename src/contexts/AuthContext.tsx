@@ -113,30 +113,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string) => {
     // Route login through secure-login edge function which enforces
-    // 6-hour account lockout after 3 consecutive failed attempts.
+    // account lockout after too many failed attempts.
     const { data: result, error: fnError } = await supabase.functions.invoke("secure-login", {
       body: { email, password },
     });
 
-    // The edge function returns rich error payloads (locked, attempts left, etc.)
-    // even on non-2xx. Surface the server message verbatim and attach metadata
-    // on the thrown Error so the UI can render a lockout countdown.
-    if (result?.error || fnError) {
-      const msg = result?.error || fnError?.message || "Login failed";
+    // supabase.functions.invoke throws FunctionsHttpError on non-2xx and leaves
+    // `result` null. Pull the JSON body off the underlying response so the UI
+    // sees the server's real message (lockout countdown, attempts remaining…)
+    // instead of a generic "Service unavailable" fallback.
+    let payload: any = result;
+    if (fnError && (fnError as any)?.context?.response) {
+      try { payload = await (fnError as any).context.response.clone().json(); } catch { /* ignore */ }
+    }
+
+    if (payload?.error || (fnError && !payload?.access_token)) {
+      const msg = payload?.error || fnError?.message || "Login failed";
       const err = new Error(msg) as Error & { locked?: boolean; locked_until?: string; attempts_remaining?: number };
-      if (result?.locked) err.locked = true;
-      if (result?.locked_until) err.locked_until = result.locked_until;
-      if (typeof result?.attempts_remaining === "number") err.attempts_remaining = result.attempts_remaining;
+      if (payload?.locked) err.locked = true;
+      if (payload?.locked_until) err.locked_until = payload.locked_until;
+      if (typeof payload?.attempts_remaining === "number") err.attempts_remaining = payload.attempts_remaining;
       throw err;
     }
-    if (!result?.access_token || !result?.refresh_token) {
+    if (!payload?.access_token || !payload?.refresh_token) {
       throw new Error("Login failed");
     }
 
     const { data, error } = await supabase.auth.setSession({
-      access_token: result.access_token,
-      refresh_token: result.refresh_token,
+      access_token: payload.access_token,
+      refresh_token: payload.refresh_token,
     });
+
     if (error) throw error;
 
     if (data.user) {

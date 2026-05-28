@@ -192,7 +192,10 @@ const Auth = () => {
         });
       }
     } catch (err: any) {
-      const msg = friendlyError(err);
+      // For locked / attempts-remaining errors, preserve the server's exact
+      // message so the user sees the lockout countdown verbatim.
+      const isAuthSignal = err?.locked || typeof err?.attempts_remaining === "number";
+      const msg = isAuthSignal ? (err?.message || "Sign in failed") : friendlyError(err);
       setError(msg);
       if (err?.locked && err?.locked_until) {
         setLockedUntil(err.locked_until);
@@ -207,6 +210,7 @@ const Auth = () => {
       }
       setLoading(false);
     }
+
   };
 
   // Tick every second to update lockout countdown.
