@@ -107,6 +107,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session: sess } }) => {
       loadUser(sess);
     });
+
+    return () => subscription.unsubscribe();
+  }, [loadUser]);
+
+  const login = useCallback(async (email: string, password: string) => {
     // Route login through secure-login edge function which enforces
     // account lockout after too many failed attempts.
     const { data: result, error: fnError } = await supabase.functions.invoke("secure-login", {
@@ -139,17 +144,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       refresh_token: payload.refresh_token,
     });
 
-      if (typeof result?.attempts_remaining === "number") err.attempts_remaining = result.attempts_remaining;
-      throw err;
-    }
-    if (!result?.access_token || !result?.refresh_token) {
-      throw new Error("Login failed");
-    }
-
-    const { data, error } = await supabase.auth.setSession({
-      access_token: result.access_token,
-      refresh_token: result.refresh_token,
-    });
     if (error) throw error;
 
     if (data.user) {
