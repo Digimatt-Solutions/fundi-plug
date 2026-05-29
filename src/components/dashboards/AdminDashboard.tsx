@@ -79,7 +79,7 @@ export default function AdminDashboard() {
         <div><h1 className="text-2xl font-bold text-foreground">Admin Dashboard - FundiPlug Overview</h1><p className="text-muted-foreground text-sm">FundiPlug platform overview</p></div>
         <p className="text-sm text-muted-foreground hidden md:block">{today}</p>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {(stats || []).map((stat: any, i: number) => (
           <div key={stat.label} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
             <div className="flex items-center justify-between">
@@ -93,15 +93,43 @@ export default function AdminDashboard() {
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="stat-card animate-fade-in" style={{ animationDelay: "500ms" }}>
-          <div className="flex items-center gap-2 mb-6"><TrendingUp className="w-5 h-5 text-primary" /><h2 className="text-lg font-semibold text-foreground">Weekly Job Activity</h2></div>
+        <div className="stat-card animate-fade-in relative overflow-hidden" style={{ animationDelay: "500ms" }}>
+          <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+          <div className="flex items-center justify-between mb-6 relative">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground leading-tight">Weekly Job Activity</h2>
+                <p className="text-[11px] text-muted-foreground">Last 7 days</p>
+              </div>
+            </div>
+            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-md tabular-nums">
+              {weeklyData.reduce((s, d) => s + (d.jobs || 0), 0)} jobs
+            </span>
+          </div>
           {weeklyData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={weeklyData}>
-                <defs><linearGradient id="jobGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(22, 93%, 49%)" stopOpacity={0.3} /><stop offset="95%" stopColor="hsl(22, 93%, 49%)" stopOpacity={0} /></linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 20%)" /><XAxis dataKey="day" stroke="hsl(220, 10%, 46%)" fontSize={12} /><YAxis stroke="hsl(220, 10%, 46%)" fontSize={12} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: "8px", color: "hsl(220, 14%, 90%)" }} />
-                <Area type="monotone" dataKey="jobs" stroke="hsl(22, 93%, 49%)" fill="url(#jobGrad)" strokeWidth={2} />
+              <AreaChart data={weeklyData} margin={{ top: 8, right: 8, left: -24, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="jobGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.55} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="jobStroke" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" />
+                    <stop offset="100%" stopColor="hsl(22, 93%, 65%)" />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={28} />
+                <Tooltip
+                  cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.3, strokeWidth: 1 }}
+                  contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", color: "hsl(var(--foreground))", fontSize: 12 }}
+                />
+                <Area type="monotone" dataKey="jobs" stroke="url(#jobStroke)" strokeWidth={2.5} fill="url(#jobGrad)" dot={{ r: 3, fill: "hsl(var(--primary))", strokeWidth: 0 }} activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           ) : <div className="h-[280px] flex items-center justify-center text-muted-foreground text-sm">No job data yet</div>}
