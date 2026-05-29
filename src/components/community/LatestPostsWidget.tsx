@@ -89,7 +89,55 @@ export default function LatestPostsWidget() {
     }
   };
 
-  if (loading || posts.length === 0) return null;
+  if (loading) {
+    return (
+      <div className="animate-fade-in" style={{ animationDelay: "500ms" }}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" /> {t("Latest from Community")}
+          </h2>
+        </div>
+        <div className="flex gap-3 overflow-hidden pb-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="shrink-0 w-64 sm:w-72 stat-card animate-pulse">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-muted" />
+                <div className="flex-1 space-y-1">
+                  <div className="h-3 w-24 bg-muted rounded" />
+                  <div className="h-2 w-16 bg-muted rounded" />
+                </div>
+              </div>
+              <div className="h-28 bg-muted rounded-lg mb-2" />
+              <div className="h-3 bg-muted rounded w-full mb-1" />
+              <div className="h-3 bg-muted rounded w-2/3" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <div className="animate-fade-in" style={{ animationDelay: "500ms" }}>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary" /> {t("Latest from Community")}
+          </h2>
+          <button onClick={() => navigate("/dashboard/community")} className="text-xs font-medium text-primary hover:underline">
+            {t("View all")}
+          </button>
+        </div>
+        <div className="stat-card text-center py-8">
+          <Users className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">{t("No community posts yet")}</p>
+          <button onClick={() => navigate("/dashboard/community")} className="mt-3 text-xs font-medium text-primary hover:underline">
+            {t("Be the first to post")}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in" style={{ animationDelay: "500ms" }}>
