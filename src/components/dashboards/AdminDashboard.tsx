@@ -122,9 +122,9 @@ export default function AdminDashboard() {
                     <stop offset="100%" stopColor="hsl(22, 93%, 65%)" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={28} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--primary) / 0.25)" />
+                <XAxis dataKey="day" stroke="hsl(var(--primary))" fontSize={11} tickLine={false} />
+                <YAxis stroke="hsl(var(--primary))" fontSize={11} tickLine={false} width={28} />
                 <Tooltip
                   cursor={{ stroke: "hsl(var(--primary))", strokeOpacity: 0.3, strokeWidth: 1 }}
                   contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "10px", color: "hsl(var(--foreground))", fontSize: 12 }}
