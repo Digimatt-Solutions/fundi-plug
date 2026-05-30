@@ -1756,6 +1756,327 @@ export type Database = {
     }
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
+      admin_get_business_profile: {
+        Args: { _id: string }
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          banner_url: string | null
+          business_email: string | null
+          business_name: string
+          business_phone: string | null
+          category: string | null
+          category_other: string | null
+          county: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kra_pin: string | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          physical_address: string | null
+          registration_number: string | null
+          rejection_reason: string | null
+          submitted_at: string | null
+          town: string | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["business_verification_status"]
+          website: string | null
+          years_in_operation: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "business_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_get_worker_profile: {
+        Args: { _user_id: string }
+        Returns: {
+          alt_phone: string | null
+          availability_days: number[] | null
+          availability_type: string | null
+          bank_account: string | null
+          bank_name: string | null
+          bio: string | null
+          consent_background_check: boolean | null
+          consent_data_usage: boolean | null
+          consented_at: string | null
+          constituency: string | null
+          country: string | null
+          county: string | null
+          created_at: string
+          daily_rate: number | null
+          date_of_birth: string | null
+          exact_address: string | null
+          experience_level: string | null
+          first_name: string | null
+          gender: string | null
+          good_conduct_url: string | null
+          hourly_rate: number | null
+          id: string
+          id_back_url: string | null
+          id_front_url: string | null
+          id_number: string | null
+          is_online: boolean
+          kra_pin: string | null
+          landmark: string | null
+          last_name: string | null
+          latitude: number | null
+          longitude: number | null
+          max_travel_km: number | null
+          middle_name: string | null
+          mpesa_name: string | null
+          mpesa_number: string | null
+          nca_number: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
+          onboarding_completed_at: string | null
+          onboarding_step: number
+          other_licenses: Json
+          other_skill: string | null
+          portfolio_urls: string[] | null
+          profile_photo_url: string | null
+          rejection_reason: string | null
+          selfie_with_id_url: string | null
+          service_area: string | null
+          service_radius_km: number | null
+          skills: string[] | null
+          sub_skills: string[] | null
+          submitted_for_review: boolean
+          tools_owned: string[] | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          ward: string | null
+          willing_to_travel: boolean | null
+          years_experience: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "worker_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_list_business_profiles: {
+        Args: never
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          banner_url: string | null
+          business_email: string | null
+          business_name: string
+          business_phone: string | null
+          category: string | null
+          category_other: string | null
+          county: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kra_pin: string | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          physical_address: string | null
+          registration_number: string | null
+          rejection_reason: string | null
+          submitted_at: string | null
+          town: string | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["business_verification_status"]
+          website: string | null
+          years_in_operation: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "business_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_list_worker_profiles: {
+        Args: never
+        Returns: {
+          alt_phone: string | null
+          availability_days: number[] | null
+          availability_type: string | null
+          bank_account: string | null
+          bank_name: string | null
+          bio: string | null
+          consent_background_check: boolean | null
+          consent_data_usage: boolean | null
+          consented_at: string | null
+          constituency: string | null
+          country: string | null
+          county: string | null
+          created_at: string
+          daily_rate: number | null
+          date_of_birth: string | null
+          exact_address: string | null
+          experience_level: string | null
+          first_name: string | null
+          gender: string | null
+          good_conduct_url: string | null
+          hourly_rate: number | null
+          id: string
+          id_back_url: string | null
+          id_front_url: string | null
+          id_number: string | null
+          is_online: boolean
+          kra_pin: string | null
+          landmark: string | null
+          last_name: string | null
+          latitude: number | null
+          longitude: number | null
+          max_travel_km: number | null
+          middle_name: string | null
+          mpesa_name: string | null
+          mpesa_number: string | null
+          nca_number: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
+          onboarding_completed_at: string | null
+          onboarding_step: number
+          other_licenses: Json
+          other_skill: string | null
+          portfolio_urls: string[] | null
+          profile_photo_url: string | null
+          rejection_reason: string | null
+          selfie_with_id_url: string | null
+          service_area: string | null
+          service_radius_km: number | null
+          skills: string[] | null
+          sub_skills: string[] | null
+          submitted_for_review: boolean
+          tools_owned: string[] | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          ward: string | null
+          willing_to_travel: boolean | null
+          years_experience: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "worker_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_my_business_profile: {
+        Args: never
+        Returns: {
+          approved_at: string | null
+          approved_by: string | null
+          banner_url: string | null
+          business_email: string | null
+          business_name: string
+          business_phone: string | null
+          category: string | null
+          category_other: string | null
+          county: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kra_pin: string | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          physical_address: string | null
+          registration_number: string | null
+          rejection_reason: string | null
+          submitted_at: string | null
+          town: string | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["business_verification_status"]
+          website: string | null
+          years_in_operation: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "business_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_my_worker_profile: {
+        Args: never
+        Returns: {
+          alt_phone: string | null
+          availability_days: number[] | null
+          availability_type: string | null
+          bank_account: string | null
+          bank_name: string | null
+          bio: string | null
+          consent_background_check: boolean | null
+          consent_data_usage: boolean | null
+          consented_at: string | null
+          constituency: string | null
+          country: string | null
+          county: string | null
+          created_at: string
+          daily_rate: number | null
+          date_of_birth: string | null
+          exact_address: string | null
+          experience_level: string | null
+          first_name: string | null
+          gender: string | null
+          good_conduct_url: string | null
+          hourly_rate: number | null
+          id: string
+          id_back_url: string | null
+          id_front_url: string | null
+          id_number: string | null
+          is_online: boolean
+          kra_pin: string | null
+          landmark: string | null
+          last_name: string | null
+          latitude: number | null
+          longitude: number | null
+          max_travel_km: number | null
+          middle_name: string | null
+          mpesa_name: string | null
+          mpesa_number: string | null
+          nca_number: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
+          onboarding_completed_at: string | null
+          onboarding_step: number
+          other_licenses: Json
+          other_skill: string | null
+          portfolio_urls: string[] | null
+          profile_photo_url: string | null
+          rejection_reason: string | null
+          selfie_with_id_url: string | null
+          service_area: string | null
+          service_radius_km: number | null
+          skills: string[] | null
+          sub_skills: string[] | null
+          submitted_for_review: boolean
+          tools_owned: string[] | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          ward: string | null
+          willing_to_travel: boolean | null
+          years_experience: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "worker_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_super_admin_id: { Args: never; Returns: string }
       get_support_admin_id: { Args: never; Returns: string }
       get_user_role: {
