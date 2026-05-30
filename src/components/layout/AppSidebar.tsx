@@ -171,10 +171,6 @@ export function AppSidebar() {
           <LogOut className="w-4 h-4 shrink-0" />
           {!collapsed && <span>{t("Logout")}</span>}
         </button>
-        <button onClick={toggleSidebar} className="flex items-center gap-2 px-3 py-2 text-sm text-sidebar-foreground hover:text-primary transition-colors">
-          <ChevronLeft className={`w-4 h-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
-          {!collapsed && <span>{t("Collapse")}</span>}
-        </button>
       </SidebarFooter>
     </Sidebar>
   );

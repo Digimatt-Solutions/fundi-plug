@@ -34,8 +34,8 @@ export default function AdminDashboard() {
       { label: "Active Fundis", value: workersRes.count ?? 0, icon: Wrench, color: "text-chart-2", bg: "bg-chart-2/10" },
       { label: "Suppliers", value: suppliersRes.count ?? 0, icon: Package, color: "text-chart-5", bg: "bg-chart-5/10" },
       { label: "Jobs Completed", value: jobsRes.count ?? 0, icon: CheckCircle, color: "text-primary", bg: "bg-primary/10" },
-      { label: "Revenue", value: `KSH ${revenue.toLocaleString()}`, icon: CreditCard, color: "text-chart-4", bg: "bg-chart-4/10" },
-      { label: "Commission", value: `KSH ${commission.toLocaleString()}`, icon: Coins, color: "text-green-500", bg: "bg-green-500/10" },
+      { label: "Revenue", value: ` ${revenue.toLocaleString()}`, icon: CreditCard, color: "text-chart-4", bg: "bg-chart-4/10" },
+      { label: "Commission", value: ` ${commission.toLocaleString()}`, icon: Coins, color: "text-green-500", bg: "bg-green-500/10" },
       { label: "Pending Verifications", value: pendingRes.count ?? 0, icon: TrendingUp, color: "text-chart-5", bg: "bg-chart-5/10" },
     ]);
     const cats = categoriesRes.data || [];
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-foreground">Admin Dashboard - FundiPlug Overview</h1><p className="text-muted-foreground text-sm">FundiPlug platform overview</p></div>
+        <div><h1 className="text-2xl font-bold text-foreground">Admin Dashboard</h1><p className="text-muted-foreground text-sm">FundiPlug platform overview</p></div>
         <p className="text-sm text-muted-foreground hidden md:block">{today}</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">

@@ -59,7 +59,7 @@ export function TopNavbar() {
         <button
           onClick={toggleSidebar}
           aria-label="Open menu"
-          className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+          className=" inline-flex items-center justify-center w-10 h-10 rounded-lg text-foreground hover:bg-primary/10 hover:text-primary transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
