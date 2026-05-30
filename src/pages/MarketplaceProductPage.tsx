@@ -22,7 +22,7 @@ export default function MarketplaceProductPage() {
     (async () => {
       const { data: p } = await supabase.from("supplier_products").select("*").eq("id", id).maybeSingle();
       if (p) {
-        const { data: b } = await supabase.from("business_profiles").select("*").eq("id", p.business_id).maybeSingle();
+        const { data: b } = await supabase.from("business_profiles").select("id, user_id, business_name, logo_url, banner_url, description, category, county, town, physical_address, latitude, longitude, website, business_phone, business_email, years_in_operation, verification_status").eq("id", p.business_id).maybeSingle();
         setProduct(p); setBusiness(b);
         if (user) {
           supabase.from("activity_logs").insert({

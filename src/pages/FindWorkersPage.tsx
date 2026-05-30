@@ -102,7 +102,7 @@ export default function FindWorkersPage() {
       const [wpsRes, catsRes] = await Promise.all([
         supabase
           .from("worker_profiles")
-          .select("*, profiles:user_id(name, email, phone, avatar_url)")
+          .select("id, user_id, bio, years_experience, skills, sub_skills, service_area, county, hourly_rate, daily_rate, latitude, longitude, is_online, verification_status, profile_photo_url, first_name, middle_name, last_name, experience_level, service_radius_km, willing_to_travel, max_travel_km, availability_days, gender, created_at, profiles:user_id(name, email, phone, avatar_url)")
           .eq("verification_status", "approved")
           .order("is_online", { ascending: false }),
         supabase.from("service_categories").select("*").order("name"),

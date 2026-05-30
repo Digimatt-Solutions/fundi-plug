@@ -22,7 +22,7 @@ export default function AdminBusinessVerificationsPage() {
   const [reason, setReason] = useState("");
 
   const load = async () => {
-    const { data } = await supabase.from("business_profiles").select("*").order("submitted_at", { ascending: false });
+    const { data } = await supabase.rpc("admin_list_business_profiles");
     const list = data || [];
     setItems(list);
     const uids = Array.from(new Set(list.map(b => b.user_id)));

@@ -252,7 +252,7 @@ export default function CustomerDashboard() {
 
       const { data: onlineWorkers } = await supabase
         .from("worker_profiles")
-        .select("*, profiles!worker_profiles_user_id_fkey(name, avatar_url, email, phone)")
+        .select("id, user_id, bio, years_experience, skills, service_area, county, hourly_rate, latitude, longitude, is_online, verification_status, profile_photo_url, first_name, last_name, experience_level, profiles!worker_profiles_user_id_fkey(name, avatar_url, email, phone)")
         .eq("verification_status", "approved");
 
       const workerIds = (onlineWorkers || []).map(w => w.user_id);

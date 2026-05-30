@@ -40,7 +40,7 @@ export default function SupplierDashboard() {
         supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "worker"),
         supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "customer"),
         supabase.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", user.id).is("read_at", null),
-        supabase.from("business_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        supabase.rpc("get_my_business_profile").maybeSingle(),
         supabase.from("supplier_products").select("id, name, category, price, is_active, is_featured, stock_status, created_at").eq("supplier_id", user.id).order("created_at", { ascending: false }),
       ]);
       setBiz(bizRes.data);

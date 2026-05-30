@@ -72,7 +72,7 @@ export default function WorkerProfilePage() {
     if (!user) return;
     async function load() {
       const [wpRes, catsRes, profileRes] = await Promise.all([
-        supabase.from("worker_profiles").select("*").eq("user_id", user!.id).single(),
+        supabase.rpc("get_my_worker_profile").maybeSingle(),
         supabase.from("service_categories").select("*").order("name"),
         supabase.from("profiles").select("avatar_url").eq("id", user!.id).single(),
       ]);
