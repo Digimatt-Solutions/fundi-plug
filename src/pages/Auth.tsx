@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Mail, Lock, User, Eye, EyeOff, Phone, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import heroImage from "@/assets/workers-hero.jpg";
+import heroImage from "@/assets/fundiplug1.png";
 import fundiplugLogo from "@/assets/fundiplug-logo.png";
 import { playSubmitSound } from "@/lib/sound";
 import logo from "@/assets/logo.png";
