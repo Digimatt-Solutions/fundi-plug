@@ -42,7 +42,7 @@ export default function SupplierBusinessProfilePage() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase.from("business_profiles").select("*").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase.rpc("get_my_business_profile").maybeSingle();
       if (data) setForm({ ...form, ...data, years_in_operation: data.years_in_operation ?? "" });
       setLoading(false);
     })();

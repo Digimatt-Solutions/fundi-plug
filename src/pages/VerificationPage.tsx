@@ -55,11 +55,15 @@ export default function VerificationPage() {
 
   async function loadAll() {
     setLoading(true);
-    const { data } = await supabase
-      .from("worker_profiles")
-      .select("*, profiles:user_id(name, email, avatar_url, phone)")
-      .order("created_at", { ascending: false });
-    setWorkers(data || []);
+    const { data: wps } = await supabase.rpc("admin_list_worker_profiles");
+    const list = (wps || []) as any[];
+    const userIds = list.map((w: any) => w.user_id);
+    const { data: profs } = userIds.length
+      ? await supabase.from("profiles").select("id, name, email, avatar_url, phone").in("id", userIds)
+      : { data: [] as any[] };
+    const profMap: Record<string, any> = {};
+    (profs || []).forEach((p: any) => { profMap[p.id] = p; });
+    setWorkers(list.map((w: any) => ({ ...w, profiles: profMap[w.user_id] || null })).sort((a: any, b: any) => (b.created_at || "").localeCompare(a.created_at || "")));
     setLoading(false);
   }
 

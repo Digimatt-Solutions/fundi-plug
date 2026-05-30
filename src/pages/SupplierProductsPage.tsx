@@ -29,7 +29,7 @@ export default function SupplierProductsPage() {
 
   const load = async () => {
     if (!user) return;
-    const { data: biz } = await supabase.from("business_profiles").select("*").eq("user_id", user.id).maybeSingle();
+    const { data: biz } = await supabase.rpc("get_my_business_profile").maybeSingle();
     setBusiness(biz);
     if (biz?.verification_status === "approved") {
       const { data } = await supabase.from("supplier_products").select("*").eq("supplier_id", user.id).order("created_at", { ascending: false });

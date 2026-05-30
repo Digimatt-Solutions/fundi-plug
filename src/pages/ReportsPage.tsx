@@ -60,7 +60,7 @@ export default function ReportsPage() {
       const [profilesRes, rolesRes, wpRes, catRes, jobsRes, paymentsRes, withdrawalsRes] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase.from("user_roles").select("*"),
-        supabase.from("worker_profiles").select("*"),
+        supabase.rpc("admin_list_worker_profiles"),
         supabase.from("service_categories").select("*"),
         supabase.from("jobs").select("*, service_categories:category_id(name)"),
         supabase.from("payments").select("*"),

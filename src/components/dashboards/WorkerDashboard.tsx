@@ -48,7 +48,7 @@ export default function WorkerDashboard() {
   useEffect(() => {
     if (!user) return;
     async function load() {
-      const { data: wp } = await supabase.from("worker_profiles").select("*").eq("user_id", user!.id).single();
+      const { data: wp } = await supabase.rpc("get_my_worker_profile").maybeSingle();
       if (wp) { setIsOnline(wp.is_online); setProfile(wp); }
 
       const sevenDaysAgo = new Date();

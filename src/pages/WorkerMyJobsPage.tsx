@@ -34,7 +34,7 @@ export default function WorkerMyJobsPage() {
 
   async function loadData() {
     if (!user) return;
-    const { data: wp } = await supabase.from("worker_profiles").select("*").eq("user_id", user.id).maybeSingle();
+    const { data: wp } = await supabase.rpc("get_my_worker_profile").maybeSingle();
     setWorkerProfile(wp);
 
     const [availRes, appsRes, assignedRes, hireRes] = await Promise.all([
