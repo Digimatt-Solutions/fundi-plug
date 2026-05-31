@@ -299,7 +299,7 @@ const Auth = () => {
             {!isForgot && (
               <div className="flex bg-muted rounded-lg p-1 mb-6">
                 <button
-                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); }}
+                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); setResetEmailSent(false); }}
                   className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                     isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -307,7 +307,7 @@ const Auth = () => {
                   Sign In
                 </button>
                 <button
-                  onClick={() => { setMode("signup"); setError(""); resetOtpState(); }}
+                  onClick={() => { setMode("signup"); setError(""); resetOtpState(); setResetEmailSent(false); }}
                   className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                     !isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -321,7 +321,7 @@ const Auth = () => {
               <div className="mb-6 flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); setNewPassword(""); }}
+                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); setResetEmailSent(false); setNewPassword(""); }}
                   className="text-xs text-primary hover:underline"
                 >
                   ← Back to Sign In
@@ -393,7 +393,7 @@ const Auth = () => {
                     {isSignIn && (
                       <button
                         type="button"
-                        onClick={() => { setMode("forgot"); setError(""); resetOtpState(); setNewPassword(""); }}
+                        onClick={() => { setMode("forgot"); setError(""); resetOtpState(); setResetEmailSent(false); setNewPassword(""); }}
                         className="text-xs text-primary hover:underline"
                       >
                         Forgot password?
