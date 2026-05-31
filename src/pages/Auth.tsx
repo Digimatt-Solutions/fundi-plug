@@ -412,7 +412,7 @@ const Auth = () => {
               )}
 
               {/* Phone OTP Section - Sign Up AND Forgot Password */}
-              {(mode === "signup" || isForgot) && (
+              {mode === "signup" && !isForgot && (
                 <div className="space-y-3 animate-fade-in">
                   <Label className="text-foreground font-medium">
                     {isForgot ? "Registered Phone Number" : "Phone Number"}
