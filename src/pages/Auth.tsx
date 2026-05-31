@@ -366,13 +366,23 @@ const Auth = () => {
                 </div>
               )}
 
-              {isSignIn && !isForgot && (
+              {(isSignIn || isForgot) && !(isForgot && false) && (
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
+                  {isForgot && (
+                    <p className="text-xs text-muted-foreground">
+                      Enter the email you registered with. We'll send you a secure link to set a new password.
+                    </p>
+                  )}
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required disabled={isForgot && resetEmailSent} />
                   </div>
+                  {isForgot && resetEmailSent && (
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      ✓ Email sent. Check your inbox (and spam folder) for the reset link.
+                    </p>
+                  )}
                 </div>
               )}
 
