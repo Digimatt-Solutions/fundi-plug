@@ -122,36 +122,32 @@ const Auth = () => {
     }
   };
 
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+
   const handleResetPassword = async () => {
-    if (!otpVerified) {
-      setError("Verify your phone number first");
-      return;
-    }
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (!email) {
+      setError("Enter the email associated with your account");
       return;
     }
     setError("");
     setResetting(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("reset-password-with-otp", {
-        body: { phone_number: phoneNumber, otp: otpCode, new_password: newPassword },
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-      toast({ title: "Password updated", description: "You can now sign in with your new password." });
-      // Pre-fill email if returned, switch to sign-in
-      if (data?.email) setEmail(data.email);
-      setPassword("");
-      setNewPassword("");
-      resetOtpState();
-      setMode("signin");
+      if (resetError) throw resetError;
+      setResetEmailSent(true);
+      toast({
+        title: "Check your email",
+        description: "We sent a password reset link. Open it to set a new password.",
+      });
     } catch (err: any) {
-      setError(friendlyError(err, "We couldn't reset your password. Please try again."));
+      setError(friendlyError(err, "We couldn't send the reset email. Please try again."));
     } finally {
       setResetting(false);
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
