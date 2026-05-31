@@ -526,7 +526,7 @@ const Auth = () => {
                   className="flex-1 h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
                 >
                   {isForgot
-                    ? (resetting ? "Updating..." : "Update Password")
+                    ? (resetting ? "Sending..." : resetEmailSent ? "Email sent ✓" : "Send reset link")
                     : loading
                       ? "Please wait..."
                       : isSignIn
