@@ -12,6 +12,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { supabase } from "@/integrations/supabase/client";
 import Auth from "@/pages/Auth";
 import SetupAdminPage from "@/pages/SetupAdminPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
 import ReportsPage from "@/pages/ReportsPage";
