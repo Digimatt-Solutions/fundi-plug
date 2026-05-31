@@ -237,7 +237,7 @@ const Auth = () => {
 
   const signupDisabled =
     !isSignIn && !isForgot && (!otpVerified || password.length < 12 || scorePassword(password) < 3);
-  const resetDisabled = isForgot && (!otpVerified || newPassword.length < 6);
+  const resetDisabled = isForgot && (!email || resetEmailSent);
 
   return (
     <div className="flex min-h-screen">
