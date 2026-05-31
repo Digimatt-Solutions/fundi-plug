@@ -12,6 +12,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { supabase } from "@/integrations/supabase/client";
 import Auth from "@/pages/Auth";
 import SetupAdminPage from "@/pages/SetupAdminPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Dashboard from "@/pages/Dashboard";
 import ReportsPage from "@/pages/ReportsPage";
@@ -83,6 +84,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/setup-admin" element={<SetupAdminPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/reviews/:workerId" element={<PublicReviewsPage />} />
               <Route path="/verify-fundi/:workerId" element={<VerifyFundiPage />} />
               <Route path="/dashboard" element={<DashboardLayout />}>

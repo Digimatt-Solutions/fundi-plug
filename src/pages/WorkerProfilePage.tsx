@@ -134,7 +134,7 @@ export default function WorkerProfilePage() {
     if (!consentChecked) { toast({ title: "Please accept the platform terms", variant: "destructive" }); return; }
     if (!hasRequiredDocs()) { toast({ title: "Required documents missing", description: "Please upload your National ID and NCA Document.", variant: "destructive" }); return; }
     setSaving(true);
-    await supabase.from("worker_profiles").update({
+    await supabase.rpc("upsert_my_worker_profile", { _patch: {
       bio, hourly_rate: hourlyRate ? Number(hourlyRate) : null,
       years_experience: yearsExperience ? Number(yearsExperience) : 0,
       service_area: serviceArea || null, skills: selectedSkills,
@@ -142,7 +142,7 @@ export default function WorkerProfilePage() {
       id_number: idNumber || null, country: country || "Kenya",
       county: county || null, constituency: constituency || null,
       ward: ward || null, verification_status: "pending",
-    } as any).eq("id", profile.id);
+    } as any });
     await supabase.from("activity_logs").insert({
       user_id: user!.id, action: "Profile Submitted",
       detail: "Fundi submitted/updated profile for review", entity_type: "worker_profile", entity_id: profile.id,

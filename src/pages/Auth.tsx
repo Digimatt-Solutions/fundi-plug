@@ -122,36 +122,32 @@ const Auth = () => {
     }
   };
 
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+
   const handleResetPassword = async () => {
-    if (!otpVerified) {
-      setError("Verify your phone number first");
-      return;
-    }
-    if (newPassword.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (!email) {
+      setError("Enter the email associated with your account");
       return;
     }
     setError("");
     setResetting(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("reset-password-with-otp", {
-        body: { phone_number: phoneNumber, otp: otpCode, new_password: newPassword },
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-      toast({ title: "Password updated", description: "You can now sign in with your new password." });
-      // Pre-fill email if returned, switch to sign-in
-      if (data?.email) setEmail(data.email);
-      setPassword("");
-      setNewPassword("");
-      resetOtpState();
-      setMode("signin");
+      if (resetError) throw resetError;
+      setResetEmailSent(true);
+      toast({
+        title: "Check your email",
+        description: "We sent a password reset link. Open it to set a new password.",
+      });
     } catch (err: any) {
-      setError(friendlyError(err, "We couldn't reset your password. Please try again."));
+      setError(friendlyError(err, "We couldn't send the reset email. Please try again."));
     } finally {
       setResetting(false);
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,7 +237,7 @@ const Auth = () => {
 
   const signupDisabled =
     !isSignIn && !isForgot && (!otpVerified || password.length < 12 || scorePassword(password) < 3);
-  const resetDisabled = isForgot && (!otpVerified || newPassword.length < 6);
+  const resetDisabled = isForgot && (!email || resetEmailSent);
 
   return (
     <div className="flex min-h-screen">
@@ -303,7 +299,7 @@ const Auth = () => {
             {!isForgot && (
               <div className="flex bg-muted rounded-lg p-1 mb-6">
                 <button
-                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); }}
+                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); setResetEmailSent(false); }}
                   className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                     isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -311,7 +307,7 @@ const Auth = () => {
                   Sign In
                 </button>
                 <button
-                  onClick={() => { setMode("signup"); setError(""); resetOtpState(); }}
+                  onClick={() => { setMode("signup"); setError(""); resetOtpState(); setResetEmailSent(false); }}
                   className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                     !isSignIn ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -325,7 +321,7 @@ const Auth = () => {
               <div className="mb-6 flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); setNewPassword(""); }}
+                  onClick={() => { setMode("signin"); setError(""); resetOtpState(); setResetEmailSent(false); setNewPassword(""); }}
                   className="text-xs text-primary hover:underline"
                 >
                   ← Back to Sign In
@@ -370,13 +366,23 @@ const Auth = () => {
                 </div>
               )}
 
-              {isSignIn && !isForgot && (
+              {(isSignIn || isForgot) && !(isForgot && false) && (
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
+                  {isForgot && (
+                    <p className="text-xs text-muted-foreground">
+                      Enter the email you registered with. We'll send you a secure link to set a new password.
+                    </p>
+                  )}
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required />
+                    <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="pl-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20" required disabled={isForgot && resetEmailSent} />
                   </div>
+                  {isForgot && resetEmailSent && (
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      ✓ Email sent. Check your inbox (and spam folder) for the reset link.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -387,7 +393,7 @@ const Auth = () => {
                     {isSignIn && (
                       <button
                         type="button"
-                        onClick={() => { setMode("forgot"); setError(""); resetOtpState(); setNewPassword(""); }}
+                        onClick={() => { setMode("forgot"); setError(""); resetOtpState(); setResetEmailSent(false); setNewPassword(""); }}
                         className="text-xs text-primary hover:underline"
                       >
                         Forgot password?
@@ -406,7 +412,7 @@ const Auth = () => {
               )}
 
               {/* Phone OTP Section - Sign Up AND Forgot Password */}
-              {(mode === "signup" || isForgot) && (
+              {mode === "signup" && !isForgot && (
                 <div className="space-y-3 animate-fade-in">
                   <Label className="text-foreground font-medium">
                     {isForgot ? "Registered Phone Number" : "Phone Number"}
@@ -471,28 +477,7 @@ const Auth = () => {
                 </div>
               )}
 
-              {/* New password field - only in forgot-password flow, after verification */}
-              {isForgot && otpVerified && (
-                <div className="space-y-2 animate-fade-in">
-                  <Label htmlFor="newPassword" className="text-foreground font-medium">New Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="newPassword"
-                      type={showPassword ? "text" : "password"}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="At least 6 characters"
-                      className="pl-10 pr-10 h-12 bg-muted/50 border border-primary/40 focus-visible:border-primary focus-visible:ring-primary/20"
-                      minLength={6}
-                      required
-                    />
-                    <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* Password reset uses a secure email link; no new password field on this page */}
 
               {mode === "signup" && (
                 <div className="space-y-2 animate-fade-in">
@@ -541,7 +526,7 @@ const Auth = () => {
                   className="flex-1 h-12 text-base font-semibold rounded-lg active:scale-[0.98] transition-transform"
                 >
                   {isForgot
-                    ? (resetting ? "Updating..." : "Update Password")
+                    ? (resetting ? "Sending..." : resetEmailSent ? "Email sent ✓" : "Send reset link")
                     : loading
                       ? "Please wait..."
                       : isSignIn
@@ -562,8 +547,8 @@ const Auth = () => {
               {signupDisabled && (
                 <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
               )}
-              {isForgot && !otpVerified && (
-                <p className="text-xs text-muted-foreground text-center">Verify your phone number to reset your password</p>
+              {isForgot && !resetEmailSent && (
+                <p className="text-xs text-muted-foreground text-center">We'll email you a secure link to set a new password.</p>
               )}
             </form>
 

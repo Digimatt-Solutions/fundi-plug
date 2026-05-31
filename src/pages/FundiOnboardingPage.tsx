@@ -161,7 +161,7 @@ export default function FundiOnboardingPage() {
         };
         const fullName = [data.first_name, data.middle_name, data.last_name].filter(Boolean).join(" ").trim();
 
-        const { error } = await supabase.from("worker_profiles").upsert(payload, { onConflict: "user_id" });
+        const { error } = await supabase.rpc("upsert_my_worker_profile", { _patch: payload as any });
         if (error) throw error;
 
         if (fullName) {
