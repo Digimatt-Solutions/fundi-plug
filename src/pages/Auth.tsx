@@ -547,8 +547,8 @@ const Auth = () => {
               {signupDisabled && (
                 <p className="text-xs text-muted-foreground text-center">Verify your phone number to create an account</p>
               )}
-              {isForgot && !otpVerified && (
-                <p className="text-xs text-muted-foreground text-center">Verify your phone number to reset your password</p>
+              {isForgot && !resetEmailSent && (
+                <p className="text-xs text-muted-foreground text-center">We'll email you a secure link to set a new password.</p>
               )}
             </form>
 
