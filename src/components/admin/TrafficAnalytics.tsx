@@ -309,7 +309,16 @@ export default function TrafficAnalytics() {
                 {devices.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Tooltip contentStyle={{ backgroundColor: "hsl(222, 28%, 12%)", border: "1px solid hsl(222, 20%, 20%)", borderRadius: 8, color: "hsl(220, 14%, 90%)" }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(222, 28%, 12%)",
+                  border: "1px solid hsl(222, 20%, 20%)",
+                  borderRadius: 8,
+                  color: "#fff",
+                }}
+                labelStyle={{ color: "#fff" }}
+                itemStyle={{ color: "#fff" }}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
