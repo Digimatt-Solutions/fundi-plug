@@ -123,8 +123,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // sees the server's real message (lockout countdown, attempts remaining…)
     // instead of a generic "Service unavailable" fallback.
     let payload: any = result;
-    if (fnError && (fnError as any)?.context?.response) {
-      try { payload = await (fnError as any).context.response.clone().json(); } catch { /* ignore */ }
+    // FunctionsHttpError.context IS the Response (no `.response` sub-property).
+    const ctx: any = (fnError as any)?.context;
+    if (fnError && ctx && typeof ctx.clone === "function") {
+      try { payload = await ctx.clone().json(); } catch { /* ignore */ }
+    } else if (fnError && ctx?.response && typeof ctx.response.clone === "function") {
+      try { payload = await ctx.response.clone().json(); } catch { /* ignore */ }
     }
 
     if (payload?.error || (fnError && !payload?.access_token)) {
