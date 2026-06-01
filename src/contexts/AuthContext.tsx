@@ -112,36 +112,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [loadUser]);
 
   const login = useCallback(async (email: string, password: string) => {
-    // Route login through secure-login edge function which enforces
-    // account lockout after too many failed attempts.
-    const { data: result, error: fnError } = await supabase.functions.invoke("secure-login", {
-      body: { email, password },
-    });
+    // Call the secure-login edge function via raw fetch so we ALWAYS read the
+    // JSON body verbatim (incl. attempts_remaining / locked / locked_until)
+    // regardless of HTTP status. supabase.functions.invoke wraps non-2xx into
+    // FunctionsHttpError and the body extraction was fragile across versions.
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
-    // supabase.functions.invoke throws FunctionsHttpError on non-2xx and leaves
-    // `result` null. Pull the JSON body off the underlying response so the UI
-    // sees the server's real message (lockout countdown, attempts remaining…)
-    // instead of a generic "Service unavailable" fallback.
-    let payload: any = result;
-    // FunctionsHttpError.context IS the Response (no `.response` sub-property).
-    const ctx: any = (fnError as any)?.context;
-    if (fnError && ctx && typeof ctx.clone === "function") {
-      try { payload = await ctx.clone().json(); } catch { /* ignore */ }
-    } else if (fnError && ctx?.response && typeof ctx.response.clone === "function") {
-      try { payload = await ctx.response.clone().json(); } catch { /* ignore */ }
+    let payload: any = null;
+    let httpStatus = 0;
+    try {
+      const res = await fetch(`${supabaseUrl}/functions/v1/secure-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: anonKey,
+          Authorization: `Bearer ${anonKey}`,
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      httpStatus = res.status;
+      try { payload = await res.json(); } catch { payload = null; }
+      console.log("[secure-login] status:", httpStatus, "payload:", payload);
+    } catch (networkErr: any) {
+      console.error("[secure-login] network error:", networkErr);
+      throw new Error("Connection problem. Check your internet and try again.");
     }
 
-    if (payload?.error || (fnError && !payload?.access_token)) {
-      const msg = payload?.error || fnError?.message || "Login failed";
+    if (payload?.error || httpStatus >= 400 || !payload?.access_token) {
+      const msg = payload?.error || "Login failed";
       const err = new Error(msg) as Error & { locked?: boolean; locked_until?: string; attempts_remaining?: number };
       if (payload?.locked) err.locked = true;
       if (payload?.locked_until) err.locked_until = payload.locked_until;
       if (typeof payload?.attempts_remaining === "number") err.attempts_remaining = payload.attempts_remaining;
       throw err;
     }
-    if (!payload?.access_token || !payload?.refresh_token) {
+    if (!payload?.refresh_token) {
       throw new Error("Login failed");
     }
+
 
     const { data, error } = await supabase.auth.setSession({
       access_token: payload.access_token,
