@@ -188,10 +188,18 @@ const Auth = () => {
         });
       }
     } catch (err: any) {
-      // For locked / attempts-remaining errors, preserve the server's exact
-      // message so the user sees the lockout countdown verbatim.
-      const isAuthSignal = err?.locked || typeof err?.attempts_remaining === "number";
-      const msg = isAuthSignal ? (err?.message || "Sign in failed") : friendlyError(err);
+      console.log("[Auth] login error:", {
+        message: err?.message,
+        locked: err?.locked,
+        locked_until: err?.locked_until,
+        attempts_remaining: err?.attempts_remaining,
+      });
+      // Always show the server's exact message when available. Only fall back
+      // to friendlyError for truly opaque errors (no message at all).
+      const serverMsg: string | undefined = err?.message;
+      const msg = serverMsg && serverMsg.trim().length > 0
+        ? serverMsg
+        : friendlyError(err, "Sign in failed");
       setError(msg);
       if (err?.locked && err?.locked_until) {
         setLockedUntil(err.locked_until);
@@ -206,6 +214,7 @@ const Auth = () => {
       }
       setLoading(false);
     }
+
 
   };
 
