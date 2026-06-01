@@ -633,7 +633,7 @@ export default function CustomerDashboard() {
             <div className="flex items-center gap-3">
               <button onClick={() => navigate("/dashboard/find-workers")} className="text-xs font-medium text-primary hover:underline">{t("See all")}</button>
               {onlineFundis.length > 0 && (
-                <Button variant="outline" size="sm" className="gap-1.5 bg-emerald-500/10 text-emerald-600 rounded-20 text-foreground border-emerald-600/40 " onClick={() => setShowMap(!showMap)}>
+                <Button variant="outline" size="sm" className="gap-1.5 bg-primary text-white rounded-20 border-primary-600 hover:bg-emerald-500/10 hover:text-emerald-600 hover:border-emerald-600/40 rounded-20 transition-all duration-200 " onClick={() => setShowMap(!showMap)}>
                   <MapPin className="w-3.5 h-3.5" /> {showMap ? t("Hide Map") : t("View Map")}
                 </Button>
               )}
@@ -646,7 +646,7 @@ export default function CustomerDashboard() {
                 {paginatedWorkers.map((worker) => {
                   const dist = getWorkerDistance(worker);
                   return (
-                    <div key={worker.id} className="group relative rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/5 via-card to-card shadow-sm overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-0.5 hover:border-primary/30 transition-all" onClick={() => openWorkerProfile(worker)}>
+                    <div key={worker.id} className="group relative rounded-2xl border border-primary/50 bg-gradient-to-br from-primary/5 via-card to-card shadow-sm overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-0.5 hover:border-primary/30 transition-all" onClick={() => openWorkerProfile(worker)}>
                       <div className="p-4">
                         <div className="flex items-start gap-3">
                           <div className="relative shrink-0">
@@ -668,7 +668,7 @@ export default function CustomerDashboard() {
                           </div>
                           <button onClick={(e) => { e.stopPropagation(); }} className="text-muted-foreground hover:text-rose-500 transition-colors shrink-0" aria-label="Save"><Heart className="w-4 h-4" /></button>
                         </div>
-                        <div className="flex items-center gap-2 mt-3 text-xs">
+                        <div className="fle~x items-center gap-2 mt-3 text-xs">
                           <span className="flex items-center gap-1 font-medium text-foreground"><Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> {worker.rating > 0 ? worker.rating : t("New")}</span>
                           <span className="text-muted-foreground">·</span>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${worker.available ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"}`}>{worker.available ? t("Online") : t("Offline")}</span>
