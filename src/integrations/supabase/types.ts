@@ -1581,7 +1581,6 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           id: string | null
-          is_active: boolean | null
           is_online: boolean | null
           name: string | null
         }
@@ -1589,7 +1588,6 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           id?: string | null
-          is_active?: boolean | null
           is_online?: boolean | null
           name?: string | null
         }
@@ -1597,7 +1595,6 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           id?: string | null
-          is_active?: boolean | null
           is_online?: boolean | null
           name?: string | null
         }
@@ -1623,17 +1620,13 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           max_travel_km: number | null
-          middle_name: string | null
-          other_skill: string | null
           portfolio_urls: string[] | null
           profile_photo_url: string | null
-          rejection_reason: string | null
           service_area: string | null
           service_radius_km: number | null
           skills: string[] | null
           sub_skills: string[] | null
-          submitted_for_review: boolean | null
-          tools_owned: string[] | null
+          updated_at: string | null
           user_id: string | null
           verification_status:
             | Database["public"]["Enums"]["verification_status"]
@@ -1658,20 +1651,16 @@ export type Database = {
           id?: string | null
           is_online?: boolean | null
           last_name?: string | null
-          latitude?: number | null
-          longitude?: number | null
+          latitude?: never
+          longitude?: never
           max_travel_km?: number | null
-          middle_name?: string | null
-          other_skill?: string | null
           portfolio_urls?: string[] | null
           profile_photo_url?: string | null
-          rejection_reason?: string | null
           service_area?: string | null
           service_radius_km?: number | null
           skills?: string[] | null
           sub_skills?: string[] | null
-          submitted_for_review?: boolean | null
-          tools_owned?: string[] | null
+          updated_at?: string | null
           user_id?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -1696,20 +1685,16 @@ export type Database = {
           id?: string | null
           is_online?: boolean | null
           last_name?: string | null
-          latitude?: number | null
-          longitude?: number | null
+          latitude?: never
+          longitude?: never
           max_travel_km?: number | null
-          middle_name?: string | null
-          other_skill?: string | null
           portfolio_urls?: string[] | null
           profile_photo_url?: string | null
-          rejection_reason?: string | null
           service_area?: string | null
           service_radius_km?: number | null
           skills?: string[] | null
           sub_skills?: string[] | null
-          submitted_for_review?: boolean | null
-          tools_owned?: string[] | null
+          updated_at?: string | null
           user_id?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -1804,28 +1789,6 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "business_profiles"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      admin_get_profile: {
-        Args: { _id: string }
-        Returns: {
-          avatar_url: string | null
-          created_at: string
-          email: string
-          id: string
-          is_active: boolean
-          is_online: boolean
-          latitude: number | null
-          longitude: number | null
-          name: string
-          phone: string | null
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "profiles"
           isOneToOne: false
           isSetofReturn: true
         }
@@ -1937,28 +1900,6 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      admin_list_profiles: {
-        Args: never
-        Returns: {
-          avatar_url: string | null
-          created_at: string
-          email: string
-          id: string
-          is_active: boolean
-          is_online: boolean
-          latitude: number | null
-          longitude: number | null
-          name: string
-          phone: string | null
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "profiles"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
       admin_list_worker_profiles: {
         Args: never
         Returns: {
@@ -2029,16 +1970,6 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_job_contact: {
-        Args: { _user_id: string }
-        Returns: {
-          avatar_url: string
-          email: string
-          id: string
-          name: string
-          phone: string
-        }[]
-      }
       get_my_business_profile: {
         Args: never
         Returns: {
@@ -2072,28 +2003,6 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "business_profiles"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      get_my_profile: {
-        Args: never
-        Returns: {
-          avatar_url: string | null
-          created_at: string
-          email: string
-          id: string
-          is_active: boolean
-          is_online: boolean
-          latitude: number | null
-          longitude: number | null
-          name: string
-          phone: string | null
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "profiles"
           isOneToOne: false
           isSetofReturn: true
         }

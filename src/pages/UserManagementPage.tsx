@@ -33,9 +33,8 @@ export default function UserManagementPage() {
   const isCallerSuper = !!currentUser?.id && currentUser.id === superAdminId;
 
   async function loadUsers() {
-    const { data: profilesRaw } = await supabase.rpc("admin_list_profiles");
-    const profiles = (profilesRaw || []).slice().sort((a: any, b: any) => (b.created_at || "").localeCompare(a.created_at || ""));
-    if (!profiles.length) { setLoading(false); return; }
+    const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    if (!profiles) { setLoading(false); return; }
 
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");
     const { data: workerProfiles } = await supabase.from("worker_profiles").select("user_id, verification_status");

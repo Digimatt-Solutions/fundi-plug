@@ -58,10 +58,9 @@ export default function VerificationPage() {
     const { data: wps } = await supabase.rpc("admin_list_worker_profiles");
     const list = (wps || []) as any[];
     const userIds = list.map((w: any) => w.user_id);
-    const { data: allProfs } = userIds.length
-      ? await supabase.rpc("admin_list_profiles")
+    const { data: profs } = userIds.length
+      ? await supabase.from("profiles").select("id, name, email, avatar_url, phone").in("id", userIds)
       : { data: [] as any[] };
-    const profs = (allProfs || []).filter((p: any) => userIds.includes(p.id));
     const profMap: Record<string, any> = {};
     (profs || []).forEach((p: any) => { profMap[p.id] = p; });
     setWorkers(list.map((w: any) => ({ ...w, profiles: profMap[w.user_id] || null })).sort((a: any, b: any) => (b.created_at || "").localeCompare(a.created_at || "")));

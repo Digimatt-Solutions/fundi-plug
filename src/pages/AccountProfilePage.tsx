@@ -42,8 +42,11 @@ export default function AccountProfilePage() {
     if (!user) return;
     (async () => {
       setLoading(true);
-      const { data: rows } = await supabase.rpc("get_my_profile");
-      const data = Array.isArray(rows) ? rows[0] : null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("name, phone, email, avatar_url, created_at")
+        .eq("id", user.id)
+        .maybeSingle();
       if (data) {
         setForm({
           name: data.name || "",

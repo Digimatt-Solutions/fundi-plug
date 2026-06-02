@@ -33,10 +33,9 @@ export default function AdminDisbursementsPage() {
       .order("requested_at", { ascending: false });
 
     const workerIds = [...new Set((wds || []).map((w: any) => w.worker_id))];
-    const { data: allProfs } = workerIds.length > 0
-      ? await supabase.rpc("admin_list_profiles")
+    const { data: profiles } = workerIds.length > 0
+      ? await supabase.from("profiles").select("id, name, email, phone").in("id", workerIds)
       : { data: [] };
-    const profiles = (allProfs || []).filter((p: any) => workerIds.includes(p.id));
     const profileMap: Record<string, any> = {};
     (profiles || []).forEach(p => { profileMap[p.id] = p; });
 

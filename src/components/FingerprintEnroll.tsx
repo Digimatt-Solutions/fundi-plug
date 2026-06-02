@@ -91,12 +91,11 @@ export default function FingerprintEnroll({
 
       if (showFundiPreview && user) {
         // Load fundi public info that a client would see
-        const [{ data: profRows }, { data: wp }, { data: reviews }] = await Promise.all([
-          supabase.rpc("get_my_profile"),
+        const [{ data: profile }, { data: wp }, { data: reviews }] = await Promise.all([
+          supabase.from("profiles").select("name, avatar_url, phone, is_online").eq("id", user.id).maybeSingle(),
           supabase.from("worker_profiles").select("bio, hourly_rate, years_experience, service_area, county, skills, verification_status").eq("user_id", user.id).maybeSingle(),
           supabase.from("reviews").select("rating, comment").eq("reviewee_id", user.id),
         ]);
-        const profile: any = Array.isArray(profRows) ? profRows[0] : null;
         const ratings = (reviews || []).map((r) => r.rating);
         const avg = ratings.length ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10 : 0;
         let skillNames: string[] = [];
