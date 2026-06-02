@@ -1808,6 +1808,28 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      admin_get_profile: {
+        Args: { _id: string }
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          is_online: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_get_worker_profile: {
         Args: { _user_id: string }
         Returns: {
@@ -1911,6 +1933,28 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "business_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_list_profiles: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          is_online: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          phone: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
           isOneToOne: false
           isSetofReturn: true
         }

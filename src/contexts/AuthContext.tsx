@@ -33,11 +33,10 @@ export const useAuth = () => {
 };
 
 async function fetchAppUser(userId: string): Promise<AppUser | null> {
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+  // Use SECURITY DEFINER RPC to read own full profile (incl. email/phone)
+  // since direct table SELECT excludes PII columns for safety.
+  const { data: rows } = await supabase.rpc("get_my_profile");
+  const profile = Array.isArray(rows) ? rows[0] : null;
 
   if (!profile) return null;
 

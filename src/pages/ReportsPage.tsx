@@ -58,7 +58,7 @@ export default function ReportsPage() {
       sixMonthsAgo.setDate(1);
 
       const [profilesRes, rolesRes, wpRes, catRes, jobsRes, paymentsRes, withdrawalsRes] = await Promise.all([
-        supabase.from("profiles").select("*"),
+        supabase.rpc("admin_list_profiles"),
         supabase.from("user_roles").select("*"),
         supabase.rpc("admin_list_worker_profiles"),
         supabase.from("service_categories").select("*"),

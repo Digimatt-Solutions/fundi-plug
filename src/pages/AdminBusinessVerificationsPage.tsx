@@ -27,7 +27,8 @@ export default function AdminBusinessVerificationsPage() {
     setItems(list);
     const uids = Array.from(new Set(list.map(b => b.user_id)));
     if (uids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,name,email,phone,avatar_url").in("id", uids);
+      const { data: allProfs } = await supabase.rpc("admin_list_profiles");
+      const profs = (allProfs || []).filter((p: any) => uids.includes(p.id));
       const map: Record<string, any> = {};
       (profs || []).forEach((p: any) => { map[p.id] = p; });
       setProfiles(map);
