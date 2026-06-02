@@ -133,8 +133,8 @@ export default function FindWorkersPage() {
       setWorkers(wps.map(w => ({
         ...w,
         name: (w as any).profiles?.name || "Fundi",
-        email: (w as any).profiles?.email || "",
-        phone: (w as any).profiles?.phone || "",
+        email: "",
+        phone: "",
         avatar_url: (w as any).profiles?.avatar_url || null,
         skillIds: w.skills || [],
         skillNames: (w.skills || []).map((s: string) => catMap[s] || "").filter(Boolean),
