@@ -47,11 +47,30 @@ export default function WorkerMyJobsPage() {
 
     const allJobs = [...(availRes.data || []), ...(assignedRes.data || []), ...(hireRes.data || [])];
     const customerIds = [...new Set(allJobs.map(j => j.customer_id))];
+    // Safe basic info for ALL customers (name/avatar only)
     const { data: profiles } = customerIds.length > 0
-      ? await supabase.from("profiles").select("id, name, email, phone").in("id", customerIds)
+      ? await supabase.from("profiles").select("id, name, avatar_url").in("id", customerIds)
       : { data: [] };
     const profileMap: Record<string, any> = {};
-    (profiles || []).forEach(p => { profileMap[p.id] = p; });
+    (profiles || []).forEach(p => { profileMap[p.id] = { ...p, email: "", phone: "" }; });
+
+    // Contact info (email/phone) only for customers on jobs where this worker is a participant
+    const participantCustomerIds = [
+      ...new Set([...(assignedRes.data || []), ...(hireRes.data || [])].map((j: any) => j.customer_id))
+    ];
+    if (participantCustomerIds.length > 0) {
+      const contactResults = await Promise.all(
+        participantCustomerIds.map(id => supabase.rpc("get_job_contact", { _user_id: id }))
+      );
+      contactResults.forEach((res, i) => {
+        const id = participantCustomerIds[i];
+        const row: any = Array.isArray(res.data) ? res.data[0] : null;
+        if (row && profileMap[id]) {
+          profileMap[id].email = row.email || "";
+          profileMap[id].phone = row.phone || "";
+        }
+      });
+    }
 
     const appliedJobIds = new Set((appsRes.data || []).map((a: any) => a.job_id));
     
