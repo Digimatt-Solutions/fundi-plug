@@ -405,7 +405,7 @@ const Auth = () => {
                         onClick={() => { setMode("forgot"); setError(""); resetOtpState(); setResetEmailSent(false); setNewPassword(""); }}
                         className="text-xs text-primary hover:underline"
                       >
-                        Forgot password?
+                        {/* Forgot password? */}
                       </button>
                     )}
                   </div>
