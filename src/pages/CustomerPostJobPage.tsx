@@ -192,7 +192,7 @@ export default function CustomerPostJobPage() {
   const viewApplications = async (jobId: string) => {
     setViewAppsJobId(jobId);
     setLoadingApps(true);
-    const { data } = await supabase.from("job_applications").select("*, profiles:worker_id(name, email, phone)").eq("job_id", jobId).order("created_at", { ascending: false });
+    const { data } = await supabase.from("job_applications").select("*, profiles:worker_id(name, avatar_url)").eq("job_id", jobId).order("created_at", { ascending: false });
     setApplications(data || []);
     setLoadingApps(false);
   };
