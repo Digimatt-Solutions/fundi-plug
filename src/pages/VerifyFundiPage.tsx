@@ -22,8 +22,8 @@ export default function VerifyFundiPage() {
     if (!workerId) return;
     async function load() {
       const [{ data: prof }, { data: w }, { data: revs }] = await Promise.all([
-        supabase.from("profiles").select("id, name, avatar_url, phone, email, is_online").eq("id", workerId!).maybeSingle(),
-        supabase.from("worker_profiles").select("first_name, last_name, profile_photo_url, selfie_with_id_url, county, service_area, hourly_rate, years_experience, verification_status, skills, bio").eq("user_id", workerId!).maybeSingle(),
+        supabase.from("profiles").select("id, name, avatar_url, is_online").eq("id", workerId!).maybeSingle(),
+        supabase.from("worker_profiles").select("first_name, last_name, profile_photo_url, county, service_area, hourly_rate, years_experience, verification_status, skills, bio").eq("user_id", workerId!).maybeSingle(),
         supabase.from("reviews").select("rating").eq("reviewee_id", workerId!),
       ]);
       setProfile(prof);
