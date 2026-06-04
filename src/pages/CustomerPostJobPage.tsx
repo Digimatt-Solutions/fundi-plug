@@ -50,6 +50,8 @@ export default function CustomerPostJobPage() {
   const [editImage, setEditImage] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Page-level chat state so the popup persists when the Applications dialog closes
+  const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
 
   async function loadData() {
     if (!user) return;
