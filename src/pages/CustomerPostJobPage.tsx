@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, ImagePlus, Trash2 } from "lucide-react";
+import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, ImagePlus, Trash2, MessageCircle, AlertTriangle } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
 import PriceLockBadge from "@/components/PriceLockBadge";
 import ChatButton from "@/components/chat/ChatButton";
+import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import { Lock } from "lucide-react";
 import { AssetImage } from "@/components/AssetImage";
 
