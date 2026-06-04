@@ -22,6 +22,7 @@ interface ReceiptData {
   workerName?: string;
   adminNotes?: string;
   phone?: string;
+  mpesaCode?: string;
 }
 
 interface Props {
