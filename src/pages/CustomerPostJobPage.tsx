@@ -575,6 +575,10 @@ export default function CustomerPostJobPage() {
         </DialogContent>
       </Dialog>
 
+      {activeChatPeer && (
+        <ChatPopup peer={activeChatPeer} onClose={() => setActiveChatPeer(null)} />
+      )}
     </div>
+
   );
 }
