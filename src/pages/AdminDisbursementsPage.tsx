@@ -272,7 +272,7 @@ export default function AdminDisbursementsPage() {
                           )}
                           {w.status === "approved" && (
                             <Button size="sm" className="text-xs gap-1"
-                              onClick={() => { setActionDialog({ withdrawal: w, action: "complete" }); setAdminNotes(""); }}>
+                              onClick={() => { setActionDialog({ withdrawal: w, action: "complete" }); setAdminNotes(""); setMpesaCode(""); }}>
                               <CheckCircle className="w-3.5 h-3.5" /> Mark Sent
                             </Button>
                           )}
@@ -280,7 +280,7 @@ export default function AdminDisbursementsPage() {
                             <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setReceiptData({
                               id: w.id, type: "withdrawal", amount: Number(w.amount), status: w.status,
                               date: w.processed_at || w.requested_at, workerName: w.workerName,
-                              phone: w.workerPhone, adminNotes: w.admin_notes,
+                              phone: w.workerPhone, adminNotes: w.admin_notes, mpesaCode: (w as any).mpesa_code,
                             })}>
                               <FileText className="w-3.5 h-3.5" /> Receipt
                             </Button>
