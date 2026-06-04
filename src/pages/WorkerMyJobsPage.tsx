@@ -38,6 +38,8 @@ export default function WorkerMyJobsPage() {
     if (!user) return;
     const { data: wp } = await supabase.rpc("get_my_worker_profile").maybeSingle();
     setWorkerProfile(wp);
+    const { data: cats } = await supabase.from("service_categories").select("id, name, icon").order("name");
+    setAllCategories(cats || []);
 
     const [availRes, appsRes, assignedRes, hireRes] = await Promise.all([
       supabase.from("jobs").select("*, service_categories:category_id(name, icon)").eq("status", "pending").is("worker_id", null).order("created_at", { ascending: false }),
