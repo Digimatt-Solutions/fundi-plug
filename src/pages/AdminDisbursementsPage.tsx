@@ -22,6 +22,7 @@ export default function AdminDisbursementsPage() {
   const [filter, setFilter] = useState<string>("all");
   const [actionDialog, setActionDialog] = useState<{ withdrawal: any; action: "approve" | "reject" | "complete" } | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const [mpesaCode, setMpesaCode] = useState("");
   const [processing, setProcessing] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
 
