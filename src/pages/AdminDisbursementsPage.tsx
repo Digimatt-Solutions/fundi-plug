@@ -87,25 +87,31 @@ export default function AdminDisbursementsPage() {
 
   const handleAction = async () => {
     if (!actionDialog) return;
-    setProcessing(true);
     const { withdrawal, action } = actionDialog;
+    if (action === "complete" && !mpesaCode.trim()) {
+      toast({ title: "M-Pesa code required", description: "Enter the M-Pesa transaction code to mark this disbursement as sent.", variant: "destructive" });
+      return;
+    }
+    setProcessing(true);
     try {
       const newStatus = action === "approve" ? "approved" : action === "reject" ? "rejected" : "completed";
+      const patch: any = {
+        status: newStatus,
+        admin_notes: adminNotes || null,
+        processed_at: new Date().toISOString(),
+        processed_by: user!.id,
+      };
+      if (action === "complete") patch.mpesa_code = mpesaCode.trim();
       const { error } = await supabase
         .from("withdrawals")
-        .update({
-          status: newStatus,
-          admin_notes: adminNotes || null,
-          processed_at: new Date().toISOString(),
-          processed_by: user!.id,
-        })
+        .update(patch)
         .eq("id", withdrawal.id);
       if (error) throw error;
 
       await supabase.from("activity_logs").insert({
         user_id: user!.id,
         action: `Withdrawal ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
-        detail: `${newStatus} withdrawal of KSH ${Number(withdrawal.amount).toLocaleString()} for ${withdrawal.workerName}`,
+        detail: `${newStatus} withdrawal of KSH ${Number(withdrawal.amount).toLocaleString()} for ${withdrawal.workerName}${action === "complete" ? ` - M-Pesa code: ${mpesaCode.trim()}` : ""}`,
         entity_type: "withdrawal",
         entity_id: withdrawal.id,
       });
@@ -113,6 +119,7 @@ export default function AdminDisbursementsPage() {
       toast({ title: `Withdrawal ${newStatus}`, description: `KSH ${Number(withdrawal.amount).toLocaleString()} request has been ${newStatus}.` });
       setActionDialog(null);
       setAdminNotes("");
+      setMpesaCode("");
       load();
     } catch (err: any) {
       toast({ title: "Action failed", description: friendlyError(err), variant: "destructive" });
