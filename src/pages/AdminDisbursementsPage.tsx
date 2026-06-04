@@ -330,6 +330,13 @@ export default function AdminDisbursementsPage() {
                   );
                 })()}
               </div>
+              {actionDialog.action === "complete" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">M-Pesa Transaction Code *</label>
+                  <Input placeholder="e.g. QGH7XKZ12A" value={mpesaCode} onChange={(e) => setMpesaCode(e.target.value.toUpperCase())} className="font-mono uppercase tracking-wider" />
+                  <p className="text-xs text-muted-foreground">This code is recorded on the receipt and in the admin reports for tracking.</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Notes (optional)</label>
                 <Textarea placeholder="Add notes about this disbursement..." value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} />
