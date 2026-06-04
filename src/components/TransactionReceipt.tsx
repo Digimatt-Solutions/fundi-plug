@@ -148,6 +148,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
         ` : `
           ${data.workerName ? `<div class="row"><span class="label">Fundi</span><span class="value">${data.workerName}</span></div>` : ""}
           ${data.phone ? `<div class="row"><span class="label">Phone</span><span class="value">${data.phone}</span></div>` : ""}
+          ${data.mpesaCode ? `<div class="row"><span class="label">M-Pesa Code</span><span class="value mono">${data.mpesaCode}</span></div>` : ""}
           ${data.adminNotes ? `<div class="row"><span class="label">Notes</span><span class="value">${data.adminNotes}</span></div>` : ""}
           <hr class="divider" />
           <div class="total-row"><span>Amount Disbursed</span><span class="value">KSH ${data.amount.toLocaleString()}</span></div>
