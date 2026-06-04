@@ -263,6 +263,12 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
                   <span className="text-foreground">{data.phone}</span>
                 </div>
               )}
+              {data.mpesaCode && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">M-Pesa Code</span>
+                  <span className="font-mono font-semibold text-foreground tracking-wider">{data.mpesaCode}</span>
+                </div>
+              )}
               {data.adminNotes && (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Notes</span>
