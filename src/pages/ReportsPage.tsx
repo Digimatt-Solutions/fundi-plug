@@ -64,7 +64,7 @@ export default function ReportsPage() {
         supabase.from("service_categories").select("*"),
         supabase.from("jobs").select("*, service_categories:category_id(name)"),
         supabase.from("payments").select("*"),
-        supabase.from("withdrawals").select("*, profiles:worker_id(name)"),
+        supabase.from("withdrawals").select("*"),
       ]);
 
       const profiles = profilesRes.data || [];
@@ -73,7 +73,12 @@ export default function ReportsPage() {
       const cats = catRes.data || [];
       const allJobs = jobsRes.data || [];
       const allPayments = paymentsRes.data || [];
-      const allWithdrawals = withdrawalsRes.data || [];
+      const profileNameMap: Record<string, string> = {};
+      profiles.forEach((p: any) => { profileNameMap[p.id] = p.name; });
+      const allWithdrawals = (withdrawalsRes.data || []).map((w: any) => ({
+        ...w,
+        profiles: { name: profileNameMap[w.worker_id] || "Unknown Fundi" },
+      }));
 
       const roleMap: Record<string, string> = {};
       roles.forEach(r => { roleMap[r.user_id] = r.role; });
