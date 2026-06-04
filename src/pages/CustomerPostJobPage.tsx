@@ -486,17 +486,21 @@ export default function CustomerPostJobPage() {
                   {app.proposed_rate && <p className="text-xs text-foreground">Proposed: KSH {app.proposed_rate}</p>}
                   <p className="text-xs text-muted-foreground">Applied: {new Date(app.created_at).toLocaleString()}</p>
                   <div className="pt-1">
-                    <ChatButton
-                      peer={{
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setActiveChatPeer({
                         id: app.worker_id,
                         name: (app as any).profiles?.name || "Fundi",
                         avatar_url: (app as any).profiles?.avatar_url,
                         jobId: app.job_id,
-                      }}
-                      label="Chat with fundi to agree on final price"
-                      fullWidth
-                    />
+                      })}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-1" /> Chat with fundi to agree on final price
+                    </Button>
                   </div>
+
                 </div>
               ))}
             </div>
