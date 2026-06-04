@@ -332,6 +332,9 @@ export default function CustomerPostJobPage() {
                           job.status === "cancelled" ? "bg-destructive/10 text-destructive" :
                           "bg-chart-4/10 text-chart-4"
                         }`}>{job.status.replace("_", " ")}</span>
+                        {job.is_instant && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive text-destructive-foreground">URGENT</span>
+                        )}
                         <PriceLockBadge job={job} />
                       </div>
                       {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
@@ -353,7 +356,7 @@ export default function CustomerPostJobPage() {
                         <Users className="w-4 h-4 mr-1" /> Applications
                       </Button>
                     )}
-                    {job.worker_id && job.customer_price_confirmed && !job.price_locked_at && (
+                    {job.worker_id && !job.price_locked_at && (
                       <Button size="sm" variant="outline" onClick={() => { setEditPriceJob(job); setEditPriceValue(String(job.final_price ?? job.budget ?? "")); }} className="active:scale-[0.97]">
                         <Pencil className="w-4 h-4 mr-1" /> Edit Final Price
                       </Button>
@@ -365,8 +368,21 @@ export default function CustomerPostJobPage() {
                     )}
                   </div>
                 </div>
+                {(job as any).price_rejected_at && !job.price_locked_at && (
+                  <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/30 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+                    <div className="flex-1 text-sm">
+                      <p className="font-medium text-foreground">The fundi rejected the proposed final price.</p>
+                      <p className="text-xs text-muted-foreground">Adjust the price and resend - the fundi will need to confirm the new amount.</p>
+                    </div>
+                    <Button size="sm" onClick={() => { setEditPriceJob(job); setEditPriceValue(String(job.final_price ?? job.budget ?? "")); }}>
+                      <Pencil className="w-3.5 h-3.5 mr-1" /> Edit Price
+                    </Button>
+                  </div>
+                )}
               </div>
             )) : (
+
               <div className="stat-card flex flex-col items-center py-16 text-center">
                 <Briefcase className="w-10 h-10 text-muted-foreground mb-3" />
                 <p className="text-foreground font-medium">No {tab} jobs</p>
