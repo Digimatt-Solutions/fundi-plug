@@ -31,6 +31,8 @@ export default function WorkerMyJobsPage() {
   const [clientRating, setClientRating] = useState(5);
   const [clientComment, setClientComment] = useState("");
   const [clientRatings, setClientRatings] = useState<Record<string, { avg: number; count: number }>>({});
+  const [jobCategoryFilter, setJobCategoryFilter] = useState<string>("mine"); // 'mine' | 'all' | category_id
+  const [allCategories, setAllCategories] = useState<any[]>([]);
 
   async function loadData() {
     if (!user) return;
