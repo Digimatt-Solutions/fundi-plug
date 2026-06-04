@@ -64,7 +64,7 @@ export default function ReportsPage() {
         supabase.from("service_categories").select("*"),
         supabase.from("jobs").select("*, service_categories:category_id(name)"),
         supabase.from("payments").select("*"),
-        supabase.from("withdrawals").select("*, profiles:worker_id(name)"),
+        supabase.from("withdrawals").select("*"),
       ]);
 
       const profiles = profilesRes.data || [];
@@ -73,7 +73,12 @@ export default function ReportsPage() {
       const cats = catRes.data || [];
       const allJobs = jobsRes.data || [];
       const allPayments = paymentsRes.data || [];
-      const allWithdrawals = withdrawalsRes.data || [];
+      const profileNameMap: Record<string, string> = {};
+      profiles.forEach((p: any) => { profileNameMap[p.id] = p.name; });
+      const allWithdrawals = (withdrawalsRes.data || []).map((w: any) => ({
+        ...w,
+        profiles: { name: profileNameMap[w.worker_id] || "Unknown Fundi" },
+      }));
 
       const roleMap: Record<string, string> = {};
       roles.forEach(r => { roleMap[r.user_id] = r.role; });
@@ -456,7 +461,7 @@ export default function ReportsPage() {
                 <Button size="sm" variant="outline" onClick={() => exportCSV(withdrawals.map(w => ({
                   Fundi: (w as any).profiles?.name || "-", Amount: w.amount, Status: w.status,
                   Requested: new Date(w.requested_at).toLocaleDateString(), Processed: w.processed_at ? new Date(w.processed_at).toLocaleDateString() : "-",
-                  Notes: w.admin_notes || "",
+                  MpesaCode: (w as any).mpesa_code || "", Notes: w.admin_notes || "",
                 })), "disbursements_report.csv")} className="gap-1.5"><Download className="w-4 h-4" /> Export CSV</Button>
               </div>
               <div className="overflow-auto">
@@ -464,7 +469,7 @@ export default function ReportsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Fundi</TableHead><TableHead>Amount (KSH)</TableHead><TableHead>Status</TableHead>
-                      <TableHead>Requested</TableHead><TableHead>Processed</TableHead><TableHead>Notes</TableHead>
+                      <TableHead>Requested</TableHead><TableHead>Processed</TableHead><TableHead>M-Pesa Code</TableHead><TableHead>Notes</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -475,6 +480,7 @@ export default function ReportsPage() {
                         <TableCell><span className={`px-2 py-0.5 rounded-full text-xs capitalize ${w.status === "completed" ? "bg-green-500/10 text-green-500" : w.status === "pending" ? "bg-chart-4/10 text-chart-4" : "bg-destructive/10 text-destructive"}`}>{w.status}</span></TableCell>
                         <TableCell className="text-xs">{new Date(w.requested_at).toLocaleDateString()}</TableCell>
                         <TableCell className="text-xs">{w.processed_at ? new Date(w.processed_at).toLocaleDateString() : "-"}</TableCell>
+                        <TableCell className="text-xs font-mono tracking-wider">{(w as any).mpesa_code || "-"}</TableCell>
                         <TableCell className="text-xs text-muted-foreground">{w.admin_notes || "-"}</TableCell>
                       </TableRow>
                     ))}

@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, Star, Lock } from "lucide-react";
+import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, Star, Lock, Zap, Filter } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -31,11 +31,15 @@ export default function WorkerMyJobsPage() {
   const [clientRating, setClientRating] = useState(5);
   const [clientComment, setClientComment] = useState("");
   const [clientRatings, setClientRatings] = useState<Record<string, { avg: number; count: number }>>({});
+  const [jobCategoryFilter, setJobCategoryFilter] = useState<string>("mine"); // 'mine' | 'all' | category_id
+  const [allCategories, setAllCategories] = useState<any[]>([]);
 
   async function loadData() {
     if (!user) return;
     const { data: wp } = await supabase.rpc("get_my_worker_profile").maybeSingle();
     setWorkerProfile(wp);
+    const { data: cats } = await supabase.from("service_categories").select("id, name, icon").order("name");
+    setAllCategories(cats || []);
 
     const [availRes, appsRes, assignedRes, hireRes] = await Promise.all([
       supabase.from("jobs").select("*, service_categories:category_id(name, icon)").eq("status", "pending").is("worker_id", null).order("created_at", { ascending: false }),
@@ -206,11 +210,17 @@ export default function WorkerMyJobsPage() {
     const { error } = await supabase.from("jobs").update({
       customer_price_confirmed: false,
       worker_price_confirmed: false,
-    }).eq("id", jobId);
+      price_rejected_at: new Date().toISOString(),
+    } as any).eq("id", jobId);
     if (error) {
       toast({ title: "Action failed", description: friendlyError(error), variant: "destructive" });
       return;
     }
+    await supabase.from("activity_logs").insert({
+      user_id: user!.id, action: "Final Price Rejected",
+      detail: `Fundi rejected the proposed final price - waiting for client to adjust`,
+      entity_type: "job", entity_id: jobId,
+    });
     toast({ title: "Sent back to client to adjust price" });
     loadData();
   };
@@ -332,40 +342,72 @@ export default function WorkerMyJobsPage() {
         </TabsList>
 
         <TabsContent value="available" className="space-y-4">
-          {availableJobs.length > 0 ? availableJobs.map((job, i) => (
-            <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                {job.image_url && (
-                  <AssetImage src={job.image_url} bucket="job-images" alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
-                )}
-                <div className="flex-1 min-w-0 space-y-2 w-full">
-                  <div className="flex items-start justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
-                      <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
-                    </div>
-                    <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97] shrink-0">
-                      <Send className="w-4 h-4 mr-1" /> Apply
-                    </Button>
-                  </div>
-                  {job.description && <p className="text-sm text-muted-foreground break-words">{job.description}</p>}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address || "No location"}</span>
-                    <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
-                    <span className="flex items-center gap-1">by {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</span>
-                  </div>
+          {(() => {
+            const mySkillIds: string[] = workerProfile?.skills || [];
+            const filteredJobs = availableJobs.filter((j: any) => {
+              if (jobCategoryFilter === "all") return true;
+              if (jobCategoryFilter === "mine") {
+                if (!mySkillIds.length) return true;
+                return j.category_id && mySkillIds.includes(j.category_id);
+              }
+              return j.category_id === jobCategoryFilter;
+            }).sort((a: any, b: any) => Number(b.is_instant) - Number(a.is_instant));
+            const skillCats = allCategories.filter(c => mySkillIds.includes(c.id));
+            return (
+              <>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <button onClick={() => setJobCategoryFilter("mine")} className={`px-3 py-1 rounded-full text-xs font-medium border ${jobCategoryFilter === "mine" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/40"}`}>My categories</button>
+                  <button onClick={() => setJobCategoryFilter("all")} className={`px-3 py-1 rounded-full text-xs font-medium border ${jobCategoryFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/40"}`}>All</button>
+                  {skillCats.map((c) => (
+                    <button key={c.id} onClick={() => setJobCategoryFilter(c.id)} className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${jobCategoryFilter === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/40"}`}>
+                      <span>{c.icon || "🔧"}</span><span>{c.name}</span>
+                    </button>
+                  ))}
                 </div>
-              </div>
-            </div>
-          )) : (
-            <div className="stat-card flex flex-col items-center py-16 text-center">
-              <Search className="w-10 h-10 text-muted-foreground mb-3" />
-              <p className="text-foreground font-medium">No available jobs</p>
-              <p className="text-sm text-muted-foreground">New jobs posted by clients will appear here in real-time</p>
-            </div>
-          )}
+                {filteredJobs.length > 0 ? filteredJobs.map((job: any, i: number) => (
+                  <div key={job.id} className={`stat-card animate-fade-in ${job.is_instant ? "border-destructive/40 bg-destructive/5" : ""}`} style={{ animationDelay: `${i * 60}ms` }}>
+                    <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                      {job.image_url && (
+                        <AssetImage src={job.image_url} bucket="job-images" alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0 space-y-2 w-full">
+                        <div className="flex items-start justify-between gap-2 flex-wrap">
+                          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                            <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                            <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
+                            {job.is_instant && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive text-destructive-foreground animate-pulse">
+                                <Zap className="w-3 h-3" /> URGENT
+                              </span>
+                            )}
+                          </div>
+                          <Button size="sm" onClick={() => setApplyDialog(job)} disabled={!isVerified} className="active:scale-[0.97] shrink-0">
+                            <Send className="w-4 h-4 mr-1" /> Apply
+                          </Button>
+                        </div>
+                        {job.description && <p className="text-sm text-muted-foreground break-words">{job.description}</p>}
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {job.address || "No location"}</span>
+                          <span>KSH {job.budget ? job.budget.toLocaleString() : "Open"}</span>
+                          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {new Date(job.created_at).toLocaleString()}</span>
+                          <span className="flex items-center gap-1">by {job.customerName} {clientRatings[job.customer_id] && renderStars(clientRatings[job.customer_id].avg, clientRatings[job.customer_id].count)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )) : (
+                  <div className="stat-card flex flex-col items-center py-16 text-center">
+                    <Search className="w-10 h-10 text-muted-foreground mb-3" />
+                    <p className="text-foreground font-medium">No jobs match this filter</p>
+                    <p className="text-sm text-muted-foreground">Try switching to "All" or another category</p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </TabsContent>
+
 
         <TabsContent value="applications" className="space-y-4">
           {myApplications.length > 0 ? myApplications.map((app, i) => (

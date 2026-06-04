@@ -22,6 +22,7 @@ export default function AdminDisbursementsPage() {
   const [filter, setFilter] = useState<string>("all");
   const [actionDialog, setActionDialog] = useState<{ withdrawal: any; action: "approve" | "reject" | "complete" } | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
+  const [mpesaCode, setMpesaCode] = useState("");
   const [processing, setProcessing] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
 
@@ -86,25 +87,31 @@ export default function AdminDisbursementsPage() {
 
   const handleAction = async () => {
     if (!actionDialog) return;
-    setProcessing(true);
     const { withdrawal, action } = actionDialog;
+    if (action === "complete" && !mpesaCode.trim()) {
+      toast({ title: "M-Pesa code required", description: "Enter the M-Pesa transaction code to mark this disbursement as sent.", variant: "destructive" });
+      return;
+    }
+    setProcessing(true);
     try {
       const newStatus = action === "approve" ? "approved" : action === "reject" ? "rejected" : "completed";
+      const patch: any = {
+        status: newStatus,
+        admin_notes: adminNotes || null,
+        processed_at: new Date().toISOString(),
+        processed_by: user!.id,
+      };
+      if (action === "complete") patch.mpesa_code = mpesaCode.trim();
       const { error } = await supabase
         .from("withdrawals")
-        .update({
-          status: newStatus,
-          admin_notes: adminNotes || null,
-          processed_at: new Date().toISOString(),
-          processed_by: user!.id,
-        })
+        .update(patch)
         .eq("id", withdrawal.id);
       if (error) throw error;
 
       await supabase.from("activity_logs").insert({
         user_id: user!.id,
         action: `Withdrawal ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
-        detail: `${newStatus} withdrawal of KSH ${Number(withdrawal.amount).toLocaleString()} for ${withdrawal.workerName}`,
+        detail: `${newStatus} withdrawal of KSH ${Number(withdrawal.amount).toLocaleString()} for ${withdrawal.workerName}${action === "complete" ? ` - M-Pesa code: ${mpesaCode.trim()}` : ""}`,
         entity_type: "withdrawal",
         entity_id: withdrawal.id,
       });
@@ -112,6 +119,7 @@ export default function AdminDisbursementsPage() {
       toast({ title: `Withdrawal ${newStatus}`, description: `KSH ${Number(withdrawal.amount).toLocaleString()} request has been ${newStatus}.` });
       setActionDialog(null);
       setAdminNotes("");
+      setMpesaCode("");
       load();
     } catch (err: any) {
       toast({ title: "Action failed", description: friendlyError(err), variant: "destructive" });
@@ -264,7 +272,7 @@ export default function AdminDisbursementsPage() {
                           )}
                           {w.status === "approved" && (
                             <Button size="sm" className="text-xs gap-1"
-                              onClick={() => { setActionDialog({ withdrawal: w, action: "complete" }); setAdminNotes(""); }}>
+                              onClick={() => { setActionDialog({ withdrawal: w, action: "complete" }); setAdminNotes(""); setMpesaCode(""); }}>
                               <CheckCircle className="w-3.5 h-3.5" /> Mark Sent
                             </Button>
                           )}
@@ -272,7 +280,7 @@ export default function AdminDisbursementsPage() {
                             <Button size="sm" variant="ghost" className="gap-1 text-xs" onClick={() => setReceiptData({
                               id: w.id, type: "withdrawal", amount: Number(w.amount), status: w.status,
                               date: w.processed_at || w.requested_at, workerName: w.workerName,
-                              phone: w.workerPhone, adminNotes: w.admin_notes,
+                              phone: w.workerPhone, adminNotes: w.admin_notes, mpesaCode: (w as any).mpesa_code,
                             })}>
                               <FileText className="w-3.5 h-3.5" /> Receipt
                             </Button>
@@ -322,6 +330,13 @@ export default function AdminDisbursementsPage() {
                   );
                 })()}
               </div>
+              {actionDialog.action === "complete" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">M-Pesa Transaction Code *</label>
+                  <Input placeholder="e.g. QGH7XKZ12A" value={mpesaCode} onChange={(e) => setMpesaCode(e.target.value.toUpperCase())} className="font-mono uppercase tracking-wider" />
+                  <p className="text-xs text-muted-foreground">This code is recorded on the receipt and in the admin reports for tracking.</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Notes (optional)</label>
                 <Textarea placeholder="Add notes about this disbursement..." value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} />

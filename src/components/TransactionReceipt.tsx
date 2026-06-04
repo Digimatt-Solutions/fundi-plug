@@ -22,6 +22,7 @@ interface ReceiptData {
   workerName?: string;
   adminNotes?: string;
   phone?: string;
+  mpesaCode?: string;
 }
 
 interface Props {
@@ -147,6 +148,7 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
         ` : `
           ${data.workerName ? `<div class="row"><span class="label">Fundi</span><span class="value">${data.workerName}</span></div>` : ""}
           ${data.phone ? `<div class="row"><span class="label">Phone</span><span class="value">${data.phone}</span></div>` : ""}
+          ${data.mpesaCode ? `<div class="row"><span class="label">M-Pesa Code</span><span class="value mono">${data.mpesaCode}</span></div>` : ""}
           ${data.adminNotes ? `<div class="row"><span class="label">Notes</span><span class="value">${data.adminNotes}</span></div>` : ""}
           <hr class="divider" />
           <div class="total-row"><span>Amount Disbursed</span><span class="value">KSH ${data.amount.toLocaleString()}</span></div>
@@ -259,6 +261,12 @@ export default function TransactionReceipt({ open, onClose, data }: Props) {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Phone</span>
                   <span className="text-foreground">{data.phone}</span>
+                </div>
+              )}
+              {data.mpesaCode && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">M-Pesa Code</span>
+                  <span className="font-mono font-semibold text-foreground tracking-wider">{data.mpesaCode}</span>
                 </div>
               )}
               {data.adminNotes && (

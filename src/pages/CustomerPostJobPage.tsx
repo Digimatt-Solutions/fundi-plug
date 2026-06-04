@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, ImagePlus, Trash2 } from "lucide-react";
+import { Briefcase, Plus, MapPin, Clock, Users, Check, X, CalendarDays, Pencil, ImagePlus, Trash2, MessageCircle, AlertTriangle } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +15,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { friendlyError } from "@/lib/friendlyError";
 import PriceLockBadge from "@/components/PriceLockBadge";
 import ChatButton from "@/components/chat/ChatButton";
+import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import { Lock } from "lucide-react";
 import { AssetImage } from "@/components/AssetImage";
 
@@ -49,6 +50,8 @@ export default function CustomerPostJobPage() {
   const [editImage, setEditImage] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Page-level chat state so the popup persists when the Applications dialog closes
+  const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
 
   async function loadData() {
     if (!user) return;
@@ -260,7 +263,8 @@ export default function CustomerPostJobPage() {
       final_price: Number(editPriceValue),
       customer_price_confirmed: true,
       worker_price_confirmed: false,
-    }).eq("id", editPriceJob.id);
+      price_rejected_at: null,
+    } as any).eq("id", editPriceJob.id);
     if (error) {
       toast({ title: "Update failed", description: friendlyError(error), variant: "destructive" });
       return;
@@ -329,6 +333,9 @@ export default function CustomerPostJobPage() {
                           job.status === "cancelled" ? "bg-destructive/10 text-destructive" :
                           "bg-chart-4/10 text-chart-4"
                         }`}>{job.status.replace("_", " ")}</span>
+                        {job.is_instant && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive text-destructive-foreground">URGENT</span>
+                        )}
                         <PriceLockBadge job={job} />
                       </div>
                       {job.description && <p className="text-sm text-muted-foreground">{job.description}</p>}
@@ -350,7 +357,7 @@ export default function CustomerPostJobPage() {
                         <Users className="w-4 h-4 mr-1" /> Applications
                       </Button>
                     )}
-                    {job.worker_id && job.customer_price_confirmed && !job.price_locked_at && (
+                    {job.worker_id && !job.price_locked_at && (
                       <Button size="sm" variant="outline" onClick={() => { setEditPriceJob(job); setEditPriceValue(String(job.final_price ?? job.budget ?? "")); }} className="active:scale-[0.97]">
                         <Pencil className="w-4 h-4 mr-1" /> Edit Final Price
                       </Button>
@@ -362,8 +369,21 @@ export default function CustomerPostJobPage() {
                     )}
                   </div>
                 </div>
+                {(job as any).price_rejected_at && !job.price_locked_at && (
+                  <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/30 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+                    <div className="flex-1 text-sm">
+                      <p className="font-medium text-foreground">The fundi rejected the proposed final price.</p>
+                      <p className="text-xs text-muted-foreground">Adjust the price and resend - the fundi will need to confirm the new amount.</p>
+                    </div>
+                    <Button size="sm" onClick={() => { setEditPriceJob(job); setEditPriceValue(String(job.final_price ?? job.budget ?? "")); }}>
+                      <Pencil className="w-3.5 h-3.5 mr-1" /> Edit Price
+                    </Button>
+                  </div>
+                )}
               </div>
             )) : (
+
               <div className="stat-card flex flex-col items-center py-16 text-center">
                 <Briefcase className="w-10 h-10 text-muted-foreground mb-3" />
                 <p className="text-foreground font-medium">No {tab} jobs</p>
@@ -466,17 +486,21 @@ export default function CustomerPostJobPage() {
                   {app.proposed_rate && <p className="text-xs text-foreground">Proposed: KSH {app.proposed_rate}</p>}
                   <p className="text-xs text-muted-foreground">Applied: {new Date(app.created_at).toLocaleString()}</p>
                   <div className="pt-1">
-                    <ChatButton
-                      peer={{
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setActiveChatPeer({
                         id: app.worker_id,
                         name: (app as any).profiles?.name || "Fundi",
                         avatar_url: (app as any).profiles?.avatar_url,
                         jobId: app.job_id,
-                      }}
-                      label="Chat with fundi to agree on final price"
-                      fullWidth
-                    />
+                      })}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-1" /> Chat with fundi to agree on final price
+                    </Button>
                   </div>
+
                 </div>
               ))}
             </div>
@@ -551,6 +575,10 @@ export default function CustomerPostJobPage() {
         </DialogContent>
       </Dialog>
 
+      {activeChatPeer && (
+        <ChatPopup peer={activeChatPeer} onClose={() => setActiveChatPeer(null)} />
+      )}
     </div>
+
   );
 }

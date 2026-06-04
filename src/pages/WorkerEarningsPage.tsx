@@ -361,6 +361,7 @@ export default function WorkerEarningsPage() {
                          <Button size="sm" variant="ghost" className="gap-1.5 text-xs" onClick={() => setReceiptData({
                            id: w.id, type: "withdrawal", amount: Number(w.amount), status: w.status,
                            date: w.processed_at || w.requested_at, workerName: user?.name, adminNotes: w.admin_notes,
+                           mpesaCode: (w as any).mpesa_code,
                          })}>
                            <FileText className="w-3.5 h-3.5" /> View
                          </Button>

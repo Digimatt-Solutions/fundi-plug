@@ -618,6 +618,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           price_locked_at: string | null
+          price_rejected_at: string | null
           status: Database["public"]["Enums"]["job_status"]
           title: string
           updated_at: string
@@ -639,6 +640,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           price_locked_at?: string | null
+          price_rejected_at?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           title: string
           updated_at?: string
@@ -660,6 +662,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           price_locked_at?: string | null
+          price_rejected_at?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           title?: string
           updated_at?: string
@@ -1267,6 +1270,7 @@ export type Database = {
           admin_notes: string | null
           amount: number
           id: string
+          mpesa_code: string | null
           processed_at: string | null
           processed_by: string | null
           requested_at: string
@@ -1277,6 +1281,7 @@ export type Database = {
           admin_notes?: string | null
           amount: number
           id?: string
+          mpesa_code?: string | null
           processed_at?: string | null
           processed_by?: string | null
           requested_at?: string
@@ -1287,6 +1292,7 @@ export type Database = {
           admin_notes?: string | null
           amount?: number
           id?: string
+          mpesa_code?: string | null
           processed_at?: string | null
           processed_by?: string | null
           requested_at?: string
