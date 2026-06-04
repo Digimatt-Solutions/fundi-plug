@@ -263,7 +263,8 @@ export default function CustomerPostJobPage() {
       final_price: Number(editPriceValue),
       customer_price_confirmed: true,
       worker_price_confirmed: false,
-    }).eq("id", editPriceJob.id);
+      price_rejected_at: null,
+    } as any).eq("id", editPriceJob.id);
     if (error) {
       toast({ title: "Update failed", description: friendlyError(error), variant: "destructive" });
       return;
