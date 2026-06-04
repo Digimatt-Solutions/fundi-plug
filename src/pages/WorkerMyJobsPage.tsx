@@ -210,11 +210,17 @@ export default function WorkerMyJobsPage() {
     const { error } = await supabase.from("jobs").update({
       customer_price_confirmed: false,
       worker_price_confirmed: false,
-    }).eq("id", jobId);
+      price_rejected_at: new Date().toISOString(),
+    } as any).eq("id", jobId);
     if (error) {
       toast({ title: "Action failed", description: friendlyError(error), variant: "destructive" });
       return;
     }
+    await supabase.from("activity_logs").insert({
+      user_id: user!.id, action: "Final Price Rejected",
+      detail: `Fundi rejected the proposed final price - waiting for client to adjust`,
+      entity_type: "job", entity_id: jobId,
+    });
     toast({ title: "Sent back to client to adjust price" });
     loadData();
   };
