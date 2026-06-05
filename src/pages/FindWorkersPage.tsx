@@ -393,9 +393,12 @@ export default function FindWorkersPage() {
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           {selectedWorker && (() => {
             const dist = getDist(selectedWorker);
-            const unlocked = unlockedWorkerIds.has(selectedWorker.user_id);
-            const phoneShown = unlocked ? selectedWorker.phone : maskPhone(selectedWorker.phone);
-            const emailShown = unlocked ? selectedWorker.email : maskEmail(selectedWorker.email);
+            // Contact details are always masked in the profile preview popup.
+            // Full details are only ever visible after a hire request is accepted,
+            // and only inside the booking/chat views — never on the discovery card.
+            const unlocked = false;
+            const phoneShown = maskPhone(selectedWorker.phone);
+            const emailShown = maskEmail(selectedWorker.email);
             return (
               <>
                 <DialogHeader>

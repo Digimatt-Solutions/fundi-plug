@@ -727,9 +727,11 @@ export default function CustomerDashboard() {
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           {selectedWorker && (() => {
             const dist = getWorkerDistance(selectedWorker);
-            const unlocked = unlockedWorkerIds.has(selectedWorker.user_id);
-            const phoneShown = unlocked ? selectedWorker.phone : maskPhone(selectedWorker.phone);
-            const emailShown = unlocked ? (selectedWorker as any).email : maskEmail((selectedWorker as any).email);
+            // Always mask contact details in the profile preview popup.
+            // Real phone/email is only revealed inside the booking/chat once a hire is accepted.
+            const unlocked = false;
+            const phoneShown = maskPhone(selectedWorker.phone);
+            const emailShown = maskEmail((selectedWorker as any).email);
             return (
               <>
                 <DialogHeader>

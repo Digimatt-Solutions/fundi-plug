@@ -131,16 +131,112 @@ export function parseSpokenEmail(raw: string): string {
   return s;
 }
 
-// Parse spoken password: remove spaces, allow "number 5" -> "5"
+// Parse a spoken password where the user spells out each character: letters
+// (e.g. "capital a", "alpha", "bravo"), digits ("one", "five"), and special
+// characters ("at", "hash", "dollar", "exclamation", "underscore", etc.).
+// Each spoken token becomes exactly one character of the password.
 export function parseSpokenPassword(raw: string): string {
-  const words: Record<string, string> = {
-    zero: "0", one: "1", two: "2", three: "3", four: "4",
-    five: "5", six: "6", seven: "7", eight: "8", nine: "9",
+  const numberWords: Record<string, string> = {
+    zero: "0", oh: "0", o: "0",
+    one: "1", two: "2", to: "2", too: "2", three: "3", four: "4", for: "4",
+    five: "5", six: "6", seven: "7", eight: "8", ate: "8", nine: "9",
   };
-  return raw
+  // NATO phonetic + common alternates -> letter
+  const phonetic: Record<string, string> = {
+    alpha: "a", apple: "a",
+    bravo: "b", boy: "b",
+    charlie: "c", cat: "c",
+    delta: "d", dog: "d",
+    echo: "e", easy: "e",
+    foxtrot: "f", fox: "f", frank: "f",
+    golf: "g", george: "g",
+    hotel: "h", henry: "h",
+    india: "i", igloo: "i",
+    juliet: "j", juliette: "j", john: "j",
+    kilo: "k", king: "k",
+    lima: "l", love: "l",
+    mike: "m", mary: "m",
+    november: "n", nancy: "n",
+    oscar: "o",
+    papa: "p", peter: "p",
+    quebec: "q", queen: "q",
+    romeo: "r", robert: "r",
+    sierra: "s", sam: "s",
+    tango: "t", tom: "t",
+    uniform: "u", uncle: "u",
+    victor: "v",
+    whiskey: "w", william: "w",
+    xray: "x", "x-ray": "x",
+    yankee: "y", yellow: "y",
+    zulu: "z", zebra: "z",
+  };
+  // Special characters - words -> symbol
+  const specials: Record<string, string> = {
+    space: " ",
+    dot: ".", point: ".", period: ".", "full-stop": ".", fullstop: ".",
+    comma: ",",
+    at: "@", "at-sign": "@",
+    hash: "#", hashtag: "#", pound: "#",
+    dollar: "$", "dollar-sign": "$",
+    percent: "%",
+    ampersand: "&", and: "&",
+    asterisk: "*", star: "*",
+    dash: "-", hyphen: "-", minus: "-",
+    underscore: "_", "under-score": "_",
+    plus: "+",
+    equal: "=", equals: "=",
+    slash: "/", "forward-slash": "/",
+    backslash: "\\",
+    colon: ":",
+    semicolon: ";",
+    exclamation: "!", bang: "!", "exclamation-mark": "!",
+    question: "?", "question-mark": "?",
+    quote: "\"", quotes: "\"", doublequote: "\"",
+    apostrophe: "'", singlequote: "'",
+    tilde: "~",
+    caret: "^", hat: "^",
+    pipe: "|", bar: "|",
+    "open-bracket": "(", openparen: "(", "open-paren": "(",
+    "close-bracket": ")", closeparen: ")", "close-paren": ")",
+    "open-square": "[", "close-square": "]",
+    "open-curly": "{", "close-curly": "}",
+    "less-than": "<", "greater-than": ">",
+  };
+
+  // Tokenise: split on whitespace; also split runs of digits into individual
+  // characters ("123" -> ["1","2","3"]). Keep hyphenated words ("x-ray") intact.
+  const tokens: string[] = raw
     .toLowerCase()
+    .trim()
     .split(/\s+/)
-    .map((w) => words[w] ?? w)
-    .join("")
-    .trim();
+    .flatMap((w) => (/^\d+$/.test(w) ? w.split("") : [w]));
+
+  const out: string[] = [];
+  let capitalNext = false;
+
+  for (let raw of tokens) {
+    if (!raw) continue;
+    // Strip trailing punctuation the recogniser sometimes adds.
+    const tok = raw.replace(/[.,!?]+$/g, "");
+    if (!tok) continue;
+
+    if (tok === "capital" || tok === "uppercase" || tok === "caps") { capitalNext = true; continue; }
+    if (tok === "lowercase" || tok === "small") { capitalNext = false; continue; }
+
+    let ch: string | null = null;
+    if (numberWords[tok] !== undefined) ch = numberWords[tok];
+    else if (phonetic[tok] !== undefined) ch = phonetic[tok];
+    else if (specials[tok] !== undefined) ch = specials[tok];
+    else if (/^[a-z]$/.test(tok)) ch = tok;
+    else if (/^[0-9]$/.test(tok)) ch = tok;
+    else if (/^[!-/:-@\[-`{-~]$/.test(tok)) ch = tok; // already a symbol
+    else {
+      // Fallback: treat as literal characters (no spaces).
+      ch = tok;
+    }
+
+    if (ch && capitalNext && /^[a-z]$/.test(ch)) { ch = ch.toUpperCase(); capitalNext = false; }
+    out.push(ch);
+  }
+  return out.join("");
 }
