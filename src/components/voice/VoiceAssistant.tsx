@@ -12,52 +12,70 @@ import {
 } from "@/lib/voice";
 import { friendlyError } from "@/lib/friendlyError";
 
-type NavItem = { title: string; url: string; key: string };
+type NavItem = { title: string; url: string; key: string; purpose: string };
 
 const adminNav: NavItem[] = [
-  { title: "Dashboard", url: "/dashboard", key: "dashboard" },
-  { title: "Verification", url: "/dashboard/verification", key: "verification" },
-  { title: "Jobs", url: "/dashboard/jobs", key: "jobs" },
-  { title: "Categories", url: "/dashboard/categories", key: "categories" },
-  { title: "Payments", url: "/dashboard/payments", key: "payments" },
-  { title: "Disbursements", url: "/dashboard/disbursements", key: "disbursements" },
-  { title: "Community", url: "/dashboard/community", key: "community" },
-  { title: "Reports", url: "/dashboard/reports", key: "reports" },
-  { title: "Activity Logs", url: "/dashboard/activity", key: "activity" },
-  { title: "User Management", url: "/dashboard/user-management", key: "user-management" },
-  { title: "Profile", url: "/dashboard/account", key: "account" },
-  { title: "Settings", url: "/dashboard/settings", key: "settings" },
+  { title: "Dashboard", url: "/dashboard", key: "dashboard", purpose: "your control centre showing overall platform metrics, recent activity and quick links." },
+  { title: "Verification", url: "/dashboard/verification", key: "verification", purpose: "where you review and approve fundi onboarding documents and identities." },
+  { title: "Jobs", url: "/dashboard/jobs", key: "jobs", purpose: "the full list of jobs posted on the platform so you can monitor or moderate them." },
+  { title: "Categories", url: "/dashboard/categories", key: "categories", purpose: "manage service categories and skills that fundis and clients select from." },
+  { title: "Payments", url: "/dashboard/payments", key: "payments", purpose: "track every customer payment, commission and refund processed by the platform." },
+  { title: "Disbursements", url: "/dashboard/disbursements", key: "disbursements", purpose: "approve fundi withdrawal requests and record the M-Pesa codes you send." },
+  { title: "Community", url: "/dashboard/community", key: "community", purpose: "post announcements, blogs and moderate the social feed for all users." },
+  { title: "Reports", url: "/dashboard/reports", key: "reports", purpose: "view and export analytics on jobs, revenue, fundis and disbursements." },
+  { title: "Activity Logs", url: "/dashboard/activity", key: "activity", purpose: "the full audit trail of every action taken on the platform." },
+  { title: "User Management", url: "/dashboard/user-management", key: "user-management", purpose: "create, suspend or delete clients, fundis, suppliers and other admins." },
+  { title: "Profile", url: "/dashboard/account", key: "account", purpose: "update your own admin name, photo and contact information." },
+  { title: "Settings", url: "/dashboard/settings", key: "settings", purpose: "configure platform-wide options such as commission, modules and integrations." },
 ];
 const workerNav: NavItem[] = [
-  { title: "Dashboard", url: "/dashboard", key: "dashboard" },
-  { title: "My Jobs", url: "/dashboard/my-jobs", key: "my-jobs" },
-  { title: "Profile", url: "/dashboard/profile", key: "profile" },
-  { title: "Earnings", url: "/dashboard/earnings", key: "earnings" },
-  { title: "Reviews", url: "/dashboard/reviews", key: "reviews" },
-  { title: "Payments", url: "/dashboard/payments", key: "payments" },
-  { title: "Community", url: "/dashboard/community", key: "community" },
-  { title: "Settings", url: "/dashboard/settings", key: "settings" },
+  { title: "Dashboard", url: "/dashboard", key: "dashboard", purpose: "your home screen showing earnings, ratings and new job opportunities." },
+  { title: "My Jobs", url: "/dashboard/my-jobs", key: "my-jobs", purpose: "browse the job board, filter by your categories and apply to clients." },
+  { title: "Profile", url: "/dashboard/profile", key: "profile", purpose: "edit your skills, hourly rate, documents and verification details." },
+  { title: "Earnings", url: "/dashboard/earnings", key: "earnings", purpose: "see your balance, completed jobs and request withdrawals to M-Pesa." },
+  { title: "Reviews", url: "/dashboard/reviews", key: "reviews", purpose: "read what clients have said about your past work." },
+  { title: "Payments", url: "/dashboard/payments", key: "payments", purpose: "track payments clients have made for jobs you completed." },
+  { title: "Community", url: "/dashboard/community", key: "community", purpose: "join the social feed, share updates and learn from other fundis." },
+  { title: "Settings", url: "/dashboard/settings", key: "settings", purpose: "manage notifications, language and account preferences." },
 ];
 const customerNav: NavItem[] = [
-  { title: "Dashboard", url: "/dashboard", key: "dashboard" },
-  { title: "Post a Job", url: "/dashboard/post-job", key: "post-job" },
-  { title: "Find Fundis", url: "/dashboard/find-workers", key: "find-workers" },
-  { title: "My Bookings", url: "/dashboard/bookings", key: "bookings" },
-  { title: "Payments", url: "/dashboard/payments", key: "payments" },
-  { title: "Community", url: "/dashboard/community", key: "community" },
-  { title: "Profile", url: "/dashboard/account", key: "account" },
-  { title: "Settings", url: "/dashboard/settings", key: "settings" },
+  { title: "Dashboard", url: "/dashboard", key: "dashboard", purpose: "your home screen with quick actions, nearby fundis and recent bookings." },
+  { title: "Post a Job", url: "/dashboard/post-job", key: "post-job", purpose: "create a new job, add photos, set a budget and let fundis apply." },
+  { title: "Find Fundis", url: "/dashboard/find-workers", key: "find-workers", purpose: "search verified fundis by skill or location and hire them directly." },
+  { title: "My Bookings", url: "/dashboard/bookings", key: "bookings", purpose: "view, manage and complete the jobs you've already booked." },
+  { title: "Payments", url: "/dashboard/payments", key: "payments", purpose: "see your payment history, receipts and pending charges." },
+  { title: "Community", url: "/dashboard/community", key: "community", purpose: "follow updates, tips and discussions from fundis and other clients." },
+  { title: "Profile", url: "/dashboard/account", key: "account", purpose: "update your personal details, photo and saved address." },
+  { title: "Settings", url: "/dashboard/settings", key: "settings", purpose: "control notifications, language and account preferences." },
 ];
+
+const roleIntro = (role: string) => {
+  if (role === "admin") return "You are signed in as Administrator. Here are your modules, one by one.";
+  if (role === "worker") return "You are signed in as a Fundi. Here are your modules, one by one.";
+  return "You are signed in as a Client. Here are your modules, one by one.";
+};
+
+// Speak each module title and its purpose with a short pause between them.
+// We chain SpeechSynthesis utterances so each module is read completely before
+// the next one starts.
+const speakModulesWithPurpose = (role: string, items: NavItem[]) => {
+  const lines = [
+    roleIntro(role),
+    ...items.map((i, idx) => `Module ${idx + 1}: ${i.title}. ${i.purpose}`),
+    `That's ${items.length} modules in total. Say "go to" followed by a module name to open it, or say "help" at any time.`,
+  ];
+  const playNext = (i: number) => {
+    if (i >= lines.length) return;
+    speak(lines[i], { onEnd: () => setTimeout(() => playNext(i + 1), 350) });
+  };
+  playNext(0);
+};
 
 const roleDescription = (role: string, items: NavItem[]) => {
   const names = items.map((i) => i.title).join(", ");
-  if (role === "admin") {
-    return `You are signed in as Administrator. Available modules are: ${names}. Say "go to" followed by a module name. Say "read page" for a structured summary, or "help" for more.`;
-  }
-  if (role === "worker") {
-    return `You are signed in as a Fundi. Modules: ${names}. Try "go to my jobs", "read page", or "review applications".`;
-  }
-  return `You are signed in as a Client. Modules: ${names}. Try "post a job", "find fundis", "review applications", or "read page".`;
+  if (role === "admin") return `You are signed in as Administrator. Available modules are: ${names}.`;
+  if (role === "worker") return `You are signed in as a Fundi. Modules: ${names}.`;
+  return `You are signed in as a Client. Modules: ${names}.`;
 };
 
 const findClickable = (label: string): HTMLElement | null => {
