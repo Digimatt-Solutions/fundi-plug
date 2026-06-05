@@ -64,6 +64,7 @@ export default function CustomerDashboard() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
   const [unpaidJobs, setUnpaidJobs] = useState<any[]>([]);
   const [showThanks, setShowThanks] = useState(false);
 
@@ -422,8 +423,15 @@ export default function CustomerDashboard() {
         (w.county || "").toLowerCase().includes(q)
       );
     }
+    const loc = locationQuery.trim().toLowerCase();
+    if (loc) {
+      list = list.filter(w =>
+        (w.service_area || "").toLowerCase().includes(loc) ||
+        (w.county || "").toLowerCase().includes(loc)
+      );
+    }
     return list;
-  }, [nearbyWorkers, selectedCategory, searchQuery]);
+  }, [nearbyWorkers, selectedCategory, searchQuery, locationQuery]);
 
   // Pagination
   const totalPages = Math.ceil(filteredWorkers.length / FUNDIS_PER_PAGE);
@@ -433,7 +441,7 @@ export default function CustomerDashboard() {
   }, [filteredWorkers, currentPage]);
 
   // Reset page when filters change
-  useEffect(() => { setCurrentPage(1); }, [selectedCategory, searchQuery]);
+  useEffect(() => { setCurrentPage(1); }, [selectedCategory, searchQuery, locationQuery]);
 
   const formatDistance = (km: number) => {
     if (km < 1) return `${Math.round(km * 1000)} m away`;
@@ -563,9 +571,14 @@ export default function CustomerDashboard() {
             <div className="hidden sm:block w-px h-6 bg-border" />
             <div className="relative flex-1 min-w-0 hidden sm:block">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-              <Input placeholder="Nairobi, Kenya" className="pl-9 h-10 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm" />
+              <Input
+                value={locationQuery}
+                onChange={(e) => setLocationQuery(e.target.value)}
+                placeholder={t("Location (county or area)")}
+                className="pl-9 h-10 border-0 bg-transparent focus-visible:ring-0 shadow-none text-sm"
+              />
             </div>
-            <Button className="h-10 px-6 rounded-full shrink-0 text-sm font-semibold">
+            <Button className="h-10 px-6 rounded-full shrink-0 text-sm font-semibold" onClick={() => { /* live-filtered */ }}>
               {t("Search")}
             </Button>
           </div>
