@@ -18,6 +18,7 @@ import ChatButton from "@/components/chat/ChatButton";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import { Lock } from "lucide-react";
 import { AssetImage } from "@/components/AssetImage";
+import jobPlaceholderAsset from "@/assets/job-placeholder.png.asset.json";
 
 export default function CustomerPostJobPage() {
   const { user } = useAuth();
@@ -102,6 +103,7 @@ export default function CustomerPostJobPage() {
 
     let imageUrl: string | null = null;
     if (jobImage) imageUrl = await uploadJobImage(jobImage);
+    if (!imageUrl) imageUrl = jobPlaceholderAsset.url;
 
     const { error } = await supabase.from("jobs").insert({
       title: title.trim(), description: description.trim() || null,
@@ -357,7 +359,7 @@ export default function CustomerPostJobPage() {
                         <Users className="w-4 h-4 mr-1" /> Applications
                       </Button>
                     )}
-                    {job.worker_id && !job.price_locked_at && (
+                    {job.worker_id && !job.price_locked_at && !["in_progress", "completed", "cancelled"].includes(job.status) && (
                       <Button size="sm" variant="outline" onClick={() => { setEditPriceJob(job); setEditPriceValue(String(job.final_price ?? job.budget ?? "")); }} className="active:scale-[0.97]">
                         <Pencil className="w-4 h-4 mr-1" /> Edit Final Price
                       </Button>
@@ -369,7 +371,7 @@ export default function CustomerPostJobPage() {
                     )}
                   </div>
                 </div>
-                {(job as any).price_rejected_at && !job.price_locked_at && (
+                {(job as any).price_rejected_at && !job.price_locked_at && !["in_progress", "completed", "cancelled"].includes(job.status) && (
                   <div className="mt-3 p-3 rounded-lg bg-destructive/10 border border-destructive/30 flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
                     <div className="flex-1 text-sm">
