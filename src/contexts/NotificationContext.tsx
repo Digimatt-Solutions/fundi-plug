@@ -160,6 +160,50 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           });
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "applications" },
+        async (payload: any) => {
+          const app = payload.new;
+          // Only notify the job's customer
+          const { data: job } = await supabase.from("jobs").select("customer_id, title").eq("id", app.job_id).maybeSingle();
+          if (!job || job.customer_id !== user.id) return;
+          pushNotif({
+            id: "app-" + app.id,
+            title: "New Job Application",
+            body: `A fundi applied to "${job.title}"`,
+            time: new Date().toLocaleTimeString(),
+            read: false,
+            link: "/dashboard/post-job",
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "jobs" },
+        (payload: any) => {
+          const before = payload.old as any;
+          const after = payload.new as any;
+          if (!after || after.customer_id !== user.id) return;
+          if (before?.status === after.status) return;
+          const titles: Record<string, string> = {
+            accepted: "Job Accepted",
+            in_progress: "Job In Progress",
+            completed: "Job Completed",
+            cancelled: "Job Cancelled",
+          };
+          const title = titles[after.status];
+          if (!title) return;
+          pushNotif({
+            id: "job-status-" + after.id + "-" + after.status,
+            title,
+            body: after.title || "Your job status changed",
+            time: new Date().toLocaleTimeString(),
+            read: false,
+            link: "/dashboard/bookings",
+          });
+        }
+      )
       .subscribe();
 
     return () => {
