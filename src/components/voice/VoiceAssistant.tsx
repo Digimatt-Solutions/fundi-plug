@@ -202,8 +202,12 @@ export const VoiceAssistant = () => {
     if (shouldGreet && !greetedRef.current) {
       greetedRef.current = true;
       sessionStorage.removeItem("voice_assistant_greet");
-      const intro = `Welcome ${user.name || ""}. ${roleDescription(user.role, navItems)}`;
-      setTimeout(() => speak(intro), 600);
+      // Greet, then read each sidebar module with its purpose, one at a time.
+      setTimeout(() => {
+        speak(`Welcome ${user.name || ""}.`, {
+          onEnd: () => setTimeout(() => speakModulesWithPurpose(user.role, navItems), 400),
+        });
+      }, 600);
     }
   }, [user, navItems]);
 
@@ -224,7 +228,7 @@ export const VoiceAssistant = () => {
     if (!cmd) return;
 
     if (/^(stop|cancel|quiet|silence)/.test(cmd)) { stopSpeaking(); speak("Okay."); return; }
-    if (/help|what can i (do|say)|options|menu/.test(cmd)) { speak(roleDescription(user?.role || "customer", navItems)); return; }
+    if (/help|what can i (do|say)|options|menu|read modules|list modules/.test(cmd)) { speakModulesWithPurpose(user?.role || "customer", navItems); return; }
     if (/read (page|screen|this)|summari[sz]e/.test(cmd)) { readPageStructured(); return; }
     if (/log ?out|sign ?out/.test(cmd)) { speak("Signing you out."); await logout(); navigate("/auth", { replace: true }); return; }
     if (/where am i|current page/.test(cmd)) {
@@ -341,7 +345,7 @@ export const VoiceAssistant = () => {
           onClick={() => {
             const next = !enabled;
             setEnabled(next);
-            if (next) speak(roleDescription(user.role, navItems));
+            if (next) speakModulesWithPurpose(user.role, navItems);
             else stopSpeaking();
           }}
           className="gap-2 rounded-full shadow pr-7"
