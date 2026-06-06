@@ -259,7 +259,7 @@ export const VoiceAssistant = () => {
     if (/^(stop|cancel|quiet|silence)/.test(cmd)) { stopSpeaking(); speak("Okay."); return; }
     if (/help|what can i (do|say)|options|menu|read modules|list modules/.test(cmd)) { speakModulesWithPurpose(user?.role || "customer", navItems, navigate); return; }
     if (/read (page|screen|this)|summari[sz]e/.test(cmd)) { readPageStructured(); return; }
-    if (/log ?out|sign ?out/.test(cmd)) { speak("Signing you out."); await logout(); navigate("/auth", { replace: true }); return; }
+    if (/log ?out|sign ?out/.test(cmd)) { stopSpeaking(); speak("Signing you out."); await logout(); navigate("/auth", { replace: true }); return; }
     if (/where am i|current page/.test(cmd)) {
       const here = navItems.find((n) => n.url === location.pathname);
       speak(`You are on ${here?.title || "the dashboard"}.`); return;
