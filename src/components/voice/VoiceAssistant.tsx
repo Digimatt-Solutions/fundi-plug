@@ -220,7 +220,10 @@ export const VoiceAssistant = () => {
   const greetedRef = useRef(false);
 
   const navItems: NavItem[] =
-    user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
+    user?.role === "admin" ? adminNav :
+    user?.role === "worker" ? workerNav :
+    user?.role === "supplier" ? supplierNav :
+    customerNav;
 
   useEffect(() => {
     if (!user) return;
