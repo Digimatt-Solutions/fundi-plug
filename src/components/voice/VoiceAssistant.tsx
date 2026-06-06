@@ -49,9 +49,22 @@ const customerNav: NavItem[] = [
   { title: "Settings", url: "/dashboard/settings", key: "settings", purpose: "control notifications, language and account preferences." },
 ];
 
+const supplierNav: NavItem[] = [
+  { title: "Dashboard", url: "/dashboard", key: "dashboard", purpose: "your supplier home screen with product stats, recent orders and quick actions." },
+  { title: "Business Profile", url: "/dashboard/business-profile", key: "business_profile", purpose: "manage your business name, registration documents and contact details for verification." },
+  { title: "Products", url: "/dashboard/products", key: "products", purpose: "add, edit and manage the products you sell on the marketplace." },
+  { title: "Marketplace", url: "/dashboard/marketplace", key: "marketplace", purpose: "browse the public marketplace and see how your listings appear to buyers." },
+  { title: "Community", url: "/dashboard/community", key: "community", purpose: "join the social feed, share product updates and engage with the community." },
+  { title: "Chats", url: "/dashboard/chat", key: "chat", purpose: "chat with clients and fundis interested in your products." },
+  { title: "Payments", url: "/dashboard/payments", key: "payments", purpose: "track payments received for products sold through the marketplace." },
+  { title: "Profile", url: "/dashboard/account", key: "account", purpose: "update your personal name, photo and contact information." },
+  { title: "Settings", url: "/dashboard/settings", key: "settings", purpose: "control notifications, language and account preferences." },
+];
+
 const roleIntro = (role: string) => {
   if (role === "admin") return "You are signed in as Administrator. Here are your modules, one by one.";
   if (role === "worker") return "You are signed in as a Fundi. Here are your modules, one by one.";
+  if (role === "supplier") return "You are signed in as a Supplier. Here are your modules, one by one.";
   return "You are signed in as a Client. Here are your modules, one by one.";
 };
 
