@@ -55,20 +55,33 @@ const roleIntro = (role: string) => {
   return "You are signed in as a Client. Here are your modules, one by one.";
 };
 
-// Speak each module title and its purpose with a short pause between them.
-// We chain SpeechSynthesis utterances so each module is read completely before
-// the next one starts.
-const speakModulesWithPurpose = (role: string, items: NavItem[]) => {
-  const lines = [
-    roleIntro(role),
-    ...items.map((i, idx) => `Module ${idx + 1}: ${i.title}. ${i.purpose}`),
-    `That's ${items.length} modules in total. Say "go to" followed by a module name to open it, or say "help" at any time.`,
-  ];
-  const playNext = (i: number) => {
-    if (i >= lines.length) return;
-    speak(lines[i], { onEnd: () => setTimeout(() => playNext(i + 1), 350) });
+// Speak each module title and its purpose, navigating to that module as it is
+// read. After the last module, return to the main dashboard.
+const speakModulesWithPurpose = (
+  role: string,
+  items: NavItem[],
+  navigate?: (path: string) => void,
+) => {
+  speak(roleIntro(role), {
+    onEnd: () => setTimeout(() => readModule(0), 350),
+  });
+  const readModule = (i: number) => {
+    if (i >= items.length) {
+      speak(
+        `That's ${items.length} modules in total. Returning you to the dashboard. Say "help" at any time.`,
+        { onEnd: () => navigate?.("/dashboard") },
+      );
+      return;
+    }
+    const item = items[i];
+    navigate?.(item.url);
+    // Give the route a moment to mount before reading.
+    setTimeout(() => {
+      speak(`Module ${i + 1}: ${item.title}. ${item.purpose}`, {
+        onEnd: () => setTimeout(() => readModule(i + 1), 500),
+      });
+    }, 400);
   };
-  playNext(0);
 };
 
 const roleDescription = (role: string, items: NavItem[]) => {
