@@ -336,18 +336,27 @@ export const VoiceAssistant = () => {
     }
   };
 
+  // Stop any ongoing speech when the user logs out / becomes unauthenticated.
+  useEffect(() => {
+    if (!user) {
+      stopSpeaking();
+      greetedRef.current = false;
+    }
+  }, [user]);
+
   if (!user) return null;
 
-  // Minimized: just a small floating mic icon, click to expand
+  // Minimized: just a small floating mic icon. Clicking it stops any ongoing
+  // speech and expands the assistant.
   if (minimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           size="icon"
           variant="default"
-          onClick={() => setMinimized(false)}
+          onClick={() => { stopSpeaking(); setMinimized(false); }}
           className="rounded-full h-10 w-10 shadow-lg"
-          aria-label="Expand voice assistant"
+          aria-label="Expand voice assistant (stops speech)"
         >
           <Mic className="w-4 h-4" />
         </Button>
