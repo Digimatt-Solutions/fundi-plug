@@ -9,7 +9,6 @@ import {
   speak,
   stopSpeaking,
   parseSpokenEmail,
-  parseSpokenPassword,
 } from "@/lib/voice";
 
 /**
