@@ -53,19 +53,13 @@ export const AuthVoiceButton = ({ compact = false, autoStart = false, onCompactC
       setPopup({ kind: "warn", text: `Heard: ${email}. Now say password.` });
       await new Promise<void>((r) => speak(`I heard ${email}. Now say your password.`, { onEnd: () => r() }));
 
-      // Password — instruct user to spell it out character by character.
+      // Password — listen for the user's spoken password as a single phrase.
       setStatus("Listening for password...");
       await new Promise<void>((r) =>
-        speak(
-          "Now spell your password one character at a time. " +
-          "Say capital before a letter for uppercase, say alpha bravo charlie for letters, " +
-          "say the digits as one, two, three, and say at, hash, dollar, dash, underscore, " +
-          "exclamation, dot, or star for special characters.",
-          { onEnd: () => r() }
-        )
+        speak("Now say your password.", { onEnd: () => r() })
       );
       const passRaw = await listenOnce({ timeoutMs: 20000 });
-      const password = parseSpokenPassword(passRaw);
+      const password = (passRaw || "").trim().replace(/\s+/g, "");
 
       setStatus("Signing you in...");
       setPopup({ kind: "warn", text: "Signing you in..." });
