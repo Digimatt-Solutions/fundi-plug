@@ -49,9 +49,22 @@ const customerNav: NavItem[] = [
   { title: "Settings", url: "/dashboard/settings", key: "settings", purpose: "control notifications, language and account preferences." },
 ];
 
+const supplierNav: NavItem[] = [
+  { title: "Dashboard", url: "/dashboard", key: "dashboard", purpose: "your supplier home screen with product stats, recent orders and quick actions." },
+  { title: "Business Profile", url: "/dashboard/business-profile", key: "business_profile", purpose: "manage your business name, registration documents and contact details for verification." },
+  { title: "Products", url: "/dashboard/products", key: "products", purpose: "add, edit and manage the products you sell on the marketplace." },
+  { title: "Marketplace", url: "/dashboard/marketplace", key: "marketplace", purpose: "browse the public marketplace and see how your listings appear to buyers." },
+  { title: "Community", url: "/dashboard/community", key: "community", purpose: "join the social feed, share product updates and engage with the community." },
+  { title: "Chats", url: "/dashboard/chat", key: "chat", purpose: "chat with clients and fundis interested in your products." },
+  { title: "Payments", url: "/dashboard/payments", key: "payments", purpose: "track payments received for products sold through the marketplace." },
+  { title: "Profile", url: "/dashboard/account", key: "account", purpose: "update your personal name, photo and contact information." },
+  { title: "Settings", url: "/dashboard/settings", key: "settings", purpose: "control notifications, language and account preferences." },
+];
+
 const roleIntro = (role: string) => {
   if (role === "admin") return "You are signed in as Administrator. Here are your modules, one by one.";
   if (role === "worker") return "You are signed in as a Fundi. Here are your modules, one by one.";
+  if (role === "supplier") return "You are signed in as a Supplier. Here are your modules, one by one.";
   return "You are signed in as a Client. Here are your modules, one by one.";
 };
 
@@ -207,7 +220,10 @@ export const VoiceAssistant = () => {
   const greetedRef = useRef(false);
 
   const navItems: NavItem[] =
-    user?.role === "admin" ? adminNav : user?.role === "worker" ? workerNav : customerNav;
+    user?.role === "admin" ? adminNav :
+    user?.role === "worker" ? workerNav :
+    user?.role === "supplier" ? supplierNav :
+    customerNav;
 
   useEffect(() => {
     if (!user) return;
@@ -243,7 +259,7 @@ export const VoiceAssistant = () => {
     if (/^(stop|cancel|quiet|silence)/.test(cmd)) { stopSpeaking(); speak("Okay."); return; }
     if (/help|what can i (do|say)|options|menu|read modules|list modules/.test(cmd)) { speakModulesWithPurpose(user?.role || "customer", navItems, navigate); return; }
     if (/read (page|screen|this)|summari[sz]e/.test(cmd)) { readPageStructured(); return; }
-    if (/log ?out|sign ?out/.test(cmd)) { speak("Signing you out."); await logout(); navigate("/auth", { replace: true }); return; }
+    if (/log ?out|sign ?out/.test(cmd)) { stopSpeaking(); speak("Signing you out."); await logout(); navigate("/auth", { replace: true }); return; }
     if (/where am i|current page/.test(cmd)) {
       const here = navItems.find((n) => n.url === location.pathname);
       speak(`You are on ${here?.title || "the dashboard"}.`); return;
@@ -320,18 +336,27 @@ export const VoiceAssistant = () => {
     }
   };
 
+  // Stop any ongoing speech when the user logs out / becomes unauthenticated.
+  useEffect(() => {
+    if (!user) {
+      stopSpeaking();
+      greetedRef.current = false;
+    }
+  }, [user]);
+
   if (!user) return null;
 
-  // Minimized: just a small floating mic icon, click to expand
+  // Minimized: just a small floating mic icon. Clicking it stops any ongoing
+  // speech and expands the assistant.
   if (minimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           size="icon"
           variant="default"
-          onClick={() => setMinimized(false)}
+          onClick={() => { stopSpeaking(); setMinimized(false); }}
           className="rounded-full h-10 w-10 shadow-lg"
-          aria-label="Expand voice assistant"
+          aria-label="Expand voice assistant (stops speech)"
         >
           <Mic className="w-4 h-4" />
         </Button>
