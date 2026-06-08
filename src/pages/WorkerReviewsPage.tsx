@@ -56,6 +56,18 @@ export default function WorkerReviewsPage() {
     handleCopy();
   };
 
+  const deleteReview = async (id: string, reviewerId: string) => {
+    if (reviewerId !== user?.id) {
+      toast({ title: "Not allowed", description: "Only the review author can delete this." , variant: "destructive" });
+      return;
+    }
+    if (!confirm("Delete this review?")) return;
+    const { error } = await supabase.from("reviews").delete().eq("id", id).eq("reviewer_id", user!.id);
+    if (error) { toast({ title: "Could not delete", description: error.message, variant: "destructive" }); return; }
+    setReviews((r) => r.filter((x) => x.id !== id));
+    toast({ title: "Review deleted" });
+  };
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
