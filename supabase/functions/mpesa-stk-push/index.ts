@@ -60,10 +60,19 @@ Deno.serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser(token);
     if (!user) throw new Error("Not authenticated");
 
-    const { jobId, amount, workerId, phoneNumber } = await req.json();
-    if (!jobId || !amount || !workerId || !phoneNumber) {
-      throw new Error("Missing jobId, amount, workerId, or phoneNumber");
+    const { jobId, amount, phoneNumber } = await req.json();
+    if (!jobId || !amount || !phoneNumber) {
+      throw new Error("Missing jobId, amount, or phoneNumber");
     }
+
+    // Ownership check: caller must be the customer on this job; payee is taken
+    // from the job row, not from the body (defense against IDOR).
+    const { data: job, error: jobErr } = await supabaseClient
+      .from("jobs").select("id, customer_id, worker_id").eq("id", jobId).maybeSingle();
+    if (jobErr || !job) throw new Error("Job not found");
+    if (job.customer_id !== user.id) throw new Error("You do not own this job");
+    if (!job.worker_id) throw new Error("Job has no assigned worker");
+    const workerId = job.worker_id;
 
     // Format phone: ensure 254XXXXXXXXX
     let phone = phoneNumber.replace(/\s+/g, "").replace(/^0/, "254").replace(/^\+/, "");
