@@ -469,8 +469,19 @@ export default function WorkerMyJobsPage() {
                         <Star className="w-4 h-4 mr-1" /> Review Client
                       </Button>
                     )}
-                    {job.hasReview && (
-                      <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                    {job.hasReview && job.reviewId && (
+                      <>
+                        <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                        <Button size="sm" variant="ghost" className="text-destructive h-7 px-2" onClick={async () => {
+                          if (!confirm("Delete your review?")) return;
+                          const { error } = await supabase.from("reviews").delete().eq("id", job.reviewId).eq("reviewer_id", user!.id);
+                          if (error) { toast({ title: "Could not delete", description: error.message, variant: "destructive" }); return; }
+                          toast({ title: "Review deleted" });
+                          loadData();
+                        }}>
+                          <X className="w-3.5 h-3.5 mr-1" /> Delete
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
