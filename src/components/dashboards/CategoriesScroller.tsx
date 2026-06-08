@@ -98,7 +98,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
                   </div>
                 ) : (
                   <div className="w-full h-20 flex items-center justify-center bg-muted">
-                    <span className="text-3xl">{cat.icon}</span>
+                    <Wrench className="w-8 h-8 text-muted-foreground" />
                   </div>
                 )}
                 <div className="p-2 text-center w-full">
