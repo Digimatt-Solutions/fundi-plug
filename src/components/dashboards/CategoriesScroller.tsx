@@ -112,7 +112,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
       </div>
       {selectedCategory !== "all" && (
         <Button variant="ghost" size="sm" className="mt-2 text-xs" onClick={onClear}>
-          ✕ {t("All Categories")}
+          <X className="w-3 h-3 mr-1" /> {t("All Categories")}
         </Button>
       )}
     </div>
