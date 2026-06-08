@@ -28,8 +28,21 @@ serve(async (req) => {
     if (!user?.email) throw new Error("Not authenticated");
 
 
-    const { jobId, amount, workerId } = await req.json();
-    if (!jobId || !amount || !workerId) throw new Error("Missing jobId, amount, or workerId");
+    const { jobId, amount } = await req.json();
+    if (!jobId || !amount) throw new Error("Missing jobId or amount");
+
+    // Ownership check (defense against IDOR): caller must be the customer on
+    // this job, and we derive the payee (worker) from the job row, not from
+    // the client body.
+    const { data: job, error: jobErr } = await supabaseClient
+      .from("jobs")
+      .select("id, customer_id, worker_id, status")
+      .eq("id", jobId)
+      .maybeSingle();
+    if (jobErr || !job) throw new Error("Job not found");
+    if (job.customer_id !== user.id) throw new Error("You do not own this job");
+    if (!job.worker_id) throw new Error("Job has no assigned worker");
+    const workerId = job.worker_id;
 
     // Get commission rate from platform_settings
     const { data: settings } = await supabaseClient.from("platform_settings").select("value").eq("key", "commission_rate").single();
