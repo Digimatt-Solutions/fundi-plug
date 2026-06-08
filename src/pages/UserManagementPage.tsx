@@ -234,6 +234,9 @@ export default function UserManagementPage() {
                                 <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
                               </DropdownMenuItem>
                             )}
+                            <DropdownMenuItem onClick={() => { setEmailDialog(u); setNewEmail(u.email || ""); }}>
+                              <Mail className="w-4 h-4 mr-2" /> Change Email
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleToggleActive(u)}>
                               <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
                             </DropdownMenuItem>
