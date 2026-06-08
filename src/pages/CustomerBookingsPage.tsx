@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarDays, Star, CreditCard, Smartphone, FileText, Globe } from "lucide-react";
+import { CalendarDays, Star, CreditCard, Smartphone, FileText, Globe, Wrench, Wallet, Trash2 } from "lucide-react";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
@@ -55,21 +55,23 @@ export default function CustomerBookingsPage() {
     const jobIds = (data || []).map(j => j.id);
     const [existingReviews, existingPayments] = await Promise.all([
       jobIds.length > 0
-        ? supabase.from("reviews").select("job_id").eq("reviewer_id", user.id).in("job_id", jobIds)
+        ? supabase.from("reviews").select("id, job_id").eq("reviewer_id", user.id).in("job_id", jobIds)
         : Promise.resolve({ data: [] }),
       jobIds.length > 0
         ? supabase.from("payments").select("id, job_id, status, amount, commission, created_at, stripe_payment_id").in("job_id", jobIds)
         : Promise.resolve({ data: [] }),
     ]);
 
-    const reviewedJobIds = new Set((existingReviews.data || []).map(r => r.job_id));
+    const reviewIdByJob: Record<string, string> = {};
+    (existingReviews.data || []).forEach((r: any) => { reviewIdByJob[r.job_id] = r.id; });
     const paidJobMap: Record<string, any> = {};
     (existingPayments.data || []).forEach(p => { paidJobMap[p.job_id] = p; });
 
     setJobs((data || []).map(j => ({
       ...j,
       workerName: nameMap[j.worker_id] || "Assigned Fundi",
-      hasReview: reviewedJobIds.has(j.id),
+      hasReview: !!reviewIdByJob[j.id],
+      reviewId: reviewIdByJob[j.id] || null,
       paymentStatus: paidJobMap[j.id]?.status || null,
       paymentRecord: paidJobMap[j.id] || null,
     })));
@@ -163,6 +165,14 @@ export default function CustomerBookingsPage() {
     setSubmitting(false); loadData();
   };
 
+  const deleteOwnReview = async (reviewId: string) => {
+    if (!confirm("Delete your review? This cannot be undone.")) return;
+    const { error } = await supabase.from("reviews").delete().eq("id", reviewId).eq("reviewer_id", user!.id);
+    if (error) { toast({ title: "Could not delete", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Review deleted" });
+    loadData();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -197,7 +207,7 @@ export default function CustomerBookingsPage() {
                     />
                   ) : (
                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center text-2xl">
-                      {(job as any).service_categories?.icon || "🔧"}
+                      <Wrench className="w-7 h-7 text-muted-foreground" />
                     </div>
                   )}
                 </div>
@@ -214,7 +224,7 @@ export default function CustomerBookingsPage() {
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           job.paymentStatus === "completed" ? "bg-green-500/10 text-green-600" :
                           job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
-                        }`}>💰 {job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
+                        }`}><Wallet className="w-3 h-3 inline mr-1" />{job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
                       )}
                       <PriceLockBadge job={job} />
                     </div>
@@ -249,8 +259,13 @@ export default function CustomerBookingsPage() {
                         <FileText className="w-3.5 h-3.5" /> Receipt
                       </Button>
                     )}
-                    {job.hasReview && (
-                      <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                    {job.hasReview && job.reviewId && (
+                      <>
+                        <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                        <Button size="sm" variant="ghost" className="text-destructive h-7 px-2" onClick={() => deleteOwnReview(job.reviewId)}>
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>

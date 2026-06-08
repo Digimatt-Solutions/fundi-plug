@@ -28,6 +28,17 @@ serve(async (req) => {
 
     const { data: payment } = await supabaseClient.from("payments").select("*").eq("id", paymentId).single();
     if (!payment) throw new Error("Payment not found");
+
+    // Ownership check (defense against IDOR): only the payer, payee, or an
+    // admin may verify a payment.
+    const { data: roleRow } = await supabaseClient
+      .from("user_roles").select("role").eq("user_id", user.id).maybeSingle();
+    const isAdmin = roleRow?.role === "admin";
+    if (!isAdmin && payment.payer_id !== user.id && payment.payee_id !== user.id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     if (payment.status === "completed") {
       return new Response(JSON.stringify({ status: "completed" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

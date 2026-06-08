@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, Star, Lock, Zap, Filter } from "lucide-react";
+import { Briefcase, MapPin, Clock, Search, Send, ShieldAlert, Phone, Mail, Check, X, Star, Lock, Zap, Filter, Inbox, Wallet, Wrench } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -87,9 +87,10 @@ export default function WorkerMyJobsPage() {
 
     // Reviews this worker has already left for clients
     const { data: myReviews } = assignedJobIds.length > 0
-      ? await supabase.from("reviews").select("job_id").eq("reviewer_id", user.id).in("job_id", assignedJobIds)
+      ? await supabase.from("reviews").select("id, job_id").eq("reviewer_id", user.id).in("job_id", assignedJobIds)
       : { data: [] };
-    const reviewedJobIds = new Set((myReviews || []).map(r => r.job_id));
+    const reviewIdByJob: Record<string, string> = {};
+    (myReviews || []).forEach((r: any) => { reviewIdByJob[r.job_id] = r.id; });
 
     // Aggregate client ratings (reviews where reviewee is a customer)
     const allCustomerIds = customerIds;
@@ -122,7 +123,8 @@ export default function WorkerMyJobsPage() {
        customerEmail: profileMap[j.customer_id]?.email || "",
        customerPhone: profileMap[j.customer_id]?.phone || "",
       paymentStatus: paymentMap[j.id] || null,
-      hasReview: reviewedJobIds.has(j.id),
+      hasReview: !!reviewIdByJob[j.id],
+      reviewId: reviewIdByJob[j.id] || null,
     })));
     setHireRequests((hireRes.data || []).map(j => ({
        ...j,
@@ -290,7 +292,7 @@ export default function WorkerMyJobsPage() {
       {/* Hire Requests Banner */}
       {hireRequests.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">📩 Hire Requests ({hireRequests.length})</h2>
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><Inbox className="w-5 h-5 text-primary" /> Hire Requests ({hireRequests.length})</h2>
           {hireRequests.map((job, i) => (
             <div key={job.id} className="stat-card border-primary/30 bg-primary/5 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="space-y-2">
@@ -301,7 +303,8 @@ export default function WorkerMyJobsPage() {
                   <div className="flex-1 min-w-0 space-y-2 w-full">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                        <Wrench className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">{(job as any).service_categories?.name || ""}</span>
                         <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
                       </div>
@@ -361,12 +364,12 @@ export default function WorkerMyJobsPage() {
                   <button onClick={() => setJobCategoryFilter("all")} className={`px-3 py-1 rounded-full text-xs font-medium border ${jobCategoryFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/40"}`}>All</button>
                   {skillCats.map((c) => (
                     <button key={c.id} onClick={() => setJobCategoryFilter(c.id)} className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${jobCategoryFilter === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/40"}`}>
-                      <span>{c.icon || "🔧"}</span><span>{c.name}</span>
+                      <Wrench className="w-3 h-3" /><span>{c.name}</span>
                     </button>
                   ))}
                 </div>
                 {filteredJobs.length > 0 ? filteredJobs.map((job: any, i: number) => (
-                  <div key={job.id} className={`stat-card animate-fade-in ${job.is_instant ? "border-destructive/40 bg-destructive/5" : ""}`} style={{ animationDelay: `${i * 60}ms` }}>
+                  <div key={job.id} className="stat-card animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
                     <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                       {job.image_url && (
                         <AssetImage src={job.image_url} bucket="job-images" alt="Job" className="w-full sm:w-32 h-40 sm:h-32 rounded-lg object-cover shrink-0" />
@@ -374,7 +377,7 @@ export default function WorkerMyJobsPage() {
                       <div className="flex-1 min-w-0 space-y-2 w-full">
                         <div className="flex items-start justify-between gap-2 flex-wrap">
                           <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                            <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                            <Wrench className="w-4 h-4 text-muted-foreground" />
                             <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
                             {job.is_instant && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive text-destructive-foreground animate-pulse">
@@ -456,7 +459,7 @@ export default function WorkerMyJobsPage() {
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
                         job.paymentStatus === "completed" ? "bg-green-500/10 text-green-600" :
                         job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
-                      }`}>💰 {job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
+                      }`}><Wallet className="w-3 h-3 inline mr-1" />{job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
                     )}
                     {job.status === "completed" && !job.paymentStatus && (
                       <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-destructive/10 text-destructive">Awaiting Payment</span>
@@ -466,8 +469,19 @@ export default function WorkerMyJobsPage() {
                         <Star className="w-4 h-4 mr-1" /> Review Client
                       </Button>
                     )}
-                    {job.hasReview && (
-                      <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                    {job.hasReview && job.reviewId && (
+                      <>
+                        <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                        <Button size="sm" variant="ghost" className="text-destructive h-7 px-2" onClick={async () => {
+                          if (!confirm("Delete your review?")) return;
+                          const { error } = await supabase.from("reviews").delete().eq("id", job.reviewId).eq("reviewer_id", user!.id);
+                          if (error) { toast({ title: "Could not delete", description: error.message, variant: "destructive" }); return; }
+                          toast({ title: "Review deleted" });
+                          loadData();
+                        }}>
+                          <X className="w-3.5 h-3.5 mr-1" /> Delete
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>

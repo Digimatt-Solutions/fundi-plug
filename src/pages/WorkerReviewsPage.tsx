@@ -56,6 +56,7 @@ export default function WorkerReviewsPage() {
     handleCopy();
   };
 
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);

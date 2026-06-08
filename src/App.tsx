@@ -34,6 +34,7 @@ import FindWorkersPage from "@/pages/FindWorkersPage";
 import PaymentsPage from "@/pages/PaymentsPage";
 import AdminJobsPage from "@/pages/AdminJobsPage";
 import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
+import AdminReviewsPage from "@/pages/AdminReviewsPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
 import CommunityPage from "@/pages/CommunityPage";
 import ChatPage from "@/pages/ChatPage";
@@ -97,6 +98,7 @@ const App = () => (
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="activity" element={<ActivityLogsPage />} />
                 <Route path="user-management" element={<UserManagementPage />} />
+                <Route path="admin/reviews" element={<AdminReviewsPage />} />
                 {/* Worker */}
                 <Route path="my-jobs" element={<WorkerMyJobsPage />} />
                 <Route path="profile" element={<FundiOnboardingPage />} />

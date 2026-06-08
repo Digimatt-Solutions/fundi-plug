@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Heart, MessageCircle, Send, Image as ImageIcon, Megaphone, Trash2,
-  MoreHorizontal, Clock, PenLine, Plus,
+  MoreHorizontal, Clock, PenLine, Plus, X,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -295,7 +295,7 @@ export default function CommunityPage() {
                 {imagePreview && (
                   <div className="relative inline-block">
                     <img loading="lazy" decoding="async" src={imagePreview} alt="Preview" className="max-h-48 rounded-xl object-cover" />
-                    <button onClick={() => { setNewImage(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black/80">✕</button>
+                    <button onClick={() => { setNewImage(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-black/80"><X className="w-3.5 h-3.5" /></button>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
@@ -465,7 +465,7 @@ export default function CommunityPage() {
                       <div className="relative">
                         <img loading="lazy" decoding="async" src={blogImagePreview} alt="Preview" className="w-full h-24 rounded-lg object-cover" />
                         <button onClick={() => { setBlogImage(null); setBlogImagePreview(null); }}
-                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
+                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center"><X className="w-3 h-3" /></button>
                       </div>
                     ) : (
                       <Button variant="outline" size="sm" className="w-full text-xs h-7 gap-1" onClick={() => blogFileRef.current?.click()}>

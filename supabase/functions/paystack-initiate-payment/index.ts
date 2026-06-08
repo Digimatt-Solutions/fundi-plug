@@ -34,8 +34,17 @@ Deno.serve(async (req) => {
     const user = userData.user;
     if (!user) throw new Error("Unauthorized");
 
-    const { jobId, amount, workerId } = await req.json();
-    if (!jobId || !amount || !workerId) throw new Error("Missing required fields");
+    const { jobId, amount } = await req.json();
+    if (!jobId || !amount) throw new Error("Missing required fields");
+
+    // Ownership check (defense against IDOR): caller must be the customer on
+    // this job; payee is taken from the job row, not the request body.
+    const { data: job, error: jobErr } = await supabase
+      .from("jobs").select("id, customer_id, worker_id").eq("id", jobId).maybeSingle();
+    if (jobErr || !job) throw new Error("Job not found");
+    if (job.customer_id !== user.id) throw new Error("You do not own this job");
+    if (!job.worker_id) throw new Error("Job has no assigned worker");
+    const workerId = job.worker_id;
 
     // Compute commission split (matches create-payment behavior)
     const { data: settings } = await supabase

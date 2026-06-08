@@ -34,6 +34,7 @@ const adminNav = [
   { title: "Chats", url: "/dashboard/chat", icon: MessageCircle, key: "chat" },
   { title: "Community", url: "/dashboard/community", icon: CommunityIcon, key: "community" },
   { title: "Reports", url: "/dashboard/reports", icon: BarChart3, key: "reports" },
+  { title: "Reviews", url: "/dashboard/admin/reviews", icon: Star, key: "admin-reviews" },
   { title: "Activity Logs", url: "/dashboard/activity", icon: Activity, key: "activity" },
   { title: "User Management", url: "/dashboard/user-management", icon: UserCog, key: "user-management" },
   { title: "Profile", url: "/dashboard/account", icon: UserCog, key: "account" },

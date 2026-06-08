@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, Edit2, Upload, Image } from "lucide-react";
+import { Plus, Trash2, Edit2, Upload, Image, Wrench, X } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -108,7 +108,7 @@ export default function AdminCategoriesPage() {
                   </div>
                 ) : (
                   <div className="h-36 bg-muted flex items-center justify-center">
-                    <span className="text-5xl">{cat.icon}</span>
+                    <Wrench className="w-12 h-12 text-muted-foreground" />
                   </div>
                 )}
                 <div className="p-4">
@@ -143,7 +143,7 @@ export default function AdminCategoriesPage() {
             {imageUrl ? (
               <div className="relative h-32 rounded-lg overflow-hidden bg-muted">
                 <AssetImage loading="lazy" decoding="async" src={imageUrl} bucket="category-images" alt="Preview" className="w-full h-full object-cover" />
-                <button onClick={() => setImageUrl("")} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 text-xs text-destructive hover:bg-background">✕</button>
+                <button onClick={() => setImageUrl("")} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 text-destructive hover:bg-background"><X className="w-3.5 h-3.5" /></button>
               </div>
             ) : (
               <button

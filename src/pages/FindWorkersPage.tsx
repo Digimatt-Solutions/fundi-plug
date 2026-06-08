@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Search, Star, MapPin, CheckCircle, Phone, Mail, Briefcase, Navigation, ShieldCheck, Lock, ImagePlus, X } from "lucide-react";
+import { Search, Star, MapPin, CheckCircle, Phone, Mail, Briefcase, Navigation, ShieldCheck, Lock, ImagePlus, X, Wrench } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
@@ -258,7 +258,7 @@ export default function FindWorkersPage() {
       (w) => !(w.skillIds || []).some((s: string) => categories.find((c) => c.id === s))
     ).length;
     if (otherCount > 0) {
-      list.push({ id: "other", name: t("General"), icon: "🔧", count: otherCount } as any);
+      list.push({ id: "other", name: t("General"), icon: "", count: otherCount } as any);
     }
     return list;
   }, [filtered, categories, t]);
@@ -363,7 +363,7 @@ export default function FindWorkersPage() {
                   : "bg-card text-foreground border-border hover:border-primary/40"
               }`}
             >
-              <span>{c.icon || "🔧"}</span>
+              <Wrench className="w-3.5 h-3.5" />
               <span>{c.name}</span>
               <span className="opacity-70">({c.count})</span>
             </button>

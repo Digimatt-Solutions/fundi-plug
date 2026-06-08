@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck, Crown, Package } from "lucide-react";
+import { Users, Search, MoreVertical, Shield, Wrench, User, Ban, Trash2, UserCog, ShieldCheck, Crown, Package, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,8 @@ export default function UserManagementPage() {
   const [newRole, setNewRole] = useState("");
   const [deleteDialog, setDeleteDialog] = useState<any>(null);
   const [promoteDialog, setPromoteDialog] = useState<any>(null);
+  const [emailDialog, setEmailDialog] = useState<any>(null);
+  const [newEmail, setNewEmail] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [superAdminId, setSuperAdminId] = useState<string | null>(null);
   const isCallerSuper = !!currentUser?.id && currentUser.id === superAdminId;
@@ -232,6 +234,9 @@ export default function UserManagementPage() {
                                 <ShieldCheck className="w-4 h-4 mr-2" /> Promote to Admin
                               </DropdownMenuItem>
                             )}
+                            <DropdownMenuItem onClick={() => { setEmailDialog(u); setNewEmail(u.email || ""); }}>
+                              <Mail className="w-4 h-4 mr-2" /> Change Email
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleToggleActive(u)}>
                               <Ban className="w-4 h-4 mr-2" /> {u.status === "Inactive" ? "Activate" : "Deactivate"}
                             </DropdownMenuItem>
@@ -303,6 +308,36 @@ export default function UserManagementPage() {
             <Button onClick={handlePromote} disabled={actionLoading}>
               {actionLoading ? "Promoting..." : "Promote to Admin"}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Email Dialog */}
+      <Dialog open={!!emailDialog} onOpenChange={(o) => !o && setEmailDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Change Email for {emailDialog?.name}</DialogTitle></DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-muted-foreground">Update the sign-in email. The change is applied immediately and the user keeps their existing password.</p>
+            <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="user@example.com" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialog(null)}>Cancel</Button>
+            <Button disabled={actionLoading || !newEmail.trim()} onClick={async () => {
+              setActionLoading(true);
+              const { data: { session } } = await supabase.auth.getSession();
+              const res = await supabase.functions.invoke("admin-change-email", {
+                body: { user_id: emailDialog.id, new_email: newEmail.trim() },
+                headers: { Authorization: `Bearer ${session?.access_token}` },
+              });
+              setActionLoading(false);
+              if ((res as any).error || (res as any).data?.error) {
+                toast({ title: "Failed", description: (res as any).data?.error || (res as any).error?.message || "Could not change email", variant: "destructive" });
+                return;
+              }
+              toast({ title: "Email updated" });
+              setEmailDialog(null);
+              loadUsers();
+            }}>{actionLoading ? "Saving..." : "Update Email"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

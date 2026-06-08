@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wrench, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AssetImage } from "@/components/AssetImage";
 
@@ -98,7 +98,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
                   </div>
                 ) : (
                   <div className="w-full h-20 flex items-center justify-center bg-muted">
-                    <span className="text-3xl">{cat.icon}</span>
+                    <Wrench className="w-8 h-8 text-muted-foreground" />
                   </div>
                 )}
                 <div className="p-2 text-center w-full">
@@ -112,7 +112,7 @@ export default function CategoriesScroller({ categories, selectedCategory, onSel
       </div>
       {selectedCategory !== "all" && (
         <Button variant="ghost" size="sm" className="mt-2 text-xs" onClick={onClear}>
-          ✕ {t("All Categories")}
+          <X className="w-3 h-3 mr-1" /> {t("All Categories")}
         </Button>
       )}
     </div>
