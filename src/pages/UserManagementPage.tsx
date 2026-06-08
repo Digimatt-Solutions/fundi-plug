@@ -311,6 +311,36 @@ export default function UserManagementPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Change Email Dialog */}
+      <Dialog open={!!emailDialog} onOpenChange={(o) => !o && setEmailDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Change Email for {emailDialog?.name}</DialogTitle></DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p className="text-muted-foreground">Update the sign-in email. The change is applied immediately and the user keeps their existing password.</p>
+            <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="user@example.com" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEmailDialog(null)}>Cancel</Button>
+            <Button disabled={actionLoading || !newEmail.trim()} onClick={async () => {
+              setActionLoading(true);
+              const { data: { session } } = await supabase.auth.getSession();
+              const res = await supabase.functions.invoke("admin-change-email", {
+                body: { user_id: emailDialog.id, new_email: newEmail.trim() },
+                headers: { Authorization: `Bearer ${session?.access_token}` },
+              });
+              setActionLoading(false);
+              if ((res as any).error || (res as any).data?.error) {
+                toast({ title: "Failed", description: (res as any).data?.error || (res as any).error?.message || "Could not change email", variant: "destructive" });
+                return;
+              }
+              toast({ title: "Email updated" });
+              setEmailDialog(null);
+              loadUsers();
+            }}>{actionLoading ? "Saving..." : "Update Email"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
