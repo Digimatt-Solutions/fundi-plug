@@ -133,7 +133,7 @@ export default function LocationPicker({ latitude, longitude, onChange, disabled
       <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-xs text-muted-foreground">
           {hasPin ? (
-            <span className="font-mono">📍 {(latitude as number).toFixed(5)}, {(longitude as number).toFixed(5)}</span>
+            <span className="font-mono inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {(latitude as number).toFixed(5)}, {(longitude as number).toFixed(5)}</span>
           ) : (
             "Search above, drop a pin from your location, or enter coordinates manually."
           )}
