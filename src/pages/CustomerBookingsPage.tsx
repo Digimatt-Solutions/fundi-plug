@@ -165,6 +165,14 @@ export default function CustomerBookingsPage() {
     setSubmitting(false); loadData();
   };
 
+  const deleteOwnReview = async (reviewId: string) => {
+    if (!confirm("Delete your review? This cannot be undone.")) return;
+    const { error } = await supabase.from("reviews").delete().eq("id", reviewId).eq("reviewer_id", user!.id);
+    if (error) { toast({ title: "Could not delete", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Review deleted" });
+    loadData();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
