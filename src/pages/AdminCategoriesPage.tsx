@@ -108,7 +108,7 @@ export default function AdminCategoriesPage() {
                   </div>
                 ) : (
                   <div className="h-36 bg-muted flex items-center justify-center">
-                    <span className="text-5xl">{cat.icon}</span>
+                    <Wrench className="w-12 h-12 text-muted-foreground" />
                   </div>
                 )}
                 <div className="p-4">
