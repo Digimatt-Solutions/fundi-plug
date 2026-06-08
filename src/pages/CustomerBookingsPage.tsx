@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarDays, Star, CreditCard, Smartphone, FileText, Globe } from "lucide-react";
+import { CalendarDays, Star, CreditCard, Smartphone, FileText, Globe, Wrench, Wallet, Trash2 } from "lucide-react";
 import mpesaLogo from "@/assets/mpesa-logo.png";
 import stripeLogo from "@/assets/stripe-logo.png";
 import paystackLogo from "@/assets/paystack-logo.png";
