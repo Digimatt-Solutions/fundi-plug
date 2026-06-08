@@ -290,7 +290,7 @@ export default function WorkerMyJobsPage() {
       {/* Hire Requests Banner */}
       {hireRequests.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">📩 Hire Requests ({hireRequests.length})</h2>
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><Inbox className="w-5 h-5 text-primary" /> Hire Requests ({hireRequests.length})</h2>
           {hireRequests.map((job, i) => (
             <div key={job.id} className="stat-card border-primary/30 bg-primary/5 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
               <div className="space-y-2">
