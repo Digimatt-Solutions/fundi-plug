@@ -465,7 +465,7 @@ export default function CommunityPage() {
                       <div className="relative">
                         <img loading="lazy" decoding="async" src={blogImagePreview} alt="Preview" className="w-full h-24 rounded-lg object-cover" />
                         <button onClick={() => { setBlogImage(null); setBlogImagePreview(null); }}
-                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
+                          className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center"><X className="w-3 h-3" /></button>
                       </div>
                     ) : (
                       <Button variant="outline" size="sm" className="w-full text-xs h-7 gap-1" onClick={() => blogFileRef.current?.click()}>
