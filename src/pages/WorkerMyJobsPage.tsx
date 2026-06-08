@@ -87,9 +87,10 @@ export default function WorkerMyJobsPage() {
 
     // Reviews this worker has already left for clients
     const { data: myReviews } = assignedJobIds.length > 0
-      ? await supabase.from("reviews").select("job_id").eq("reviewer_id", user.id).in("job_id", assignedJobIds)
+      ? await supabase.from("reviews").select("id, job_id").eq("reviewer_id", user.id).in("job_id", assignedJobIds)
       : { data: [] };
-    const reviewedJobIds = new Set((myReviews || []).map(r => r.job_id));
+    const reviewIdByJob: Record<string, string> = {};
+    (myReviews || []).forEach((r: any) => { reviewIdByJob[r.job_id] = r.id; });
 
     // Aggregate client ratings (reviews where reviewee is a customer)
     const allCustomerIds = customerIds;
