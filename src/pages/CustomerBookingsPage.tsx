@@ -55,21 +55,23 @@ export default function CustomerBookingsPage() {
     const jobIds = (data || []).map(j => j.id);
     const [existingReviews, existingPayments] = await Promise.all([
       jobIds.length > 0
-        ? supabase.from("reviews").select("job_id").eq("reviewer_id", user.id).in("job_id", jobIds)
+        ? supabase.from("reviews").select("id, job_id").eq("reviewer_id", user.id).in("job_id", jobIds)
         : Promise.resolve({ data: [] }),
       jobIds.length > 0
         ? supabase.from("payments").select("id, job_id, status, amount, commission, created_at, stripe_payment_id").in("job_id", jobIds)
         : Promise.resolve({ data: [] }),
     ]);
 
-    const reviewedJobIds = new Set((existingReviews.data || []).map(r => r.job_id));
+    const reviewIdByJob: Record<string, string> = {};
+    (existingReviews.data || []).forEach((r: any) => { reviewIdByJob[r.job_id] = r.id; });
     const paidJobMap: Record<string, any> = {};
     (existingPayments.data || []).forEach(p => { paidJobMap[p.job_id] = p; });
 
     setJobs((data || []).map(j => ({
       ...j,
       workerName: nameMap[j.worker_id] || "Assigned Fundi",
-      hasReview: reviewedJobIds.has(j.id),
+      hasReview: !!reviewIdByJob[j.id],
+      reviewId: reviewIdByJob[j.id] || null,
       paymentStatus: paidJobMap[j.id]?.status || null,
       paymentRecord: paidJobMap[j.id] || null,
     })));
