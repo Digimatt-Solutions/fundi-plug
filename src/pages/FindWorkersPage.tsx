@@ -363,7 +363,7 @@ export default function FindWorkersPage() {
                   : "bg-card text-foreground border-border hover:border-primary/40"
               }`}
             >
-              <span>{c.icon || "🔧"}</span>
+              <Wrench className="w-3.5 h-3.5" />
               <span>{c.name}</span>
               <span className="opacity-70">({c.count})</span>
             </button>
