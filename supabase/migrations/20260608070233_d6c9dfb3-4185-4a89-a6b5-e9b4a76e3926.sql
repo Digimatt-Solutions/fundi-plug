@@ -1,0 +1,1 @@
+CREATE POLICY "Reviewers can delete own reviews" ON public.reviews FOR DELETE TO authenticated USING (auth.uid() = reviewer_id);
