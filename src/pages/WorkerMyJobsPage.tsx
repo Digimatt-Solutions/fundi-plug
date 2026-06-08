@@ -123,7 +123,8 @@ export default function WorkerMyJobsPage() {
        customerEmail: profileMap[j.customer_id]?.email || "",
        customerPhone: profileMap[j.customer_id]?.phone || "",
       paymentStatus: paymentMap[j.id] || null,
-      hasReview: reviewedJobIds.has(j.id),
+      hasReview: !!reviewIdByJob[j.id],
+      reviewId: reviewIdByJob[j.id] || null,
     })));
     setHireRequests((hireRes.data || []).map(j => ({
        ...j,
