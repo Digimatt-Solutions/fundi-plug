@@ -143,7 +143,7 @@ export default function AdminCategoriesPage() {
             {imageUrl ? (
               <div className="relative h-32 rounded-lg overflow-hidden bg-muted">
                 <AssetImage loading="lazy" decoding="async" src={imageUrl} bucket="category-images" alt="Preview" className="w-full h-full object-cover" />
-                <button onClick={() => setImageUrl("")} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 text-xs text-destructive hover:bg-background">✕</button>
+                <button onClick={() => setImageUrl("")} className="absolute top-2 right-2 bg-background/80 rounded-full p-1 text-destructive hover:bg-background"><X className="w-3.5 h-3.5" /></button>
               </div>
             ) : (
               <button
