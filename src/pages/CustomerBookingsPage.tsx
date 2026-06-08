@@ -259,8 +259,13 @@ export default function CustomerBookingsPage() {
                         <FileText className="w-3.5 h-3.5" /> Receipt
                       </Button>
                     )}
-                    {job.hasReview && (
-                      <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                    {job.hasReview && job.reviewId && (
+                      <>
+                        <span className="text-xs text-green-500 flex items-center gap-1"><Star className="w-3 h-3 fill-current" /> Reviewed</span>
+                        <Button size="sm" variant="ghost" className="text-destructive h-7 px-2" onClick={() => deleteOwnReview(job.reviewId)}>
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
