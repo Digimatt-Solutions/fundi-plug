@@ -244,7 +244,7 @@ export default function CustomerDashboard() {
     if (!user) return;
     async function load() {
       const { data: cats } = await supabase.from("service_categories").select("*");
-      const { data: workers } = await supabase.from("worker_profiles").select("skills");
+      const { data: workers } = await supabase.from("worker_profiles_public").select("skills");
       const skillCounts: Record<string, number> = {};
       (workers || []).forEach(w => {
         (w.skills || []).forEach((s: string) => { skillCounts[s] = (skillCounts[s] || 0) + 1; });
@@ -252,8 +252,8 @@ export default function CustomerDashboard() {
       setCategories((cats || []).map(c => ({ ...c, count: skillCounts[c.id] || 0 })));
 
       const { data: onlineWorkers } = await supabase
-        .from("worker_profiles")
-        .select("id, user_id, bio, years_experience, skills, service_area, county, hourly_rate, latitude, longitude, is_online, verification_status, profile_photo_url, first_name, last_name, experience_level, profiles!worker_profiles_user_id_fkey(name, avatar_url, email, phone)")
+        .from("worker_profiles_public")
+        .select("id, user_id, bio, years_experience, skills, service_area, county, hourly_rate, latitude, longitude, is_online, verification_status, profile_photo_url, first_name, last_name, experience_level, profiles:user_id(name, avatar_url, email, phone)")
         .eq("verification_status", "approved");
 
       const workerIds = (onlineWorkers || []).map(w => w.user_id);
