@@ -215,7 +215,7 @@ export default function AccountProfilePage() {
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="email" className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> Email</Label>
               <Input id="email" value={form.email} disabled className="bg-muted/50" />
-              <p className="text-xs text-muted-foreground">{t("Email cannot be changed from this page.")}</p>
+              <p className="text-xs text-muted-foreground">{t("Email cannot be changed here. For security, only an administrator can change your email - contact support.")}</p>
             </div>
           </div>
           <Separator />
