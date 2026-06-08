@@ -28,6 +28,8 @@ export default function UserManagementPage() {
   const [newRole, setNewRole] = useState("");
   const [deleteDialog, setDeleteDialog] = useState<any>(null);
   const [promoteDialog, setPromoteDialog] = useState<any>(null);
+  const [emailDialog, setEmailDialog] = useState<any>(null);
+  const [newEmail, setNewEmail] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [superAdminId, setSuperAdminId] = useState<string | null>(null);
   const isCallerSuper = !!currentUser?.id && currentUser.id === superAdminId;
