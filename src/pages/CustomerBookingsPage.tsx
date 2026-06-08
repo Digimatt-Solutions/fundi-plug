@@ -207,7 +207,7 @@ export default function CustomerBookingsPage() {
                     />
                   ) : (
                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-muted flex items-center justify-center text-2xl">
-                      {(job as any).service_categories?.icon || "🔧"}
+                      <Wrench className="w-7 h-7 text-muted-foreground" />
                     </div>
                   )}
                 </div>
