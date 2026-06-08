@@ -34,6 +34,7 @@ import FindWorkersPage from "@/pages/FindWorkersPage";
 import PaymentsPage from "@/pages/PaymentsPage";
 import AdminJobsPage from "@/pages/AdminJobsPage";
 import AdminCategoriesPage from "@/pages/AdminCategoriesPage";
+import AdminReviewsPage from "@/pages/AdminReviewsPage";
 import AdminDisbursementsPage from "@/pages/AdminDisbursementsPage";
 import CommunityPage from "@/pages/CommunityPage";
 import ChatPage from "@/pages/ChatPage";
