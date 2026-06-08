@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wrench, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AssetImage } from "@/components/AssetImage";
 
