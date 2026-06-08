@@ -295,7 +295,7 @@ export default function CommunityPage() {
                 {imagePreview && (
                   <div className="relative inline-block">
                     <img loading="lazy" decoding="async" src={imagePreview} alt="Preview" className="max-h-48 rounded-xl object-cover" />
-                    <button onClick={() => { setNewImage(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-black/80">✕</button>
+                    <button onClick={() => { setNewImage(null); setImagePreview(null); }} className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-black/80"><X className="w-3.5 h-3.5" /></button>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
