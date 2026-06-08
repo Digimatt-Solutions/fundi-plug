@@ -301,7 +301,8 @@ export default function WorkerMyJobsPage() {
                   <div className="flex-1 min-w-0 space-y-2 w-full">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                        <Wrench className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">{(job as any).service_categories?.name || ""}</span>
                         <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
                         <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">New Request</span>
                       </div>
