@@ -327,7 +327,7 @@ export default function CustomerPostJobPage() {
                     )}
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                        <Wrench className="w-4 h-4 text-muted-foreground" />
                         <h3 className="font-semibold text-foreground">{job.title}</h3>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
                           job.status === "completed" ? "bg-green-500/10 text-green-500" :
@@ -336,7 +336,7 @@ export default function CustomerPostJobPage() {
                           "bg-chart-4/10 text-chart-4"
                         }`}>{job.status.replace("_", " ")}</span>
                         {job.is_instant && (
-                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive text-destructive-foreground">URGENT</span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive text-destructive-foreground animate-pulse"><Zap className="w-3 h-3" /> URGENT</span>
                         )}
                         <PriceLockBadge job={job} />
                       </div>
