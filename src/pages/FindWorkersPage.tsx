@@ -258,7 +258,7 @@ export default function FindWorkersPage() {
       (w) => !(w.skillIds || []).some((s: string) => categories.find((c) => c.id === s))
     ).length;
     if (otherCount > 0) {
-      list.push({ id: "other", name: t("General"), icon: "🔧", count: otherCount } as any);
+      list.push({ id: "other", name: t("General"), icon: "", count: otherCount } as any);
     }
     return list;
   }, [filtered, categories, t]);
