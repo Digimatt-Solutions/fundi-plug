@@ -375,7 +375,7 @@ export default function WorkerMyJobsPage() {
                       <div className="flex-1 min-w-0 space-y-2 w-full">
                         <div className="flex items-start justify-between gap-2 flex-wrap">
                           <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                            <span className="text-lg">{(job as any).service_categories?.icon || "🔧"}</span>
+                            <Wrench className="w-4 h-4 text-muted-foreground" />
                             <h3 className="font-semibold text-foreground break-words">{job.title}</h3>
                             {job.is_instant && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive text-destructive-foreground animate-pulse">
