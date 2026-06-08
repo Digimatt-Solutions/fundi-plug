@@ -362,7 +362,7 @@ export default function WorkerMyJobsPage() {
                   <button onClick={() => setJobCategoryFilter("all")} className={`px-3 py-1 rounded-full text-xs font-medium border ${jobCategoryFilter === "all" ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/40"}`}>All</button>
                   {skillCats.map((c) => (
                     <button key={c.id} onClick={() => setJobCategoryFilter(c.id)} className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1 ${jobCategoryFilter === c.id ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-foreground hover:border-primary/40"}`}>
-                      <span>{c.icon || "🔧"}</span><span>{c.name}</span>
+                      <Wrench className="w-3 h-3" /><span>{c.name}</span>
                     </button>
                   ))}
                 </div>
