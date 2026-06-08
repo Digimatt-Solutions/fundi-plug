@@ -224,7 +224,7 @@ export default function CustomerBookingsPage() {
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           job.paymentStatus === "completed" ? "bg-green-500/10 text-green-600" :
                           job.paymentStatus === "pending" ? "bg-chart-4/10 text-chart-4" : ""
-                        }`}>💰 {job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
+                        }`}><Wallet className="w-3 h-3 inline mr-1" />{job.paymentStatus === "completed" ? "Paid" : job.paymentStatus === "pending" ? "Payment Pending" : job.paymentStatus}</span>
                       )}
                       <PriceLockBadge job={job} />
                     </div>
