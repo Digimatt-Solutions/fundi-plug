@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import jobPlaceholderAsset from "@/assets/job-placeholder.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -175,6 +176,7 @@ export default function FindWorkersPage() {
         imageUrl = data?.signedUrl || path;
       }
     }
+    if (!imageUrl) imageUrl = jobPlaceholderAsset.url;
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
       description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
