@@ -284,13 +284,6 @@ export type Database = {
             referencedRelation: "worker_profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "certifications_worker_id_fkey"
-            columns: ["worker_id"]
-            isOneToOne: false
-            referencedRelation: "worker_profiles_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       community_blogs: {
@@ -1541,6 +1534,135 @@ export type Database = {
           },
         ]
       }
+      worker_profiles_public: {
+        Row: {
+          availability_days: string[] | null
+          availability_type: string | null
+          bio: string | null
+          constituency: string | null
+          country: string | null
+          county: string | null
+          created_at: string
+          daily_rate: number | null
+          experience_level: string | null
+          first_name: string | null
+          gender: string | null
+          hourly_rate: number | null
+          id: string
+          is_online: boolean | null
+          last_name: string | null
+          latitude: number | null
+          longitude: number | null
+          max_travel_km: number | null
+          middle_name: string | null
+          other_skill: string | null
+          portfolio_urls: string[] | null
+          profile_photo_url: string | null
+          rejection_reason: string | null
+          service_area: string | null
+          service_radius_km: number | null
+          skills: string[] | null
+          sub_skills: string[] | null
+          submitted_for_review: boolean | null
+          tools_owned: string[] | null
+          updated_at: string
+          user_id: string
+          verification_status: string | null
+          ward: string | null
+          willing_to_travel: boolean | null
+          years_experience: number | null
+        }
+        Insert: {
+          availability_days?: string[] | null
+          availability_type?: string | null
+          bio?: string | null
+          constituency?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          daily_rate?: number | null
+          experience_level?: string | null
+          first_name?: string | null
+          gender?: string | null
+          hourly_rate?: number | null
+          id: string
+          is_online?: boolean | null
+          last_name?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          max_travel_km?: number | null
+          middle_name?: string | null
+          other_skill?: string | null
+          portfolio_urls?: string[] | null
+          profile_photo_url?: string | null
+          rejection_reason?: string | null
+          service_area?: string | null
+          service_radius_km?: number | null
+          skills?: string[] | null
+          sub_skills?: string[] | null
+          submitted_for_review?: boolean | null
+          tools_owned?: string[] | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string | null
+          ward?: string | null
+          willing_to_travel?: boolean | null
+          years_experience?: number | null
+        }
+        Update: {
+          availability_days?: string[] | null
+          availability_type?: string | null
+          bio?: string | null
+          constituency?: string | null
+          country?: string | null
+          county?: string | null
+          created_at?: string
+          daily_rate?: number | null
+          experience_level?: string | null
+          first_name?: string | null
+          gender?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_online?: boolean | null
+          last_name?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          max_travel_km?: number | null
+          middle_name?: string | null
+          other_skill?: string | null
+          portfolio_urls?: string[] | null
+          profile_photo_url?: string | null
+          rejection_reason?: string | null
+          service_area?: string | null
+          service_radius_km?: number | null
+          skills?: string[] | null
+          sub_skills?: string[] | null
+          submitted_for_review?: boolean | null
+          tools_owned?: string[] | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string | null
+          ward?: string | null
+          willing_to_travel?: boolean | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_profiles_public_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_profiles_public_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       worker_work_history: {
         Row: {
           company: string | null
@@ -1608,138 +1730,6 @@ export type Database = {
           name?: string | null
         }
         Relationships: []
-      }
-      worker_profiles_public: {
-        Row: {
-          availability_days: number[] | null
-          availability_type: string | null
-          bio: string | null
-          constituency: string | null
-          country: string | null
-          county: string | null
-          created_at: string | null
-          daily_rate: number | null
-          experience_level: string | null
-          first_name: string | null
-          gender: string | null
-          hourly_rate: number | null
-          id: string | null
-          is_online: boolean | null
-          last_name: string | null
-          latitude: number | null
-          longitude: number | null
-          max_travel_km: number | null
-          middle_name: string | null
-          other_skill: string | null
-          portfolio_urls: string[] | null
-          profile_photo_url: string | null
-          rejection_reason: string | null
-          service_area: string | null
-          service_radius_km: number | null
-          skills: string[] | null
-          sub_skills: string[] | null
-          submitted_for_review: boolean | null
-          tools_owned: string[] | null
-          user_id: string | null
-          verification_status:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          ward: string | null
-          willing_to_travel: boolean | null
-          years_experience: number | null
-        }
-        Insert: {
-          availability_days?: number[] | null
-          availability_type?: string | null
-          bio?: string | null
-          constituency?: string | null
-          country?: string | null
-          county?: string | null
-          created_at?: string | null
-          daily_rate?: number | null
-          experience_level?: string | null
-          first_name?: string | null
-          gender?: string | null
-          hourly_rate?: number | null
-          id?: string | null
-          is_online?: boolean | null
-          last_name?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          max_travel_km?: number | null
-          middle_name?: string | null
-          other_skill?: string | null
-          portfolio_urls?: string[] | null
-          profile_photo_url?: string | null
-          rejection_reason?: string | null
-          service_area?: string | null
-          service_radius_km?: number | null
-          skills?: string[] | null
-          sub_skills?: string[] | null
-          submitted_for_review?: boolean | null
-          tools_owned?: string[] | null
-          user_id?: string | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          ward?: string | null
-          willing_to_travel?: boolean | null
-          years_experience?: number | null
-        }
-        Update: {
-          availability_days?: number[] | null
-          availability_type?: string | null
-          bio?: string | null
-          constituency?: string | null
-          country?: string | null
-          county?: string | null
-          created_at?: string | null
-          daily_rate?: number | null
-          experience_level?: string | null
-          first_name?: string | null
-          gender?: string | null
-          hourly_rate?: number | null
-          id?: string | null
-          is_online?: boolean | null
-          last_name?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          max_travel_km?: number | null
-          middle_name?: string | null
-          other_skill?: string | null
-          portfolio_urls?: string[] | null
-          profile_photo_url?: string | null
-          rejection_reason?: string | null
-          service_area?: string | null
-          service_radius_km?: number | null
-          skills?: string[] | null
-          sub_skills?: string[] | null
-          submitted_for_review?: boolean | null
-          tools_owned?: string[] | null
-          user_id?: string | null
-          verification_status?:
-            | Database["public"]["Enums"]["verification_status"]
-            | null
-          ward?: string | null
-          willing_to_travel?: boolean | null
-          years_experience?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "worker_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "worker_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles_public"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       worker_work_history_public: {
         Row: {
