@@ -25,6 +25,7 @@ import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import LatestPostsWidget from "@/components/community/LatestPostsWidget";
 import { MessageCircle } from "lucide-react";
 import { AssetImage } from "@/components/AssetImage";
+import jobPlaceholderAsset from "@/assets/job-placeholder.png.asset.json";
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   "Electrician": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=300&fit=crop",

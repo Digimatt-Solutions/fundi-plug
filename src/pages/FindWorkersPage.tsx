@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import jobPlaceholderAsset from "@/assets/job-placeholder.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
