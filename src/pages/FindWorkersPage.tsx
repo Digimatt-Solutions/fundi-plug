@@ -176,6 +176,7 @@ export default function FindWorkersPage() {
         imageUrl = data?.signedUrl || path;
       }
     }
+    if (!imageUrl) imageUrl = jobPlaceholderAsset.url;
     const { data: job, error } = await supabase.from("jobs").insert({
       title: hireTitle.trim(),
       description: hireDescription.trim() || `Client hired ${hireDialog.name} directly`,
