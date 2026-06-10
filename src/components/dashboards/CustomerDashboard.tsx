@@ -122,7 +122,7 @@ export default function CustomerDashboard() {
       .limit(10);
     const reviewerIds = [...new Set((reviewsRes.data || []).map((r: any) => r.reviewer_id))];
     const { data: profiles } = reviewerIds.length > 0
-      ? await supabase.from("profiles_basic" as any).select("id, name").in("id", reviewerIds)
+      ? await supabase.from("profiles").select("id, name").in("id", reviewerIds)
       : { data: [] };
     const nameMap: Record<string, string> = {};
     (profiles || []).forEach((p: any) => { nameMap[p.id] = p.name; });
@@ -396,7 +396,7 @@ export default function CustomerDashboard() {
     (async () => {
       const [reviewsRes, clientsRes] = await Promise.all([
         supabase.from("reviews").select("rating"),
-        supabase.from("profiles_basic" as any).select("id", { count: "exact", head: true }),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
       ]);
       const reviews = reviewsRes.data || [];
       const avg = reviews.length > 0

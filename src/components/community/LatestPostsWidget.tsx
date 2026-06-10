@@ -40,7 +40,7 @@ export default function LatestPostsWidget() {
     const postIds = postsData.map((p: any) => p.id);
 
     const [profilesRes, commentsRes, likesRes] = await Promise.all([
-      supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", authorIds),
+      supabase.from("profiles").select("id, name, avatar_url").in("id", authorIds),
       supabase.from("community_comments").select("post_id").in("post_id", postIds),
       user ? supabase.from("community_likes").select("post_id").eq("user_id", user.id).in("post_id", postIds) : Promise.resolve({ data: [] as any[] }),
     ]);
