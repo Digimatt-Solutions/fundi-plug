@@ -111,7 +111,7 @@ export default function CommunityPage() {
     const missingIds = commentAuthorIds.filter(id => !profileMap[id]);
     if (missingIds.length > 0) {
       const { data: moreProfiles } = await supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", missingIds);
-      (moreProfiles || []).forEach(p => { profileMap[p.id] = p; });
+      ((moreProfiles as any[]) || []).forEach(p => { profileMap[p.id] = p; });
     }
 
     const commentsByPost: Record<string, Comment[]> = {};
