@@ -396,7 +396,7 @@ export default function CustomerDashboard() {
     (async () => {
       const [reviewsRes, clientsRes] = await Promise.all([
         supabase.from("reviews").select("rating"),
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase.from("profiles_basic" as any).select("id", { count: "exact", head: true }),
       ]);
       const reviews = reviewsRes.data || [];
       const avg = reviews.length > 0
