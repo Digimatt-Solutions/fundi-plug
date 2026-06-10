@@ -29,7 +29,7 @@ export default function WorkerReviewsPage() {
       const all = data || [];
       const reviewerIds = [...new Set(all.map(r => r.reviewer_id))];
       const { data: profiles } = reviewerIds.length > 0
-        ? await supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", reviewerIds)
+        ? await supabase.from("profiles").select("id, name, avatar_url").in("id", reviewerIds)
         : { data: [] };
       const pMap: Record<string, any> = {};
       (profiles || []).forEach(p => { pMap[p.id] = p; });
