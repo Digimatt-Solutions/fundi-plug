@@ -102,7 +102,7 @@ export default function CommunityPage() {
     ]);
 
     const profileMap: Record<string, any> = {};
-    (profilesRes.data || []).forEach(p => { profileMap[p.id] = p; });
+    ((profilesRes.data as any[]) || []).forEach(p => { profileMap[p.id] = p; });
     const roleMap: Record<string, string> = {};
     (rolesRes.data || []).forEach(r => { roleMap[r.user_id] = r.role; });
     const likedPostIds = new Set((likesRes.data || []).map(l => l.post_id));
