@@ -34,7 +34,7 @@ export default function PaymentsPage() {
     const { data } = await query;
 
     const allIds = [...new Set((data || []).flatMap(p => [p.payer_id, p.payee_id]))];
-    const { data: profiles } = allIds.length > 0 ? await supabase.from("profiles").select("id, name").in("id", allIds) : { data: [] };
+    const { data: profiles } = allIds.length > 0 ? await supabase.from("profiles_basic" as any).select("id, name").in("id", allIds) : { data: [] };
     const nameMap: Record<string, string> = {};
     (profiles || []).forEach(p => { nameMap[p.id] = p.name; });
 
