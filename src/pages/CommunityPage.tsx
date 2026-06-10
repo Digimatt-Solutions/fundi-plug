@@ -95,7 +95,7 @@ export default function CommunityPage() {
 
     const authorIds = [...new Set(postsData.map(p => p.author_id))];
     const [profilesRes, rolesRes, likesRes, commentsRes] = await Promise.all([
-      supabase.from("profiles").select("id, name, avatar_url").in("id", authorIds),
+      supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", authorIds),
       supabase.from("user_roles").select("user_id, role").in("user_id", authorIds),
       supabase.from("community_likes").select("post_id").eq("user_id", user.id),
       supabase.from("community_comments").select("*").in("post_id", postsData.map(p => p.id)).order("created_at", { ascending: true }),
@@ -110,7 +110,7 @@ export default function CommunityPage() {
     const commentAuthorIds = [...new Set((commentsRes.data || []).map(c => c.author_id))];
     const missingIds = commentAuthorIds.filter(id => !profileMap[id]);
     if (missingIds.length > 0) {
-      const { data: moreProfiles } = await supabase.from("profiles").select("id, name, avatar_url").in("id", missingIds);
+      const { data: moreProfiles } = await supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", missingIds);
       (moreProfiles || []).forEach(p => { profileMap[p.id] = p; });
     }
 

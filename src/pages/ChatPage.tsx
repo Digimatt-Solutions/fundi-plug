@@ -62,7 +62,7 @@ export default function ChatPage() {
 
     const peerIds = Array.from(map.keys());
     if (peerIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("id, name, avatar_url").in("id", peerIds);
+      const { data: profs } = await supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", peerIds);
       (profs || []).forEach((p: any) => {
         const c = map.get(p.id);
         if (c) { c.peer_name = p.name || "User"; c.peer_avatar = p.avatar_url; }

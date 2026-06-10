@@ -53,7 +53,7 @@ export default function WorkerMyJobsPage() {
     const customerIds = [...new Set(allJobs.map(j => j.customer_id))];
     // Safe basic info for ALL customers (name/avatar only)
     const { data: profiles } = customerIds.length > 0
-      ? await supabase.from("profiles").select("id, name, avatar_url").in("id", customerIds)
+      ? await supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", customerIds)
       : { data: [] };
     const profileMap: Record<string, any> = {};
     (profiles || []).forEach(p => { profileMap[p.id] = { ...p, email: "", phone: "" }; });

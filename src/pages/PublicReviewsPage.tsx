@@ -18,14 +18,14 @@ export default function PublicReviewsPage() {
     if (!workerId) return;
     async function load() {
       const [{ data: profile }, { data: revs }] = await Promise.all([
-        supabase.from("profiles").select("id, name, avatar_url").eq("id", workerId!).maybeSingle(),
+        supabase.from("profiles_basic" as any).select("id, name, avatar_url").eq("id", workerId!).maybeSingle(),
         supabase.from("reviews").select("*, jobs:job_id(title)").eq("reviewee_id", workerId!).order("created_at", { ascending: false }),
       ]);
       setWorker(profile);
       const all = revs || [];
       const reviewerIds = [...new Set(all.map((r: any) => r.reviewer_id))];
       const { data: profiles } = reviewerIds.length > 0
-        ? await supabase.from("profiles").select("id, name, avatar_url").in("id", reviewerIds)
+        ? await supabase.from("profiles_basic" as any).select("id, name, avatar_url").in("id", reviewerIds)
         : { data: [] };
       const pMap: Record<string, any> = {};
       (profiles || []).forEach((p: any) => { pMap[p.id] = p; });

@@ -122,7 +122,7 @@ export default function CustomerDashboard() {
       .limit(10);
     const reviewerIds = [...new Set((reviewsRes.data || []).map((r: any) => r.reviewer_id))];
     const { data: profiles } = reviewerIds.length > 0
-      ? await supabase.from("profiles").select("id, name").in("id", reviewerIds)
+      ? await supabase.from("profiles_basic" as any).select("id, name").in("id", reviewerIds)
       : { data: [] };
     const nameMap: Record<string, string> = {};
     (profiles || []).forEach((p: any) => { nameMap[p.id] = p.name; });

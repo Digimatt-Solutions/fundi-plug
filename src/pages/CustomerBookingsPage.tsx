@@ -47,7 +47,7 @@ export default function CustomerBookingsPage() {
 
     const workerIds = (data || []).map(j => j.worker_id).filter(Boolean);
     const { data: workerProfiles } = workerIds.length > 0
-      ? await supabase.from("profiles").select("id, name").in("id", workerIds)
+      ? await supabase.from("profiles_basic" as any).select("id, name").in("id", workerIds)
       : { data: [] };
     const nameMap: Record<string, string> = {};
     (workerProfiles || []).forEach(p => { nameMap[p.id] = p.name; });
