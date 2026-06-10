@@ -91,10 +91,10 @@ export default function ChatPage() {
     if (!to || !user || to === user.id) return;
     (async () => {
       const { data: prof } = await supabase
-        .from("profiles")
+        .from("profiles_basic" as any)
         .select("id,name,avatar_url")
         .eq("id", to)
-        .maybeSingle();
+        .maybeSingle() as { data: any };
       if (!prof) { toast.error("Could not start chat"); return; }
       setInitialDraft(draft);
       setActive({ id: prof.id, name: prof.name || "User", avatar_url: prof.avatar_url });
