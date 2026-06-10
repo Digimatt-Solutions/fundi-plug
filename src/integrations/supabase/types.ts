@@ -54,13 +54,6 @@ export type Database = {
             foreignKeyName: "activity_logs_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "activity_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -136,13 +129,6 @@ export type Database = {
             foreignKeyName: "bookings_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -158,13 +144,6 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bookings_worker_id_fkey"
-            columns: ["worker_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -350,13 +329,6 @@ export type Database = {
             foreignKeyName: "community_blogs_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "community_blogs_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -390,13 +362,6 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "community_comments_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -453,13 +418,6 @@ export type Database = {
             foreignKeyName: "community_likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "community_likes_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -502,13 +460,6 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "community_posts_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -566,13 +517,6 @@ export type Database = {
             foreignKeyName: "complaints_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "complaints_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -581,13 +525,6 @@ export type Database = {
             columns: ["fundi_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "complaints_fundi_id_fkey"
-            columns: ["fundi_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -647,13 +584,6 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "job_applications_worker_id_fkey"
-            columns: ["worker_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -751,13 +681,6 @@ export type Database = {
             foreignKeyName: "jobs_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "jobs_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -766,13 +689,6 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "jobs_worker_id_fkey"
-            columns: ["worker_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -930,13 +846,6 @@ export type Database = {
             foreignKeyName: "payments_payee_id_fkey"
             columns: ["payee_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_payee_id_fkey"
-            columns: ["payee_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -945,13 +854,6 @@ export type Database = {
             columns: ["payer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_payer_id_fkey"
-            columns: ["payer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -1124,13 +1026,6 @@ export type Database = {
             foreignKeyName: "reviews_reviewee_id_fkey"
             columns: ["reviewee_id"]
             isOneToOne: false
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_reviewee_id_fkey"
-            columns: ["reviewee_id"]
-            isOneToOne: false
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -1139,13 +1034,6 @@ export type Database = {
             columns: ["reviewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reviews_reviewer_id_fkey"
-            columns: ["reviewer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -1359,13 +1247,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "webauthn_credentials_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles_basic"
             referencedColumns: ["id"]
           },
           {
@@ -1648,13 +1529,6 @@ export type Database = {
             foreignKeyName: "worker_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "worker_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -1784,13 +1658,6 @@ export type Database = {
             foreignKeyName: "worker_profiles_public_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "profiles_basic"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "worker_profiles_public_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
             referencedRelation: "profiles_public"
             referencedColumns: ["id"]
           },
@@ -1837,27 +1704,6 @@ export type Database = {
       }
     }
     Views: {
-      profiles_basic: {
-        Row: {
-          avatar_url: string | null
-          id: string | null
-          is_online: boolean | null
-          name: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          id?: string | null
-          is_online?: boolean | null
-          name?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          id?: string | null
-          is_online?: boolean | null
-          name?: string | null
-        }
-        Relationships: []
-      }
       profiles_public: {
         Row: {
           avatar_url: string | null
