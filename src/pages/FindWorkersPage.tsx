@@ -19,6 +19,9 @@ import { friendlyError } from "@/lib/friendlyError";
 import QRScanner from "@/components/QRScanner";
 import ChatPopup, { ChatPeer } from "@/components/chat/ChatPopup";
 import { MessageCircle } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import * as L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -43,6 +46,7 @@ export default function FindWorkersPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>(ALL_TAB);
   const [customerPos, setCustomerPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [showMap, setShowMap] = useState(false);
   // Set of worker user_ids that this customer has an active/successful hire with
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
   const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
@@ -373,10 +377,43 @@ export default function FindWorkersPage() {
         </div>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder={t("Search by name or skill...")} className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder={t("Search by name or skill...")} className="pl-10 bg-card" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        {visibleWorkers.length > 0 && (
+          <Button variant="outline" size="sm" className="gap-1.5 bg-primary text-white border-primary-600 hover:bg-emerald-500/10 hover:text-emerald-600 hover:border-emerald-600/40 transition-all duration-200" onClick={() => setShowMap(!showMap)}>
+            <MapPin className="w-3.5 h-3.5" /> {showMap ? t("Hide Map") : t("View Map")}
+          </Button>
+        )}
       </div>
+
+      {showMap && visibleWorkers.length > 0 && (
+        <div className="rounded-2xl border border-border/70 bg-card p-5 animate-fade-in">
+          <h2 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-primary" /> {t("Fundis Map")}
+          </h2>
+          <div className="w-full h-80 rounded-xl overflow-hidden border border-border">
+            <MapContainer center={customerPos ? [customerPos.lat, customerPos.lng] : [visibleWorkers.reduce((s, w) => s + (w.latitude || 0), 0) / visibleWorkers.filter(w => w.latitude).length, visibleWorkers.reduce((s, w) => s + (w.longitude || 0), 0) / visibleWorkers.filter(w => w.longitude).length]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={true}>
+              <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              {customerPos && (
+                <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
+                  <Popup>{t("You are here")}</Popup>
+                </Marker>
+              )}
+              {visibleWorkers.filter(w => w.latitude && w.longitude).map((w) => {
+                const dist = customerPos ? getDist(w) : null;
+                return (
+                  <Marker key={w.id} position={[w.latitude, w.longitude]} icon={L.divIcon({ className: "", html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })}>
+                    <Popup><div className="text-sm"><p className="font-semibold">{w.name}</p><p className="text-xs">{w.skillNames.join(", ")}</p>{dist != null && <p className="text-xs text-primary font-medium">{formatDistance(dist)}</p>}</div></Popup>
+                  </Marker>
+                );
+              })}
+            </MapContainer>
+          </div>
+        </div>
+      )}
 
       {visibleWorkers.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
