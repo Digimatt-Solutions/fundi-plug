@@ -615,19 +615,21 @@ export default function CustomerDashboard() {
           t={t}
         />
 
-        {showMap && customerPos && onlineFundis.length > 0 && (
+        {showMap && onlineFundis.length > 0 && (
           <div className="rounded-2xl border border-border/70 bg-card p-5 animate-fade-in">
             <h2 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" /> {t("Online Fundis Map")}
             </h2>
             <div className="w-full h-80 rounded-xl overflow-hidden border border-border">
-              <MapContainer center={[customerPos.lat, customerPos.lng]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={true}>
+              <MapContainer center={customerPos ? [customerPos.lat, customerPos.lng] : [onlineFundis.reduce((s, w) => s + w.latitude, 0) / onlineFundis.length, onlineFundis.reduce((s, w) => s + w.longitude, 0) / onlineFundis.length]} zoom={13} style={{ width: "100%", height: "100%" }} scrollWheelZoom={true}>
                 <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
-                  <Popup>{t("You are here")}</Popup>
-                </Marker>
+                {customerPos && (
+                  <Marker position={[customerPos.lat, customerPos.lng]} icon={L.divIcon({ className: "", html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [16, 16], iconAnchor: [8, 8] })}>
+                    <Popup>{t("You are here")}</Popup>
+                  </Marker>
+                )}
                 {onlineFundis.map((w) => {
-                  const dist = getWorkerDistance(w);
+                  const dist = customerPos ? getWorkerDistance(w) : null;
                   return (
                     <Marker key={w.id} position={[w.latitude, w.longitude]} icon={L.divIcon({ className: "", html: '<div style="width:14px;height:14px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.3)"></div>', iconSize: [14, 14], iconAnchor: [7, 7] })}>
                       <Popup><div className="text-sm"><p className="font-semibold">{w.name}</p><p className="text-xs">{w.skill}</p>{dist != null && <p className="text-xs text-primary font-medium">{formatDistance(dist)}</p>}</div></Popup>
