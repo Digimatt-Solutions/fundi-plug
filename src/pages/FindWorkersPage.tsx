@@ -46,6 +46,7 @@ export default function FindWorkersPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>(ALL_TAB);
   const [customerPos, setCustomerPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [showMap, setShowMap] = useState(false);
   // Set of worker user_ids that this customer has an active/successful hire with
   const [unlockedWorkerIds, setUnlockedWorkerIds] = useState<Set<string>>(new Set());
   const [activeChatPeer, setActiveChatPeer] = useState<ChatPeer | null>(null);
